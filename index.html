@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head><link rel="manifest" href="manifest.json">
+<!-- Adicione também meta tags para theme-color se não estiverem no manifest -->
+<meta name="theme-color" content="#007bff"> <!-- Use a cor principal do seu tema -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Super Professor Pro</title>
@@ -1539,6 +1541,20 @@
             updateCustomSoundUI();
 
         });
+            // --- Service Worker Registration ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/super-professor-pro/pwabuilder-sw.js') // <<< VERIFIQUE ESSE CAMINHO!
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
+
+}); // Fechamento do DOMContentLoaded
     </script>
 
 </body>
