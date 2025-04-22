@@ -1541,7 +1541,7 @@
             if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
             updateCustomSoundUI();
 
-        });
+        
             // --- Service Worker Registration ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -1556,6 +1556,19 @@
     }
 
 }); // Fechamento do DOMContentLoaded
+        });});
+            // --- Service Worker Registration ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/super_professor-pro/pwabuilder-sw.js') // <<< VERIFIQUE ESSE CAMINHO!
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+                                         }
     </script>
 
 </body>
