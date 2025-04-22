@@ -1,0 +1,8 @@
+{
+  "name": "Super Professor Pro",
+  "theme_color": "#007bff",
+  "background_color": "#f7f9fa",
+  "short_name": "SuperProf",
+  "description": "App para ajudar professores a gerenciar turmas, alunos, notas, frequência e mais.",
+  "id": "/super-professor-pro/"
+}
