@@ -1,26 +1,17 @@
-{
-  "name": "Super Professor Pro",
-  "short_name": "SuperProf",
-  "description": "App para ajudar professores a gerenciar turmas, alunos, notas, frequência e mais.",
-  "id": "/super_professor-pro/",
-  "start_url": "/super_professor-pro/",
-  "scope": "/super_professor-pro/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#007bff",
+// ... (outras propriedades como name, start_url, etc.) ...
   "icons": [
     {
-      "src": "icons/icon-192x192.png",
+      "src": "icons/icon-192x192.png", // Ícone menor para 'any'
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"   // <-- Mudado para 'any'
     },
     {
-      "src": "icons/icon-512x512.png",
+      "src": "icons/icon-512x512.png", // Ícone maior para 'maskable'
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable" // <-- Mudado para 'maskable'
     }
+    // Opcional: Adicionar mais tamanhos se tiver (ex: 144x144, etc.)
   ]
-}
+// ... (fim do JSON) ...
