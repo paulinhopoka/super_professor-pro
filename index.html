@@ -3038,7 +3038,7 @@
 
              // Update export button titles/text if in WebView AFTER elements are potentially rendered
              // Moved inside a small timeout to ensure dynamic buttons are potentially ready
-             setTimeout(() => {
+             /*setTimeout(() => {
                 if (isAndroidWebView()) {
                     if(exportDataButton) { exportDataButton.title = "Copiar Backup JSON"; exportDataButton.innerHTML = '<span class="icon icon-copiar"></span> Copiar Backup (JSON)'; }
                     if(exportGradesCsvButton) exportGradesCsvButton.title = "Copiar Notas (CSV)";
@@ -3058,7 +3058,7 @@
                       });
 
                 }
-            }, 100); // Pequeno delay para garantir que a UI inicializou
+            }, 100);*/ // Pequeno delay para garantir que a UI inicializou
 
         }); // --- FIM DO DOMContentLoaded ---
 
