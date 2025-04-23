@@ -3201,8 +3201,8 @@
              window.addEventListener('beforeunload', saveAppState);
 
             // --- Inicialização ---
-            loadData(); // Carrega e migra dados se necessário
-            restoreAppState(); // Restaura último estado de navegação
+            //loadData(); // Carrega e migra dados se necessário
+            //restoreAppState(); // Restaura último estado de navegação
             //renderScheduleList(); // Renderiza horários com nova ordenação
             //renderSchoolList(); // Renderiza escolas com botão de compartilhar
             const todayStr = getCurrentDateString();
@@ -3214,7 +3214,7 @@
              //else { showSection('schedule-section'); } // Garante que uma seção seja mostrada
 
             //if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
-            updateCustomSoundUI();
+            //updateCustomSoundUI();
 
              // Update export button titles/text if in WebView AFTER elements are potentially rendered
              // Moved inside a small timeout to ensure dynamic buttons are potentially ready
