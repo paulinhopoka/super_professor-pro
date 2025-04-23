@@ -3021,7 +3021,7 @@
              window.addEventListener('beforeunload', saveAppState);
 
             // --- Inicialização ---
-            loadData(); // Carrega e migra dados se necessário
+            /*loadData(); // Carrega e migra dados se necessário
             restoreAppState(); // Restaura último estado de navegação
             renderScheduleList(); // Renderiza horários com nova ordenação
             renderSchoolList(); // Renderiza escolas com botão de compartilhar
@@ -3034,11 +3034,11 @@
              else { showSection('schedule-section'); } // Garante que uma seção seja mostrada
 
             if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
-            updateCustomSoundUI();
+            updateCustomSoundUI();*/
 
              // Update export button titles/text if in WebView AFTER elements are potentially rendered
              // Moved inside a small timeout to ensure dynamic buttons are potentially ready
-             /*setTimeout(() => {
+             setTimeout(() => {
                 if (isAndroidWebView()) {
                     if(exportDataButton) { exportDataButton.title = "Copiar Backup JSON"; exportDataButton.innerHTML = '<span class="icon icon-copiar"></span> Copiar Backup (JSON)'; }
                     if(exportGradesCsvButton) exportGradesCsvButton.title = "Copiar Notas (CSV)";
@@ -3058,7 +3058,7 @@
                       });
 
                 }
-            }, 100);*/ // Pequeno delay para garantir que a UI inicializou
+            }, 100); // Pequeno delay para garantir que a UI inicializou
 
         }); // --- FIM DO DOMContentLoaded ---
 
