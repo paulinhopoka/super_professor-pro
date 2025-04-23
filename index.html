@@ -3204,16 +3204,16 @@
             loadData(); // Carrega e migra dados se necessário
             restoreAppState(); // Restaura último estado de navegação
             //renderScheduleList(); // Renderiza horários com nova ordenação
-            renderSchoolList(); // Renderiza escolas com botão de compartilhar
+            //renderSchoolList(); // Renderiza escolas com botão de compartilhar
             const todayStr = getCurrentDateString();
             if (attendanceDateInput) attendanceDateInput.value = todayStr;
             if (lessonPlanDateInput) lessonPlanDateInput.value = todayStr;
             // Renderiza lista de turmas ou detalhes se aplicável
-            if (currentSection === 'classes-section' && currentSchoolId) { renderClassList(currentSchoolId); }
-            else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); } // Força recarga para aplicar novas lógicas
-             else { showSection('schedule-section'); } // Garante que uma seção seja mostrada
+            //if (currentSection === 'classes-section' && currentSchoolId) { renderClassList(currentSchoolId); }
+            //else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); } // Força recarga para aplicar novas lógicas
+             //else { showSection('schedule-section'); } // Garante que uma seção seja mostrada
 
-            if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
+            //if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
             updateCustomSoundUI();
 
              // Update export button titles/text if in WebView AFTER elements are potentially rendered
