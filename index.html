@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; /* Remove highlight azul no toque mobile */
         }
 
         html, body {
@@ -106,7 +106,9 @@
             --calc-mode-button-text: var(--text-secondary);
             --calc-mode-button-active-bg: var(--accent-primary);
             --calc-mode-button-active-text: #ffffff;
-
+            /* Touch Feedback */
+            --active-scale: 0.96;
+            --active-opacity: 0.9;
         }
 
         /* Pseudo-elemento para background pattern com opacidade */
@@ -198,7 +200,7 @@
         a:hover { color: var(--accent-secondary); text-decoration: underline; }
         button, .button-like { padding: 0.6rem 1.2rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.2, 0, 0.38, 0.9), opacity 0.2s ease; background-color: var(--accent-primary); color: #fff; margin: 0.25rem; display: inline-flex; align-items: center; justify-content: center; text-align: center; vertical-align: middle; line-height: 1.4; user-select: none; /* Prevent text selection */ }
         button:hover, .button-like:hover { opacity: 0.85; }
-        button:active, .button-like:active { transform: scale(0.96); }
+        button:active, .button-like:active { transform: scale(var(--active-scale)); opacity: var(--active-opacity); }
         button:disabled, .button-like:disabled { opacity: 0.6; cursor: not-allowed; background-color: var(--accent-secondary); }
         form button:not([type="submit"]) { type: button; }
         button.secondary, .button-like.secondary { background-color: var(--accent-secondary); color: #fff; }
@@ -207,6 +209,7 @@
         button.warning, .button-like.warning { background-color: var(--accent-warning); color: var(--text-primary); }
         button.icon-button, .button-like.icon-button { padding: 0.4rem; font-size: 1.1rem; line-height: 1; background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 5px; margin: 0 2px; }
         button.icon-button:hover, .button-like.icon-button:hover { color: var(--accent-primary); background-color: var(--bg-tertiary-alpha); border-color: var(--accent-primary); }
+        button.icon-button:active, .button-like.icon-button:active { transform: scale(0.92); opacity: 1; background-color: color-mix(in srgb, var(--bg-tertiary-alpha) 80%, black); }
         button.icon-button:disabled { background-color: transparent; border-color: var(--border-color); color: var(--text-secondary); opacity: 0.5; }
         input[type="text"], input[type="time"], input[type="number"], input[type="date"], select, textarea, input[type="search"], input[type="color"] { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid var(--input-border); border-radius: 5px; background-color: var(--input-bg); color: var(--text-primary); font-size: 1rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
         input[type="color"] { padding: 0.2rem; height: 40px; width: 50px; vertical-align: middle; cursor: pointer;}
@@ -225,11 +228,12 @@
         .app-content { flex-grow: 1; overflow-y: auto; padding: 1rem; background-color: transparent; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--nav-height) + 10px); }
         .app-nav { background-color: var(--bg-secondary-alpha); padding: 0.4rem 0; display: flex; justify-content: space-around; align-items: stretch; border-top: 1px solid var(--border-color); position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; flex-shrink: 0; height: var(--nav-height); box-shadow: 0 -2px 5px var(--shadow-color); transition: background-color 0.4s ease; }
         /* Ajuste para 7 botões */
-        .nav-button { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.7rem; /* Reduzido */ text-align: center; padding: 0.4rem 0.2rem; /* Reduzido padding horizontal */ display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; border-radius: 0; transition: background-color 0.25s ease, color 0.25s ease; overflow: hidden; }
+        .nav-button { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.7rem; /* Reduzido */ text-align: center; padding: 0.4rem 0.2rem; /* Reduzido padding horizontal */ display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; height: 100%; border-radius: 0; transition: background-color 0.25s ease, color 0.25s ease, transform 0.1s ease; overflow: hidden; }
         .nav-button .icon { font-size: 1.3rem; /* Levemente reduzido */ margin-bottom: 0.1rem; }
         .nav-button span:not(.icon) { white-space: nowrap; /* Garante que fique em uma linha */ }
         .nav-button.active { color: var(--accent-primary); background-color: var(--bg-tertiary-alpha); }
         .nav-button:hover:not(.active) { background-color: var(--bg-tertiary-alpha); }
+        .nav-button:active { transform: scale(0.95); } /* Feedback de toque */
         .nav-button:disabled { opacity: 0.5; cursor: not-allowed; background-color: transparent !important; }
         .section { display: none; animation: fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .section.active { display: block; }
@@ -240,22 +244,177 @@
         .card-header h3 { margin: 0; font-size: 1.1rem; flex-basis: calc(100% - 50px); margin-bottom: 5px; display: flex; align-items: center; gap: 0.5em; margin-top: 0.1rem; }
         .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-left: auto; flex-shrink: 0; }
         .card-actions button, .card-actions .button-like { margin-left: 0.3rem; padding: 0.3rem 0.6rem; font-size: 0.85rem; }
-        .card-content { padding-top: 0.5rem; transition: opacity 0.3s ease, max-height 0.4s ease-out; max-height: 1500px; overflow: hidden; opacity: 1; }
+        .card-content { padding-top: 0.5rem; transition: opacity 0.3s ease, max-height 0.4s ease-out; max-height: 1500px; /* Default alto */ overflow: hidden; opacity: 1; }
+         /* Remover max-height específico do student list */
+        #student-list-container.card-content {
+            max-height: none; /* Permite que cresça */
+        }
         .card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background: transparent !important; border: none !important; color: var(--text-secondary); cursor: pointer; margin-left: auto; order: 99; margin-top: 0.1rem; }
         .card-toggle-button:hover { color: var(--accent-primary); }
         .card.collapsed { padding-bottom: 0.5rem; }
         .card.collapsed .card-content { max-height: 0; opacity: 0; padding-top: 0; margin-top: -1px; border-top: none; visibility: hidden; }
         .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; }
         .item-list { list-style: none; padding: 0; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 0.5rem; cursor: pointer; transition: background-color 0.25s ease; }
-        .list-item:hover { background-color: var(--bg-tertiary-alpha); }
-        .list-item span, .list-item .item-info { flex-grow: 1; margin-right: 1rem; overflow: hidden; text-overflow: ellipsis; }
+
+        /* --- ESTILOS GERAIS DO LIST ITEM (Restaurado) --- */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Original: alinha itens ao topo */
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-secondary-alpha);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.25s ease, transform 0.15s ease;
+            flex-direction: row; /* Layout lado a lado */
+        }
+         .list-item:hover { background-color: var(--bg-tertiary-alpha); }
+         .list-item:active { transform: scale(0.98); background-color: var(--bg-tertiary-alpha); }
+
+        .list-item .item-info {
+            flex-grow: 1;
+            margin-right: 1rem; /* Espaço original */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .list-item .item-info p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .list-item .item-info h4 { margin-bottom: 0.2rem; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .list-item-actions { flex-shrink: 0; display: flex; gap: 3px; }
+
+        .list-item-actions {
+            flex-shrink: 0;
+            display: flex;
+            gap: 3px;
+            align-self: flex-start; /* Alinha botões ao topo */
+        }
         .list-item-actions button, .list-item-actions .button-like { margin-left: 0; padding: 0.3rem; font-size: 1rem; }
+
+         /* Aluno específico (restaurado para layout original lado a lado) */
+         #student-list-container .list-item {
+             align-items: center; /* Centraliza verticalmente no item de aluno */
+         }
+         #student-list-container .list-item .student-number {
+             font-weight: bold; margin-right: 10px; min-width: 30px; text-align: right;
+         }
+          #student-list-container .list-item .student-name {
+             white-space: normal; word-break: break-word; flex-grow: 1; margin-right: 10px;
+         }
+         #student-list-container .list-item .list-item-actions {
+            align-self: center; /* Centraliza os botões do aluno verticalmente */
+            margin-left: auto; /* Empurra para a direita */
+         }
+
+
+        /* --- ESTILOS ESPECÍFICOS PARA SCHOOL ITEM (Com Footer) --- */
+        .list-item.school-item {
+            display: flex; /* Mantém flex */
+            flex-direction: column; /* Muda para coluna */
+            align-items: stretch; /* Estica filhos */
+            padding-bottom: 0.5rem; /* Espaço extra para o quorum */
+            gap: 0.75rem; /* Espaço entre linha principal e quorum */
+        }
+        /* Linha Principal: Nome e Botões */
+        .school-item-main-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Alinha ao topo como original */
+            width: 100%;
+        }
+        .school-item .item-info { /* Container do nome */
+            flex-grow: 1;
+            margin-right: 10px;
+            overflow: hidden;
+        }
+        .school-item .item-info h4 {
+             margin-bottom: 0; /* Sem margem abaixo do nome */
+             white-space: normal;
+             word-break: break-word;
+        }
+        .school-item .list-item-actions {
+            flex-shrink: 0;
+            display: flex;
+            gap: 5px;
+            align-self: flex-start; /* Alinha botões ao topo */
+        }
+         .school-item .list-item-actions .button-like { /* Botão "Turmas" */
+            padding: 0.5rem 0.8rem;
+            font-size: 0.9rem;
+         }
+         .school-item .list-item-actions .icon-button { /* Botões Editar/Excluir */
+            padding: 0.4rem;
+            font-size: 1rem;
+         }
+
+        /* Linha Inferior: Quórum */
+        .school-quorum-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding-top: 0.6rem;
+            border-top: 1px dashed var(--border-color);
+            margin-top: 0; /* Removido margin-top, controlado pelo gap do pai */
+            width: 100%;
+        }
+        .school-quorum-info label {
+             margin-bottom: 0;
+             font-size: 0.75rem; /* Fonte ainda menor */
+             color: var(--text-secondary);
+             white-space: nowrap;
+             margin-right: 1px;
+        }
+        .school-quorum-info input[type="date"],
+        .school-quorum-info select {
+             padding: 0.15rem 0.3rem; /* Padding mínimo */
+             font-size: 0.75rem; /* Fonte menor */
+             margin-bottom: 0;
+             width: auto;
+             flex-grow: 0;
+             flex-shrink: 1;
+             border-radius: 3px;
+             border: 1px solid var(--input-border);
+             background-color: var(--input-bg);
+             color: var(--text-primary);
+             cursor: pointer;
+             height: auto;
+             line-height: 1.1; /* Ajuste fino */
+             vertical-align: middle;
+        }
+        .school-quorum-info input[type="date"] {
+            max-width: 110px;
+        }
+        .school-quorum-info select {
+            max-width: 85px;
+        }
+         .school-quorum-info .quorum-display {
+            font-weight: bold;
+            font-size: 0.8rem; /* Fonte menor */
+            color: var(--accent-success);
+            margin-left: auto;
+            padding-left: 6px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25em; /* Espaço ícone-texto menor */
+         }
+          .school-quorum-info .quorum-display::before {
+              content: "📊";
+              font-size: 0.9em;
+              display: inline-block;
+          }
+         .quorum-display.no-data {
+             color: var(--accent-danger);
+             opacity: 0.8;
+         }
+         .quorum-display.no-data::before {
+            opacity: 0.6;
+         }
+         /* --- FIM CSS QUÓRUM --- */
+
         .search-result-item .item-info { margin-right: 0.5rem; }
         .search-result-item .result-type { font-size: 0.75rem; color: var(--text-secondary); background-color: var(--bg-tertiary); padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: auto; flex-shrink: 0; }
+
         .modal { display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; animation: modalFadeIn 0.3s ease-out; }
         .modal.show { display: flex; }
         .modal-content { background-color: var(--bg-modal-alpha); margin: auto; padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; width: 95%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 8px 25px var(--shadow-color); animation: modalSlideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); transition: background-color 0.4s ease; }
@@ -289,7 +448,7 @@
         .calculator-mode-selector button.active { background-color: var(--calc-mode-button-active-bg); color: var(--calc-mode-button-active-text); border-color: var(--calc-mode-button-active-bg); }
         .calculator-display { width: 100%; background-color: var(--calc-display-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 5px; padding: 10px 15px; font-size: 2rem; text-align: right; margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 60px; display: flex; align-items: center; justify-content: flex-end; }
         .calculator-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
-        .calculator-buttons button { padding: 0.8rem; font-size: 1.1rem; margin: 0; border: 1px solid transparent; background-color: var(--calc-button-bg); color: var(--calc-button-text); transition: background-color 0.2s ease, opacity 0.2s ease; }
+        .calculator-buttons button { padding: 0.8rem; font-size: 1.1rem; margin: 0; border: 1px solid transparent; background-color: var(--calc-button-bg); color: var(--calc-button-text); transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease; }
         .calculator-buttons button:hover { opacity: var(--calc-button-hover-opacity); }
         .calculator-buttons button:active { transform: scale(var(--calc-button-active-scale)); }
         .calculator-buttons button.num { background-color: var(--calc-button-bg); color: var(--calc-button-text); }
@@ -412,8 +571,8 @@
 
         /* Ajustes específicos */
         #save-grades-button, #save-attendance-button, #save-lesson-plan-button, #save-monthly-attendance-button, #save-map-button { margin-top: 0.8rem !important; }
-        .fab-button { position: fixed; bottom: calc(var(--nav-height) + var(--fab-bottom-margin)); right: 20px; width: 50px; height: 50px; border-radius: 50%; font-size: 1.8rem; line-height: 1; box-shadow: 0 4px 10px var(--shadow-color); z-index: 1010; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .fab-button:active { transform: scale(0.9); }
+        .fab-button { position: fixed; bottom: calc(var(--nav-height) + var(--fab-bottom-margin)); right: 20px; width: 50px; height: 50px; border-radius: 50%; font-size: 1.8rem; line-height: 1; box-shadow: 0 4px 10px var(--shadow-color); z-index: 1010; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease; }
+        .fab-button:active { transform: scale(0.9); opacity: var(--active-opacity); }
         #classes-section h2, #class-details-section h2 { color: var(--accent-primary); font-size: 1.3rem; margin-bottom: 1rem; display: flex; align-items: center; position: relative; text-align: center; justify-content: center; padding-left: 45px; padding-right: 45px; gap: 0.5em; }
         #classes-section h2 .back-button, #class-details-section h2 .back-button { position: absolute; left: 0; top: 50%; transform: translateY(-50%); margin-right: 0; padding: 0.3rem 0.6rem; font-size: 1rem; }
         #classes-section h2 span:not(.icon):not(.back-button), #class-details-section h2 span:not(.icon):not(.back-button) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; text-align: center; }
@@ -558,9 +717,9 @@
 
         /* --- Tools Grid --- */
         .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--tool-card-min-width), 1fr)); gap: 1rem; padding: 0.5rem 0; }
-        .tool-card { background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 2px 4px var(--shadow-color); min-height: 100px; }
+        .tool-card { background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; box-shadow: 0 2px 4px var(--shadow-color); min-height: 100px; }
         .tool-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px color-mix(in srgb, var(--shadow-color) 120%, black); }
-        .tool-card:active { transform: scale(0.97); }
+        .tool-card:active { transform: scale(0.97); background-color: var(--bg-tertiary-alpha); } /* Feedback de toque */
         .tool-card .icon { font-size: 2rem; margin-bottom: 0.6rem; color: var(--accent-primary); }
         .tool-card-title { font-size: 0.9rem; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
 
@@ -569,7 +728,7 @@
 <body>
 
     <div id="notification-banner"> <span id="notification-message">Mensagem...</span> <button id="notification-close-button" type="button">&times;</button> </div>
-    <audio id="notification-sound-default" preload="auto"> <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUReT18AAAAAAAAAAAAAAAAAAAAAAP////8AAAAA///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8=" type="audio/wav"> </audio>
+    <audio id="notification-sound-default" preload="auto"> <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUReT18AAAAAAAAAAAAAAAAAAAAAAP////8AAAAA///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8=" type="audio/wav"> </audio>
     <header class="app-header"> <div class="header-top-row"> <h1>Super Professor Pro</h1> <div id="header-info" class="header-info"></div> </div> <input type="search" id="search-input" placeholder="Buscar aluno, turma, escola..."> </header>
     <main class="app-content" id="main-content">
         <section id="schedule-section" class="section"> <h2><span class="icon icon-horario"></span>Meus Horários</h2> <button type="button" id="add-schedule-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button> <div id="schedule-list"><p style="text-align: center; padding: 1rem;">Nenhum horário cadastrado.</p></div> <p class="footer-message">Feito com ❤️ para professores</p> </section>
@@ -661,9 +820,62 @@
 
 
     <!-- Templates -->
-     <template id="school-item-template"> <div class="list-item" data-id=""> <div class="item-info"> <h4 class="school-name"></h4> </div> <div class="list-item-actions"> <button type="button" class="view-classes-button primary" title="Ver Turmas"><span class="icon icon-turmas"></span> Turmas</button> <button type="button" class="edit-school-button secondary icon-button" title="Editar Escola"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="delete-school-button danger icon-button" title="Excluir Escola"><span class="icon icon-excluir icon-only"></span></button> </div> </div> </template>
-    <template id="class-item-template"> <div class="list-item" data-id=""> <div class="item-info"> <h4 class="class-name"></h4> <p class="class-details"></p> </div> <div class="list-item-actions"> <button type="button" class="view-details-button primary" title="Ver Detalhes"><span class="icon icon-alunos"></span> Ver</button> <button type="button" class="edit-class-button secondary icon-button" title="Editar Turma"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="delete-class-button danger icon-button" title="Excluir Turma"><span class="icon icon-excluir icon-only"></span></button> </div> </div> </template>
-    <template id="student-list-item-template"> <div class="list-item" data-id=""> <span class="student-number" style="font-weight: bold; margin-right: 10px; min-width: 30px; text-align: right;"></span> <span class="student-name" style="white-space: normal; word-break: break-word;"></span> <div class="list-item-actions"> <button type="button" class="edit-student-button secondary icon-button" title="Editar Aluno"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="delete-student-button danger icon-button" title="Excluir Aluno"><span class="icon icon-excluir icon-only"></span></button> <button type="button" class="notes-student-button warning icon-button" title="Observações do Aluno"><span class="icon icon-anotacao icon-only"></span></button> <button type="button" class="move-student-button secondary icon-button" title="Mover Aluno para Outra Turma"><span class="icon icon-mover icon-only"></span></button> </div> </div> </template>
+     <!-- MODIFICADO: Template de Escola com Footer para Quorum -->
+     <template id="school-item-template">
+        <div class="list-item school-item" data-id="">
+            <!-- Linha Principal: Nome e Botões -->
+            <div class="school-item-main-row">
+                <div class="item-info"> <!-- Container do nome -->
+                    <h4 class="school-name">Nome da Escola</h4>
+                </div>
+                <div class="list-item-actions">
+                    <button type="button" class="view-classes-button button-like primary" title="Ver Turmas"><span class="icon icon-turmas"></span> Turmas</button>
+                    <button type="button" class="edit-school-button secondary icon-button" title="Editar Escola"><span class="icon icon-editar icon-only"></span></button>
+                    <button type="button" class="delete-school-button danger icon-button" title="Excluir Escola"><span class="icon icon-excluir icon-only"></span></button>
+                </div>
+            </div>
+            <!-- Linha Inferior: Quórum -->
+            <div class="school-quorum-info">
+                <label class="text-sm" for="quorum-date-input-ID_ESCOLA">Quórum:</label> <!-- ID único será gerado no JS -->
+                <input type="date" class="quorum-date-input" id="quorum-date-input-ID_ESCOLA">
+                <select class="quorum-shift-select">
+                    <option value="Geral">Geral</option>
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Noite">Noite</option>
+                    <option value="Integral">Integral</option>
+                </select>
+                <span class="quorum-display">--/-- (--%)</span>
+            </div>
+        </div>
+    </template>
+    <!-- Template de Turma (Restaurado ao original) -->
+    <template id="class-item-template">
+        <div class="list-item" data-id="">
+            <div class="item-info">
+                <h4 class="class-name"></h4>
+                <p class="class-details"></p>
+            </div>
+            <div class="list-item-actions">
+                <button type="button" class="view-details-button primary" title="Ver Detalhes"><span class="icon icon-alunos"></span> Ver</button>
+                <button type="button" class="edit-class-button secondary icon-button" title="Editar Turma"><span class="icon icon-editar icon-only"></span></button>
+                <button type="button" class="delete-class-button danger icon-button" title="Excluir Turma"><span class="icon icon-excluir icon-only"></span></button>
+            </div>
+        </div>
+    </template>
+    <!-- Template de Aluno (Restaurado ao original) -->
+    <template id="student-list-item-template">
+        <div class="list-item" data-id="">
+            <span class="student-number" style="font-weight: bold; margin-right: 10px; min-width: 30px; text-align: right;"></span>
+            <span class="student-name" style="white-space: normal; word-break: break-word; flex-grow: 1; margin-right: 10px;"></span>
+            <div class="list-item-actions">
+                <button type="button" class="edit-student-button secondary icon-button" title="Editar Aluno"><span class="icon icon-editar icon-only"></span></button>
+                <button type="button" class="delete-student-button danger icon-button" title="Excluir Aluno"><span class="icon icon-excluir icon-only"></span></button>
+                <button type="button" class="notes-student-button warning icon-button" title="Observações do Aluno"><span class="icon icon-anotacao icon-only"></span></button>
+                <button type="button" class="move-student-button secondary icon-button" title="Mover Aluno para Outra Turma"><span class="icon icon-mover icon-only"></span></button>
+            </div>
+        </div>
+    </template>
     <template id="grades-header-template"> <th class="student-col">Aluno</th> <th class="sum-col">Soma</th> <th class="avg-col">Média</th> </template>
     <template id="grades-row-template"> <tr> <td class="student-col"> <span class="student-number" style="font-weight:bold; margin-right: 5px;"></span> <span class="student-name"></span> </td> <td class="sum-col sum">--</td> <td class="avg-col average">--</td> </tr> </template>
     <template id="attendance-row-template"> <tr> <td class="student-col"> <span class="student-number"></span> <span class="student-name"></span> </td> <td class="attendance-status"></td> </tr> </template>
@@ -697,7 +909,7 @@
             const headerInfo = document.getElementById('header-info');
             const searchInput = document.getElementById('search-input');
             const scheduleListContainer = document.getElementById('schedule-list');
-            const schoolListContainer = document.getElementById('school-list');
+            const schoolListContainer = document.getElementById('school-list'); // Já existe
             const classListContainer = document.getElementById('class-list');
             const classesSchoolName = document.getElementById('classes-school-name');
             const studentListContainer = document.getElementById('student-list-container');
@@ -807,6 +1019,9 @@
                 weightedPairs: [] // Array of { grade: number, weight: number }
             };
 
+            // Definição das chaves de armazenamento
+            const DATA_STORAGE_KEY = 'superProfessorProData_v15'; // Chave atual
+            const OLD_DATA_STORAGE_KEY_V14 = 'superProfessorProData_v14'; // Chave anterior
 
             let appData = {
                 schools: [], classes: [], students: [], schedule: [],
@@ -814,27 +1029,41 @@
             };
             let currentSchoolId = null; let currentClassId = null; let currentSection = 'schedule-section';
 
-            // --- Funções de Estado e Persistência (Existentes, sem mudanças aqui) ---
+            // --- Funções de Estado e Persistência ---
             const saveAppState = () => { try { localStorage.setItem('lastSection', currentSection || 'schedule-section'); localStorage.setItem('lastSchoolId', currentSchoolId || ''); localStorage.setItem('lastClassId', currentClassId || ''); } catch (e) { console.error("Erro ao salvar estado:", e); } };
             const restoreAppState = () => { const lastSection = localStorage.getItem('lastSection'); const lastSchoolId = localStorage.getItem('lastSchoolId'); const lastClassId = localStorage.getItem('lastClassId'); console.log("Restoring App State:", {lastSection, lastSchoolId, lastClassId}); currentSection = 'schedule-section'; currentSchoolId = null; currentClassId = null; if (appData.schools.length > 0) { currentSchoolId = lastSchoolId || appData.schools[0].id; if (!findSchoolById(currentSchoolId)) { currentSchoolId = appData.schools[0]?.id || null; currentClassId = null; currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; } else { currentClassId = lastClassId || null; if (currentClassId && !findClassById(currentClassId)) { currentClassId = null; } if (lastSection) { if (lastSection === 'class-details-section' && currentClassId && findClassById(currentClassId)) { currentSection = 'class-details-section'; } else if (lastSection === 'classes-section' && currentSchoolId) { currentSection = 'classes-section'; currentClassId = null; } else if (lastSection === 'schools-section') { currentSection = 'schools-section'; currentSchoolId = null; currentClassId = null; } else if (['schedule-section', 'tools-section', 'contact-section', 'settings-section'].includes(lastSection)){ const sectionExists = document.getElementById(lastSection); if(sectionExists) { currentSection = lastSection; if(['schedule-section', 'tools-section', 'contact-section', 'settings-section'].includes(lastSection)) { currentSchoolId = null; currentClassId = null; } } else { currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; currentClassId = null; } } else { currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; currentClassId = null; } } else { if (currentClassId) currentSection = 'class-details-section'; else if (currentSchoolId) currentSection = 'classes-section'; else currentSection = 'schools-section'; } } } else { currentSection = 'schedule-section'; } if(['contact-section', 'settings-section', 'tools-section'].includes(lastSection)){ currentSection = lastSection; } console.log(`Estado Final Restaurado: Section=${currentSection}, School=${currentSchoolId}, Class=${currentClassId}`); };
 
-            // --- Funções Utilitárias (Existentes, sem mudanças aqui) ---
+            // --- Funções Utilitárias ---
             const generateId = (prefix = 'id') => `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const saveData = () => { try { localStorage.setItem('superProfessorProData_v14', JSON.stringify(appData)); console.log("Data saved (v14)."); } catch (e) { console.error("Erro salvar:", e); if (e.name === 'QuotaExceededError') { alert("Erro: Não há espaço suficiente para salvar os dados. Isso pode ser devido a um arquivo de som personalizado muito grande."); } else { alert("Erro ao salvar dados."); } } };
+            const saveData = () => { try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); console.log(`Data saved (${DATA_STORAGE_KEY}).`); } catch (e) { console.error("Erro salvar:", e); if (e.name === 'QuotaExceededError') { alert("Erro: Não há espaço suficiente para salvar os dados. Isso pode ser devido a um arquivo de som personalizado muito grande."); } else { alert("Erro ao salvar dados."); } } };
             const loadData = () => {
-                const dataV14 = localStorage.getItem('superProfessorProData_v14');
-                let dataToParse = dataV14; let importedVersion = 14;
-                if (!dataToParse) { const dataV13 = localStorage.getItem('superProfessorProData_v13'); if (dataV13) { console.log("Importing data from v13..."); dataToParse = dataV13; importedVersion = 13; } }
+                let dataToParse = localStorage.getItem(DATA_STORAGE_KEY);
+                let importedVersion = 15; // Assume a versão atual
+
+                if (!dataToParse) {
+                    const dataV14 = localStorage.getItem(OLD_DATA_STORAGE_KEY_V14);
+                    if (dataV14) {
+                        console.log("Importing data from v14...");
+                        dataToParse = dataV14;
+                        importedVersion = 14;
+                    }
+                }
 
                 if (dataToParse) {
                     try {
                         appData = JSON.parse(dataToParse);
-                        appData.schools = appData.schools || []; appData.classes = appData.classes || []; appData.students = appData.students || []; appData.schedule = appData.schedule || []; appData.settings = appData.settings || {};
+                        // Verificações de estrutura e valores padrão (importante manter e atualizar conforme necessário)
+                        appData.schools = appData.schools || [];
+                        appData.classes = appData.classes || [];
+                        appData.students = appData.students || [];
+                        appData.schedule = appData.schedule || [];
+                        appData.settings = appData.settings || {};
                         appData.settings.theme = appData.settings.theme || 'theme-light';
                         appData.settings.globalNotificationsEnabled = appData.settings.globalNotificationsEnabled !== undefined ? appData.settings.globalNotificationsEnabled : true;
                         appData.settings.notificationSoundEnabled = appData.settings.notificationSoundEnabled !== undefined ? appData.settings.notificationSoundEnabled : true;
                         appData.settings.customNotificationSound = appData.settings.customNotificationSound || null;
-                        if (appData.settings.nonSchoolDays) { delete appData.settings.nonSchoolDays; }
+
+                        // Aplica verificações e padrões para estruturas internas (exemplo)
                         appData.classes.forEach(c => {
                             c.notes = c.notes || ''; c.schoolId = c.schoolId || null;
                             c.gradeStructure = c.gradeStructure || [];
@@ -849,22 +1078,33 @@
                         appData.schedule.forEach(item => { if (item.notificationsEnabled === undefined) { item.notificationsEnabled = true; } });
 
                         console.log(`Data loaded (from version ${importedVersion}):`, appData);
-                        if (importedVersion < 14) {
-                            if (appData.settings.customNotificationSound === undefined) { appData.settings.customNotificationSound = null; }
-                            saveData();
-                            if (localStorage.getItem('superProfessorProData_v13')) localStorage.removeItem('superProfessorProData_v13');
-                            console.log("Migrated data saved as v14.");
+
+                        if (importedVersion < 15) {
+                            // Migração de v14 para v15 (se houver mudanças estruturais futuras)
+                            // Exemplo: appData.someNewFeature = appData.someNewFeature || defaultValue;
+                            saveData(); // Salva com a nova chave após migração
+                            localStorage.removeItem(OLD_DATA_STORAGE_KEY_V14); // Remove a chave antiga
+                            console.log(`Migrated data saved as ${DATA_STORAGE_KEY}.`);
                         }
+                        return true; // Dados carregados com sucesso
                     } catch (e) {
-                        console.error("Erro carregar ou migrar dados:", e);
+                        console.error("Erro ao carregar ou migrar dados:", e);
                         appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null } };
-                        localStorage.removeItem('superProfessorProData_v13');
-                        localStorage.removeItem('superProfessorProData_v14');
+                        localStorage.removeItem(OLD_DATA_STORAGE_KEY_V14);
+                        localStorage.removeItem(DATA_STORAGE_KEY);
+                        return false; // Erro ao carregar dados
                     }
-                } else { appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null } }; }
-                applyTheme(appData.settings.theme);
-                updateNotificationSettingsUI();
-                updateCustomSoundUI();
+                } else {
+                    // Nenhum dado encontrado
+                    appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null } };
+                    return false; // Nenhum dado carregado
+                }
+            };
+
+            // REMOVIDO: Função que gerava dados fictícios
+            const generateDummyDataForQuorum = () => {
+                // Esta função agora está vazia para não gerar dados
+                console.log("generateDummyDataForQuorum called, but is now empty.");
             };
 
             const applyTheme = (themeName) => { document.body.className = themeName || 'theme-light'; appData.settings.theme = themeName; document.querySelectorAll('.theme-button').forEach(btn => { btn.style.border = btn.dataset.theme === themeName ? '2px solid var(--accent-primary)' : 'none'; }); };
@@ -873,18 +1113,13 @@
             const showModal = (title, contentHtml, footerButtonsHtml = '', modalClass = '') => { modalTitle.textContent = title; modalBody.innerHTML = contentHtml; const defaultFooter = `<button type="button" data-dismiss="modal" class="secondary">Fechar</button>`; modalFooter.innerHTML = footerButtonsHtml ? footerButtonsHtml + defaultFooter : defaultFooter; modal.className = 'modal'; if (modalClass) modal.classList.add(modalClass); modal.classList.add('show'); modal.querySelectorAll('[data-dismiss="modal"]').forEach(btn => { if (!btn.listenerAttached) { btn.addEventListener('click', hideModal); btn.listenerAttached = true; } }); };
              const hideModal = () => {
                  if (stopwatchInterval) { clearInterval(stopwatchInterval); stopwatchInterval = null; isStopwatchRunning = false; }
-                 // Hide generic modal
                  modal.classList.remove('show');
-                 // Hide calculator modal specifically if it's the one being shown
                  calculatorModal?.classList.remove('show');
-
                  setTimeout(() => {
-                     // Reset generic modal content
                      modalTitle.textContent = '';
                      modalBody.innerHTML = '';
                      modalFooter.innerHTML = '';
                      modal.className = 'modal';
-                     // Reset calculator modal state if needed (might be done in openAdvancedCalculatorModal)
                  }, 300);
             };
             const findSchoolById = (id) => appData.schools.find(s => s.id === id);
@@ -894,6 +1129,7 @@
             const getStudentsByClass = (classId) => appData.students.filter(s => s.classId === classId).sort((a, b) => { const numA = parseInt(a.number) || Infinity; const numB = parseInt(b.number) || Infinity; if (numA !== numB) return numA - numB; return a.name.localeCompare(b.name); });
             const formatDate = (dateString) => { if(!dateString || dateString === 'N/A') return 'Data Indefinida'; try { const date = new Date(dateString + 'T00:00:00'); if (isNaN(date.getTime())) return 'Data Inválida'; return date.toLocaleDateString('pt-BR'); } catch { return dateString; } };
             const getCurrentDateString = () => new Date().toISOString().slice(0, 10);
+            const getYesterdayDateString = () => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); }; // Mantido para dados fictícios
             const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
             const getDayOfWeek = (year, month, day) => new Date(year, month, day).getDay();
             const sanitizeHTML = (str) => { if (str === null || str === undefined) return ''; const temp = document.createElement('div'); temp.textContent = String(str); return temp.innerHTML; };
@@ -901,18 +1137,216 @@
             const getGradeBackgroundColor = (value, ranges) => { if (value === null || value === undefined || !Array.isArray(ranges) || ranges.length === 0) { return null; } const numericValue = parseFloat(value); if (isNaN(numericValue)) { return null; } for (const range of ranges) { const min = parseFloat(range.min); const max = parseFloat(range.max); if (!isNaN(min) && !isNaN(max) && numericValue >= min && numericValue <= max) { return range.color; } } return null; };
             const applyGradeColor = (element, value, ranges) => { const bgColor = getGradeBackgroundColor(value, ranges); if (bgColor) { element.style.backgroundColor = bgColor; element.style.color = getContrastYIQ(bgColor); } else { element.style.backgroundColor = ''; element.style.color = ''; } };
 
-            // --- Funções de Renderização (Existentes) ---
+            // Função para calcular quórum
+            const calculateSchoolQuorum = (schoolId, dateString, shiftFilter = "Geral") => {
+                const classesInSchool = appData.classes.filter(c => c.schoolId === schoolId);
+                if (classesInSchool.length === 0) {
+                    return { present: 0, total: 0, percentage: 0, message: "Sem turmas" };
+                }
+
+                const filteredClasses = shiftFilter === "Geral"
+                    ? classesInSchool
+                    : classesInSchool.filter(c => c.shift === shiftFilter);
+
+                if (filteredClasses.length === 0 && shiftFilter !== "Geral") {
+                    return { present: 0, total: 0, percentage: 0, message: `Sem turmas (${shiftFilter})` };
+                }
+                const filteredClassIds = new Set(filteredClasses.map(c => c.id));
+                const studentsInFilter = appData.students.filter(s => filteredClassIds.has(s.classId));
+
+                let presentCount = 0;
+                let totalStudentsInFilter = studentsInFilter.length;
+
+                if (totalStudentsInFilter === 0) {
+                     // Se o filtro for Geral, mas não houver alunos em NENHUMA turma da escola
+                     if(shiftFilter === "Geral" && classesInSchool.length > 0) {
+                        return { present: 0, total: 0, percentage: 0, message: "Sem alunos" };
+                     }
+                     // Se o filtro for específico e não houver alunos NAQUELE turno
+                     else if (shiftFilter !== "Geral") {
+                        return { present: 0, total: 0, percentage: 0, message: `Sem alunos (${shiftFilter})` };
+                     }
+                     // Caso geral (sem turmas na escola) - já tratado acima
+                     else {
+                        return { present: 0, total: 0, percentage: 0, message: "Sem alunos" };
+                     }
+                }
+
+                studentsInFilter.forEach(student => {
+                    const attendanceRecord = student.attendance?.[dateString];
+                    if (attendanceRecord?.status === 'P') {
+                        presentCount++;
+                    }
+                });
+
+                const percentage = totalStudentsInFilter > 0 ? Math.round((presentCount / totalStudentsInFilter) * 100) : 0;
+
+                return { present: presentCount, total: totalStudentsInFilter, percentage: percentage };
+            };
+
+            // --- Funções de Renderização ---
             const renderScheduleList = () => { scheduleListContainer.innerHTML = ''; if (appData.schedule.length === 0) { scheduleListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhum horário cadastrado.</p>'; return; } const scheduleByDay = {}; weekdays.forEach(day => scheduleByDay[day] = []); appData.schedule.forEach(item => { if (scheduleByDay[item.day]) scheduleByDay[item.day].push(item); }); for (const day in scheduleByDay) { scheduleByDay[day].sort((a, b) => (a.startTime || '').localeCompare(b.startTime || '')); } const scheduleTemplate = document.getElementById('schedule-item-template'); weekdays.forEach(day => { if (scheduleByDay[day].length > 0) { const dayGroup = document.createElement('div'); dayGroup.classList.add('schedule-day-group'); const dayTitle = document.createElement('h3'); dayTitle.classList.add('schedule-day-title'); dayTitle.textContent = day; dayGroup.appendChild(dayTitle); scheduleByDay[day].forEach(item => { const clone = scheduleTemplate.content.cloneNode(true); const scheduleElement = clone.querySelector('.schedule-item'); scheduleElement.dataset.id = item.id; const school = findSchoolById(item.schoolId); scheduleElement.querySelector('.schedule-time').textContent = `${item.startTime || '?'} - ${item.endTime || '?'}`; scheduleElement.querySelector('.school-name').textContent = school ? sanitizeHTML(school.name) : 'Escola não encontrada'; scheduleElement.querySelector('.note').textContent = sanitizeHTML(item.note || ''); const notificationButton = clone.querySelector('.notification-toggle-button'); const notificationIndicator = clone.querySelector('.notification-indicator'); updateNotificationIcon(notificationIndicator, item.notificationsEnabled); notificationButton.addEventListener('click', (e) => { e.stopPropagation(); toggleScheduleNotification(item.id, notificationIndicator); }); clone.querySelector('.edit-schedule-button').addEventListener('click', (e) => { e.stopPropagation(); openScheduleModal(item.id); }); clone.querySelector('.delete-schedule-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir horário (${item.startTime} na ${school?.name || 'escola'})?`)) { deleteScheduleEntry(item.id); } }); dayGroup.appendChild(clone); }); scheduleListContainer.appendChild(dayGroup); } }); };
             const updateNotificationIcon = (indicatorElement, isEnabled) => { if (!indicatorElement) return; indicatorElement.classList.remove('icon-notificacao-on', 'icon-notificacao-off'); if (isEnabled) { indicatorElement.classList.add('icon-notificacao-on'); indicatorElement.parentElement.title = "Notificações Ativadas (Clique para desativar)"; } else { indicatorElement.classList.add('icon-notificacao-off'); indicatorElement.parentElement.title = "Notificações Desativadas (Clique para ativar)"; } };
-            const renderSchoolList = () => { schoolListContainer.innerHTML = ''; if (appData.schools.length === 0) { schoolListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p>'; return; } const template = document.getElementById('school-item-template'); appData.schools.sort((a,b) => a.name.localeCompare(b.name)).forEach(school => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = school.id; item.querySelector('.school-name').textContent = sanitizeHTML(school.name); item.querySelector('.view-classes-button').addEventListener('click', (e) => { e.stopPropagation(); selectSchool(school.id); showSection('classes-section'); }); item.querySelector('.edit-school-button').addEventListener('click', (e) => { e.stopPropagation(); openSchoolModal(school.id); }); item.querySelector('.delete-school-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir escola "${sanitizeHTML(school.name)}" e TODOS os dados associados?`)) { deleteSchool(school.id); } }); item.addEventListener('click', () => { selectSchool(school.id); showSection('classes-section'); }); schoolListContainer.appendChild(clone); }); };
-            const renderClassList = (schoolId) => { classListContainer.innerHTML = ''; const school = findSchoolById(schoolId); classesSchoolName.textContent = school ? sanitizeHTML(school.name) : 'Selecione Escola'; if (!school) { classListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Escola não encontrada.</p>'; return; } const classesInSchool = appData.classes.filter(c => c.schoolId === schoolId); if (classesInSchool.length === 0) { classListContainer.innerHTML = `<p style="text-align: center; padding: 1rem;">Nenhuma turma cadastrada para ${sanitizeHTML(school.name)}.</p>`; return; } const template = document.getElementById('class-item-template'); classesInSchool.sort((a,b) => a.name.localeCompare(b.name)).forEach(cls => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = cls.id; item.querySelector('.class-name').textContent = sanitizeHTML(cls.name); item.querySelector('.class-details').textContent = `${sanitizeHTML(cls.subject || 'Sem matéria')} - ${sanitizeHTML(cls.shift || 'Sem turno')} - ${sanitizeHTML(cls.schedule || 'Sem horário')}`; if(cls.id === currentClassId) item.classList.add('active'); item.querySelector('.view-details-button').addEventListener('click', (e) => { e.stopPropagation(); selectClass(cls.id); showSection('class-details-section'); }); item.querySelector('.edit-class-button').addEventListener('click', (e) => { e.stopPropagation(); openClassModal(cls.id); }); item.querySelector('.delete-class-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir turma "${sanitizeHTML(cls.name)}" e TODOS os dados associados?`)) { deleteClass(cls.id); } }); item.addEventListener('click', () => { selectClass(cls.id); showSection('class-details-section'); }); classListContainer.appendChild(clone); }); };
-            const renderStudentList = (classId) => { studentListContainer.innerHTML = ''; const studentsInClass = getStudentsByClass(classId); if (studentsInClass.length === 0) { studentListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhum aluno nesta turma ainda.</p>'; return; } const template = document.getElementById('student-list-item-template'); studentsInClass.forEach(std => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = std.id; item.querySelector('.student-number').textContent = std.number ? `${std.number}.` : '-.'; item.querySelector('.student-name').textContent = sanitizeHTML(std.name); item.querySelector('.edit-student-button').addEventListener('click', (e) => { e.stopPropagation(); openStudentModal(std.id); }); item.querySelector('.delete-student-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir aluno "${sanitizeHTML(std.name)}"?`)) { deleteStudent(std.id); } }); item.querySelector('.notes-student-button').addEventListener('click', (e) => { e.stopPropagation(); openStudentNotesModal(std.id); }); item.querySelector('.move-student-button').addEventListener('click', (e) => { e.stopPropagation(); openMoveStudentModal(std.id); }); item.style.cursor = 'default'; studentListContainer.appendChild(clone); }); };
+
+            // Função renderSchoolList - Usando a nova estrutura HTML do template
+            const renderSchoolList = () => {
+                schoolListContainer.innerHTML = '';
+                if (appData.schools.length === 0) {
+                    schoolListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p>';
+                    return;
+                }
+
+                const template = document.getElementById('school-item-template');
+                const today = getCurrentDateString();
+
+                appData.schools.sort((a, b) => a.name.localeCompare(b.name)).forEach(school => {
+                    const clone = template.content.cloneNode(true);
+                    const item = clone.querySelector('.list-item'); // Outer div
+                    item.dataset.id = school.id;
+
+                    // Configura Nome e Botões na linha principal
+                    item.querySelector('.school-name').textContent = sanitizeHTML(school.name);
+                    item.querySelector('.view-classes-button').addEventListener('click', (e) => { e.stopPropagation(); selectSchool(school.id); showSection('classes-section'); });
+                    item.querySelector('.edit-school-button').addEventListener('click', (e) => { e.stopPropagation(); openSchoolModal(school.id); });
+                    item.querySelector('.delete-school-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir escola "${sanitizeHTML(school.name)}" e TODOS os dados associados (turmas, alunos, etc.)?`)) { deleteSchool(school.id); } });
+
+                    // Configura a linha do Quórum
+                    const quorumContainer = item.querySelector('.school-quorum-info');
+                    const quorumDateInput = quorumContainer.querySelector('.quorum-date-input');
+                    const quorumShiftSelect = quorumContainer.querySelector('.quorum-shift-select');
+                    const quorumDisplay = quorumContainer.querySelector('.quorum-display');
+                    const quorumDateLabel = quorumContainer.querySelector('label[for="quorum-date-input-ID_ESCOLA"]');
+
+                    // IDs únicos
+                    const uniqueId = `quorum-date-input-${school.id}`;
+                    if (quorumDateLabel) quorumDateLabel.setAttribute('for', uniqueId);
+                    if (quorumDateInput) {
+                        quorumDateInput.id = uniqueId;
+                        quorumDateInput.value = today;
+                        quorumDateInput.addEventListener('click', (e) => e.stopPropagation());
+                    }
+                    if (quorumShiftSelect) {
+                        quorumShiftSelect.addEventListener('click', (e) => e.stopPropagation());
+                    }
+
+                    // Função para atualizar display do quórum (igual à anterior)
+                    const updateQuorumDisplay = () => {
+                         const selectedDate = quorumDateInput.value;
+                        const selectedShift = quorumShiftSelect.value;
+                        if (!selectedDate) {
+                            quorumDisplay.textContent = 'Data inválida';
+                            quorumDisplay.classList.add('no-data');
+                            quorumDisplay.title = 'Selecione uma data válida';
+                            return;
+                        }
+
+                        const quorumData = calculateSchoolQuorum(school.id, selectedDate, selectedShift);
+
+                        quorumDisplay.classList.remove('no-data'); // Reseta estilo
+                        if (quorumData.message) {
+                            quorumDisplay.textContent = `(${quorumData.message})`;
+                            quorumDisplay.classList.add('no-data');
+                             if (quorumData.message.includes('Sem turmas')) {
+                                quorumDisplay.title = `Não há turmas cadastradas para calcular o quórum (${selectedShift}) em ${formatDate(selectedDate)}`;
+                            } else if (quorumData.message.includes('Sem alunos')) {
+                                quorumDisplay.title = `Não há alunos cadastrados nas turmas para calcular o quórum (${selectedShift}) em ${formatDate(selectedDate)}`;
+                            } else {
+                                quorumDisplay.title = quorumData.message; // Fallback
+                            }
+                        } else {
+                            quorumDisplay.textContent = `${quorumData.present}/${quorumData.total} (${quorumData.percentage}%)`;
+                            quorumDisplay.title = `${quorumData.present} de ${quorumData.total} alunos presentes (${selectedShift}) em ${formatDate(selectedDate)}`;
+                        }
+                    };
+
+                    // Listeners e cálculo inicial
+                    quorumDateInput.addEventListener('change', updateQuorumDisplay);
+                    quorumShiftSelect.addEventListener('change', updateQuorumDisplay);
+                    updateQuorumDisplay();
+
+                    // Listener de clique no item (fora da área do quorum e actions)
+                    item.addEventListener('click', (e) => {
+                        if (!e.target.closest('.school-quorum-info, .list-item-actions')) {
+                            selectSchool(school.id);
+                            showSection('classes-section');
+                        }
+                    });
+
+                    schoolListContainer.appendChild(clone);
+                });
+            };
+
+            // Função renderClassList restaurada para usar layout original
+             const renderClassList = (schoolId) => {
+                 classListContainer.innerHTML = '';
+                 const school = findSchoolById(schoolId);
+                 classesSchoolName.textContent = school ? sanitizeHTML(school.name) : 'Selecione Escola';
+                 if (!school) {
+                     classListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Escola não encontrada.</p>';
+                     return;
+                 }
+                 const classesInSchool = appData.classes.filter(c => c.schoolId === schoolId);
+                 if (classesInSchool.length === 0) {
+                     classListContainer.innerHTML = `<p style="text-align: center; padding: 1rem;">Nenhuma turma cadastrada para ${sanitizeHTML(school.name)}.</p>`;
+                     return;
+                 }
+                 const template = document.getElementById('class-item-template'); // Usa o template restaurado
+                 classesInSchool.sort((a, b) => a.name.localeCompare(b.name)).forEach(cls => {
+                     const clone = template.content.cloneNode(true);
+                     const item = clone.querySelector('.list-item'); // Pega o .list-item do template
+                     item.dataset.id = cls.id;
+
+                     const itemInfo = item.querySelector('.item-info'); // Pega o .item-info
+                     itemInfo.querySelector('.class-name').textContent = sanitizeHTML(cls.name);
+                     itemInfo.querySelector('.class-details').textContent = `${sanitizeHTML(cls.subject || 'Sem matéria')} - ${sanitizeHTML(cls.shift || 'Sem turno')} - ${sanitizeHTML(cls.schedule || 'Sem horário')}`;
+
+                     if(cls.id === currentClassId) item.classList.add('active');
+
+                     const actions = item.querySelector('.list-item-actions'); // Pega as ações
+                     actions.querySelector('.view-details-button').addEventListener('click', (e) => { e.stopPropagation(); selectClass(cls.id); showSection('class-details-section'); });
+                     actions.querySelector('.edit-class-button').addEventListener('click', (e) => { e.stopPropagation(); openClassModal(cls.id); });
+                     actions.querySelector('.delete-class-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir turma "${sanitizeHTML(cls.name)}" e TODOS os dados associados?`)) { deleteClass(cls.id); } });
+
+                     item.addEventListener('click', () => { selectClass(cls.id); showSection('class-details-section'); });
+
+                     classListContainer.appendChild(clone); // Adiciona o clone (que contém o item)
+                 });
+             };
+
+             // Função renderStudentList restaurada para usar layout original e sem max-height
+             const renderStudentList = (classId) => {
+                 studentListContainer.innerHTML = ''; // Limpa container
+                 const studentsInClass = getStudentsByClass(classId);
+                 if (studentsInClass.length === 0) {
+                     studentListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhum aluno nesta turma ainda.</p>';
+                     return;
+                 }
+                 const template = document.getElementById('student-list-item-template'); // Usa o template restaurado
+                 studentsInClass.forEach(std => {
+                     const clone = template.content.cloneNode(true);
+                     const item = clone.querySelector('.list-item'); // Pega o .list-item do template
+                     item.dataset.id = std.id;
+
+                     item.querySelector('.student-number').textContent = std.number ? `${std.number}.` : '-.';
+                     item.querySelector('.student-name').textContent = sanitizeHTML(std.name);
+
+                     const actions = item.querySelector('.list-item-actions'); // Pega as ações
+                     actions.querySelector('.edit-student-button').addEventListener('click', (e) => { e.stopPropagation(); openStudentModal(std.id); });
+                     actions.querySelector('.delete-student-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir aluno "${sanitizeHTML(std.name)}"?`)) { deleteStudent(std.id); } });
+                     actions.querySelector('.notes-student-button').addEventListener('click', (e) => { e.stopPropagation(); openStudentNotesModal(std.id); });
+                     actions.querySelector('.move-student-button').addEventListener('click', (e) => { e.stopPropagation(); openMoveStudentModal(std.id); });
+
+                     item.style.cursor = 'default'; // Restaura cursor padrão
+                     studentListContainer.appendChild(clone); // Adiciona o clone (que contém o item)
+                 });
+             };
             const renderGradeSets = (classId) => { gradeSetSelect.innerHTML = ''; const currentClass = findClassById(classId); if (!currentClass || !currentClass.gradeStructure || currentClass.gradeStructure.length === 0) { gradeSetSelect.innerHTML = '<option value="">Configure</option>'; gradesTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Configure a estrutura de notas clicando no ícone <span class="icon icon-estrutura"></span>.</p>'; saveGradesButton.classList.add('hidden'); manageGradeStructureButton.style.borderColor = 'var(--accent-warning)'; exportGradesCsvButton.classList.add('hidden'); exportGradesPdfButton.classList.add('hidden'); return; } manageGradeStructureButton.style.borderColor = 'transparent'; currentClass.gradeStructure.forEach(gs => { const option = document.createElement('option'); option.value = gs.id; option.textContent = sanitizeHTML(gs.name); gradeSetSelect.appendChild(option); }); if (getStudentsByClass(classId).length > 0) { renderGradesTable(classId, gradeSetSelect.value); } else { gradesTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Adicione alunos para registrar notas.</p>'; saveGradesButton.classList.add('hidden'); exportGradesCsvButton.classList.add('hidden'); exportGradesPdfButton.classList.add('hidden'); } };
             const renderGradesTable = (classId, gradeSetId) => { gradesTableContainer.innerHTML = ''; const currentClass = findClassById(classId); const gradeSet = currentClass?.gradeStructure?.find(gs => gs.id === gradeSetId); const studentsInClass = getStudentsByClass(classId); const colorRanges = gradeSet?.colorRanges || []; if (!gradeSet || studentsInClass.length === 0) { gradesTableContainer.innerHTML = `<p style="padding: 1rem; text-align: center;">${!gradeSet ? 'Selecione um conjunto de notas válido.' : 'Nenhum aluno para exibir notas.'}</p>`; saveGradesButton.classList.add('hidden'); if(exportGradesCsvButton) exportGradesCsvButton.classList.add('hidden'); if(exportGradesPdfButton) exportGradesPdfButton.classList.add('hidden'); return; } saveGradesButton.classList.remove('hidden'); if(exportGradesCsvButton) exportGradesCsvButton.classList.remove('hidden'); if(exportGradesPdfButton) exportGradesPdfButton.classList.remove('hidden'); const table = document.createElement('table'); table.classList.add('data-table'); const thead = table.createTHead(); const tbody = table.createTBody(); const headerRow = thead.insertRow(); const headerTemplate = document.getElementById('grades-header-template'); const headerContent = headerTemplate.content.cloneNode(true); headerRow.appendChild(headerContent.querySelector('.student-col').cloneNode(true)); gradeSet.gradeLabels.forEach(label => { const th = document.createElement('th'); th.classList.add('grade-col'); th.textContent = sanitizeHTML(label); headerRow.appendChild(th); }); headerRow.appendChild(headerContent.querySelector('.sum-col').cloneNode(true)); headerRow.appendChild(headerContent.querySelector('.avg-col').cloneNode(true)); const rowTemplate = document.getElementById('grades-row-template'); studentsInClass.forEach(std => { const clone = rowTemplate.content.cloneNode(true); const row = clone.querySelector('tr'); row.dataset.studentId = std.id; const studentCol = row.querySelector('.student-col'); if(studentCol) { studentCol.querySelector('.student-number').textContent = std.number ? `${std.number}.` : '-.'; studentCol.querySelector('.student-name').textContent = sanitizeHTML(std.name); } const sumCellTemplate = row.querySelector('.sum'); const avgCellTemplate = row.querySelector('.average'); if(sumCellTemplate) sumCellTemplate.remove(); if(avgCellTemplate) avgCellTemplate.remove(); const studentGradesForSet = std.grades[gradeSetId] || {}; const fragment = document.createDocumentFragment(); gradeSet.gradeLabels.forEach(label => { const td = document.createElement('td'); td.classList.add('grade-col'); const input = document.createElement('input'); input.type = 'number'; input.classList.add('grade-input'); input.dataset.label = label; input.min = "0"; input.max = "100"; input.step = "0.1"; input.placeholder = sanitizeHTML(label); const gradeValue = studentGradesForSet[label] ?? ''; input.value = gradeValue; applyGradeColor(input, gradeValue, colorRanges); input.addEventListener('input', (e) => { applyGradeColor(e.target, e.target.value, colorRanges); calculateAndUpdateSumAndAverage(row, gradeSet.gradeLabels, colorRanges); }); td.appendChild(input); fragment.appendChild(td); }); studentCol.after(fragment); if(sumCellTemplate) row.appendChild(sumCellTemplate); if(avgCellTemplate) row.appendChild(avgCellTemplate); calculateAndUpdateSumAndAverage(row, gradeSet.gradeLabels, colorRanges); tbody.appendChild(row); }); gradesTableContainer.appendChild(table); };
             const calculateAndUpdateSumAndAverage = (tableRow, gradeLabels, colorRanges) => { let sum = 0; let count = 0; gradeLabels.forEach(label => { const input = tableRow.querySelector(`input[data-label="${label}"]`); const value = parseFloat(input?.value); if (!isNaN(value)) { sum += value; count++; } }); const sumCell = tableRow.querySelector('.sum'); const avgCell = tableRow.querySelector('.average'); if (sumCell) { sumCell.textContent = count > 0 ? sum.toFixed(1) : '--'; } if (avgCell) { const avg = count > 0 ? (sum / count) : null; avgCell.textContent = avg !== null ? avg.toFixed(1) : '--'; if (colorRanges && colorRanges.length > 0) { applyGradeColor(avgCell, avg, colorRanges); avgCell.classList.remove('grade-low', 'grade-medium', 'grade-high'); } else { avgCell.style.backgroundColor = ''; avgCell.style.color = ''; avgCell.classList.remove('grade-low', 'grade-medium', 'grade-high'); if(avg !== null) { if (avg < 5) avgCell.classList.add('grade-low'); else if (avg < 7) avgCell.classList.add('grade-medium'); else avgCell.classList.add('grade-high'); } } } };
             const calculateSumAndAverageForData = (gradesObject) => { let sum = 0; let count = 0; let average = null; if (gradesObject) { for(const label in gradesObject) { if (label !== 'average' && label !== 'sum') { const value = parseFloat(gradesObject[label]); if (!isNaN(value)) { sum += value; count++; } } } } if (count > 0) { average = parseFloat((sum / count).toFixed(1)); sum = parseFloat(sum.toFixed(1)); } else { sum = null; } return { sum: sum, average: average }; };
             const renderAttendanceTable = (classId, date) => { attendanceTableContainer.innerHTML = ''; saveAttendanceButton.classList.add('hidden'); attendanceActionsContainer.classList.add('hidden'); const studentsInClass = getStudentsByClass(classId); if (!date) { attendanceTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione uma data.</p>'; return; } if (studentsInClass.length === 0) { attendanceTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Nenhum aluno para registrar presença.</p>'; return; } const isNonSchoolDay = studentsInClass.every(std => std.attendance[date]?.status === 'H'); console.log(`Rendering attendance for ${date}. Is Non-School Day: ${isNonSchoolDay}`); attendanceActionsContainer.classList.remove('hidden'); saveAttendanceButton.classList.remove('hidden'); markAllPresentButton.disabled = isNonSchoolDay; if (isNonSchoolDay) { markNonSchoolDayButton.innerHTML = `<span class="icon icon-nao-letivo"></span>Desm. Não Letivo`; markNonSchoolDayButton.classList.remove('secondary'); markNonSchoolDayButton.classList.add('danger'); markNonSchoolDayButton.title = "Reverter para dia letivo normal"; } else { markNonSchoolDayButton.innerHTML = `<span class="icon icon-nao-letivo"></span>Não Letivo`; markNonSchoolDayButton.classList.remove('danger'); markNonSchoolDayButton.classList.add('secondary'); markNonSchoolDayButton.title = "Marcar este dia como não letivo"; } const table = document.createElement('table'); table.classList.add('data-table'); table.innerHTML = `<thead><tr><th class="student-col">Aluno</th><th class="attendance-status">Status</th></tr></thead><tbody></tbody>`; const tbody = table.querySelector('tbody'); const template = document.getElementById('attendance-row-template'); studentsInClass.forEach(std => { const studentId = std.id; const clone = template.content.cloneNode(true); const row = clone.querySelector('tr'); row.dataset.studentId = studentId; const studentCol = row.querySelector('.student-col'); studentCol.querySelector('.student-number').textContent = std.number ? `${std.number}.` : '-.'; studentCol.querySelector('.student-name').textContent = sanitizeHTML(std.name); const statusCell = row.querySelector('.attendance-status'); if (!std.attendance[date]) std.attendance[date] = { status: null, justification: '' }; const currentStatus = std.attendance[date].status; const currentJustification = std.attendance[date].justification || ''; statusCell.innerHTML = ''; if (currentStatus === 'H') { statusCell.textContent = 'H'; statusCell.classList.add('status-H'); } else { statusCell.classList.remove('status-H'); statusCell.innerHTML = ` <button type="button" class="attendance-toggle present" data-status="P" title="Presente"><span class="icon icon-presenca"></span> P</button> <button type="button" class="attendance-toggle absent" data-status="F" title="Faltou/Justificar"><span class="icon icon-falta"></span> F</button> `; const presentButton = statusCell.querySelector('.attendance-toggle.present'); const absentButton = statusCell.querySelector('.attendance-toggle.absent'); presentButton.disabled = isNonSchoolDay; absentButton.disabled = isNonSchoolDay; const updateButtonUI = (status, justification) => { presentButton.classList.toggle('selected', status === 'P'); absentButton.classList.toggle('selected', status === 'F'); absentButton.classList.toggle('justified', status === 'F' && !!justification); const isJustified = status === 'F' && !!justification; absentButton.innerHTML = `<span class="icon icon-falta"></span> ${isJustified ? 'FJ' : 'F'}`; absentButton.title = isJustified ? `Falta Justificada: ${sanitizeHTML(justification.substring(0, 30))}... (Clique para editar)` : 'Faltou (Clique para justificar)'; }; updateButtonUI(currentStatus, currentJustification); presentButton.addEventListener('click', () => { if (presentButton.disabled) return; const student = findStudentById(studentId); if (!student) return; if (!student.attendance[date]) student.attendance[date] = { status: null, justification: '' }; if (student.attendance[date].status === 'P') { student.attendance[date].status = null; } else { student.attendance[date].status = 'P'; } student.attendance[date].justification = ''; updateButtonUI(student.attendance[date].status, ''); console.log(`Data updated for ${studentId}:`, student.attendance[date]); }); absentButton.addEventListener('click', () => { if (absentButton.disabled) return; const student = findStudentById(studentId); if (!student) return; if (!student.attendance[date]) student.attendance[date] = { status: null, justification: '' }; if (student.attendance[date].status === 'F') { openJustificationModal(studentId, date); } else { student.attendance[date].status = 'F'; student.attendance[date].justification = ''; updateButtonUI('F', ''); console.log(`Data updated for ${studentId}:`, student.attendance[date]); } }); } tbody.appendChild(row); }); attendanceTableContainer.appendChild(table); };
             const renderLessonPlan = (classId, date) => { const currentClass = findClassById(classId); if (!currentClass || !date || !lessonPlanTextarea) { if(lessonPlanTextarea) lessonPlanTextarea.value = ''; if(saveLessonPlanButton) saveLessonPlanButton.classList.add('hidden'); return; } currentClass.lessonPlans = currentClass.lessonPlans || {}; const plan = currentClass.lessonPlans[date] || ''; lessonPlanTextarea.value = plan; saveLessonPlanButton.classList.remove('hidden'); };
+            const renderClassroomMap = (classId, isEditing = false) => { const cls = findClassById(classId); if (!cls) { console.error("Class not found for map:", classId); classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro: Turma não encontrada.</p>'; classroomContainerEdit.innerHTML = ''; mapEditArea.classList.add('hidden'); return; } const layout = cls.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }; const currentLayoutData = isEditing ? tempClassroomLayout : layout; const students = getStudentsByClass(classId); const container = isEditing ? classroomContainerEdit : classroomContainerDisplay; container.innerHTML = ''; const teacherDeskClone = teacherDeskTemplate.content.cloneNode(true); const teacherDeskElement = teacherDeskClone.querySelector('.teacher-desk'); const gridClone = classroomGridTemplate.content.cloneNode(true); const gridContainerElement = gridClone.querySelector('.classroom-map-grid'); teacherDeskElement.className = 'teacher-desk'; teacherDeskElement.classList.add(`position-${currentLayoutData.teacherDeskPosition}`); gridContainerElement.style.gridTemplateColumns = `repeat(${currentLayoutData.cols}, auto)`; container.appendChild(teacherDeskElement); container.appendChild(gridContainerElement); const seatTemplate = document.getElementById('seat-template'); const emptySeatPlaceholder = "Toque/Arraste Aluno"; if (isEditing) clearSeatSelection(); if (currentLayoutData.rows > 0 && currentLayoutData.cols > 0) { for (let r = 1; r <= currentLayoutData.rows; r++) { for (let c = 1; c <= currentLayoutData.cols; c++) { const seatData = currentLayoutData.seats.find(s => s.row === r && s.col === c); const studentId = seatData?.studentId; const student = studentId ? findStudentById(studentId) : null; const seatClone = seatTemplate.content.cloneNode(true); const seatElement = seatClone.querySelector('.seat'); seatElement.dataset.row = r; seatElement.dataset.col = c; const numberSpan = seatElement.querySelector('.seat-student-number'); const nameSpan = seatElement.querySelector('.seat-student-name'); const placeholderSpan = seatElement.querySelector('.seat-placeholder-text'); numberSpan.textContent = ''; nameSpan.textContent = ''; placeholderSpan.textContent = ''; placeholderSpan.classList.remove('seat-placeholder-text'); seatElement.classList.remove('occupied', 'empty', 'selected-for-assignment'); seatElement.removeAttribute('data-student-id'); seatElement.setAttribute('draggable', 'false'); if (student) { seatElement.classList.add('occupied'); seatElement.dataset.studentId = student.id; numberSpan.textContent = student.number ? `${student.number}.` : ''; nameSpan.textContent = sanitizeHTML(student.name); if (isEditing) { seatElement.setAttribute('draggable', 'true'); seatElement.addEventListener('dragstart', handleSeatDragStart); seatElement.addEventListener('click', handleOccupiedSeatClick); seatElement.style.cursor = 'grab'; } else { seatElement.style.cursor = 'default'; } } else { seatElement.classList.add('empty'); if (isEditing) { seatElement.addEventListener('click', handleSeatClickForAssignment); placeholderSpan.textContent = emptySeatPlaceholder; placeholderSpan.classList.add('seat-placeholder-text'); seatElement.style.cursor = 'pointer'; } else { seatElement.style.cursor = 'default'; } } if (isEditing) { seatElement.addEventListener('dragover', handleDragOver); seatElement.addEventListener('dragleave', handleDragLeave); seatElement.addEventListener('drop', handleDropOnSeat); } gridContainerElement.appendChild(seatElement); } } } else if (!isEditing) { gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p>'; } else { gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Dimensões inválidas (0 fileiras ou colunas).</p>'; } if (isEditing) { renderUnassignedStudents(classId); } classroomContainerDisplay.classList.toggle('hidden', isEditing); mapEditArea.classList.toggle('hidden', !isEditing); };
 
             // --- Funções de CRUD (Existentes, sem mudanças aqui) ---
             const openScheduleModal = (scheduleIdToEdit = null) => { const isEditing = scheduleIdToEdit !== null; const scheduleData = isEditing ? findScheduleById(scheduleIdToEdit) : { day: weekdays[new Date().getDay()], notificationsEnabled: true }; const title = isEditing ? 'Editar Horário' : 'Novo Horário'; let schoolOptions = '<option value="">-- Selecione --</option>'; appData.schools.sort((a, b) => a.name.localeCompare(b.name)).forEach(s => { schoolOptions += `<option value="${s.id}" ${scheduleData.schoolId === s.id ? 'selected' : ''}>${sanitizeHTML(s.name)}</option>`; }); let dayOptions = ''; weekdays.slice(1, 6).forEach(day => { dayOptions += `<option value="${day}" ${scheduleData.day === day ? 'selected' : ''}>${day}</option>`; }); if (weekdays.includes(scheduleData.day) && !weekdays.slice(1, 6).includes(scheduleData.day)) { dayOptions += `<option value="${scheduleData.day}" selected>${scheduleData.day}</option>`; } if (!weekdays.includes(scheduleData.day)) { dayOptions += `<option value="Sábado" ${scheduleData.day === 'Sábado' ? 'selected' : ''}>Sábado</option>`; dayOptions += `<option value="Domingo" ${scheduleData.day === 'Domingo' ? 'selected' : ''}>Domingo</option>`; } const modalContent = ` <form id="schedule-form"> <input type="hidden" id="schedule-id" value="${isEditing ? scheduleIdToEdit : ''}"> <div class="form-group"> <label for="schedule-day">Dia:</label> <select id="schedule-day" required>${dayOptions}</select> </div> <div class="form-group d-flex"> <div style="flex: 1; margin-right: 5px;"> <label for="schedule-start-time">Início:</label> <input type="time" id="schedule-start-time" required value="${scheduleData.startTime || ''}"> </div> <div style="flex: 1; margin-left: 5px;"> <label for="schedule-end-time">Fim:</label> <input type="time" id="schedule-end-time" required value="${scheduleData.endTime || ''}"> </div> </div> <div class="form-group"> <label for="schedule-school">Escola:</label> <select id="schedule-school" required>${schoolOptions}</select> </div> <div class="form-group"> <label for="schedule-note">Anotação:</label> <input type="text" id="schedule-note" placeholder="Ex: Aula Turma 8B" value="${sanitizeHTML(scheduleData.note || '')}"> </div> <div class="checkbox-group"> <input type="checkbox" id="enable-schedule-notification" ${scheduleData.notificationsEnabled ? 'checked' : ''}> <label for="enable-schedule-notification">Ativar Notificações para este Horário</label> </div> </form> `; const footerButtons = `<button type="button" id="save-schedule-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; showModal(title, modalContent, footerButtons); document.getElementById('save-schedule-button').addEventListener('click', saveScheduleEntry); };
@@ -952,7 +1386,111 @@
              const renderMonthlyAttendanceData = (classId, year, month) => { const students = getStudentsByClass(classId); const currentModal = document.querySelector('#generic-modal.show.monthly-attendance-modal'); if (!currentModal) return; const tableWrapper = currentModal.querySelector('#monthly-attendance-table-wrapper'); const summaryContainer = currentModal.querySelector('#monthly-attendance-summary'); const chartContainer = currentModal.querySelector('#monthly-attendance-chart-container'); const exportCsvBtn = currentModal.querySelector('#export-attendance-csv-button'); const exportPdfBtn = currentModal.querySelector('#export-attendance-pdf-button'); if (!tableWrapper || !summaryContainer || !chartContainer) { console.error("Um ou mais elementos do modal mensal não encontrados."); return; } tableWrapper.innerHTML = ''; summaryContainer.innerHTML = ''; chartContainer.innerHTML = ''; if (students.length === 0) { tableWrapper.innerHTML = '<p style="text-align:center; padding: 1rem;">Nenhum aluno nesta turma.</p>'; if (exportCsvBtn) exportCsvBtn.classList.add('hidden'); if (exportPdfBtn) exportPdfBtn.classList.add('hidden'); chartContainer.classList.add('hidden'); return; } if (exportCsvBtn) exportCsvBtn.classList.remove('hidden'); if (exportPdfBtn) exportPdfBtn.classList.remove('hidden'); chartContainer.classList.remove('hidden'); const daysInMonth = getDaysInMonth(year, month); const table = document.createElement('table'); table.classList.add('monthly-attendance-table'); const thead = table.createTHead(); const tbody = table.createTBody(); const headerRow = thead.insertRow(); headerRow.innerHTML = `<th class="student-col-monthly">Aluno</th>`; for (let day = 1; day <= daysInMonth; day++) { headerRow.innerHTML += `<th>${day}</th>`; } headerRow.innerHTML += `<th class="freq-col-monthly">% Freq.</th>`; let totalClassP = 0; let totalClassPossibleAttendances = 0; const studentFrequencies = []; students.forEach(student => { const row = tbody.insertRow(); row.innerHTML = `<td class="student-col-monthly"><span class="student-number">${student.number || '-'}.</span> ${sanitizeHTML(student.name)}</td>`; let studentP = 0; let studentPossibleDays = 0; for (let day = 1; day <= daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = '-'; let cellClass = ''; if (isWeekend) { cellClass = 'weekend'; cellContent = ''; } else if (status === 'H') { cellClass = 'status-H'; cellContent = 'H'; } else { studentPossibleDays++; totalClassPossibleAttendances++; if (status === 'P') { cellContent = 'P'; cellClass = 'status-P'; studentP++; totalClassP++; } else if (status === 'F') { cellClass = justification ? 'status-FJ' : 'status-F'; cellContent = justification ? 'FJ' : 'F'; } else { cellContent = '-'; } } row.innerHTML += `<td class="${cellClass}">${cellContent}</td>`; } const frequencyPercent = studentPossibleDays > 0 ? Math.round((studentP / studentPossibleDays) * 100) : 0; const frequencyText = studentPossibleDays > 0 ? frequencyPercent + '%' : '--'; row.innerHTML += `<td class="freq-col-monthly">${frequencyText}</td>`; studentFrequencies.push({ name: student.name, number: student.number, freq: frequencyPercent }); }); tableWrapper.appendChild(table); const classFrequency = totalClassPossibleAttendances > 0 ? ((totalClassP / totalClassPossibleAttendances) * 100).toFixed(0) + '%' : '--'; summaryContainer.textContent = `Frequência Média da Turma (dias letivos): ${classFrequency}`; renderMonthlyAttendanceChart(studentFrequencies); };
              const renderMonthlyAttendanceChart = (frequencies) => { const currentModal = document.querySelector('#generic-modal.show.monthly-attendance-modal'); const chartContainer = currentModal?.querySelector('#monthly-attendance-chart-container'); if (!chartContainer) return; chartContainer.innerHTML = ''; if (frequencies.length === 0) { return; } const maxFreq = 100; const chartHeight = 100; frequencies.forEach(item => { const barContainer = document.createElement('div'); barContainer.classList.add('chart-bar-container'); const bar = document.createElement('div'); bar.classList.add('chart-bar'); const barHeightValue = (item.freq / maxFreq) * chartHeight; bar.style.height = `${barHeightValue}px`; bar.style.backgroundColor = item.freq >= 70 ? 'var(--accent-success)' : item.freq >= 50 ? 'var(--accent-warning)' : 'var(--accent-danger)'; bar.dataset.percentage = `${item.freq}%`; const label = document.createElement('div'); label.classList.add('chart-label'); label.textContent = item.number ? `${item.number}.` : ''; label.title = sanitizeHTML(item.name); barContainer.appendChild(bar); barContainer.appendChild(label); chartContainer.appendChild(barContainer); }); };
              const exportMonthlyAttendanceCSV = (classId, year, month) => { const students = getStudentsByClass(classId); if (students.length === 0) { alert("Nenhum aluno na turma para exportar."); return; } const currentClass = findClassById(classId); const className = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const monthName = monthNames[month]; const daysInMonth = getDaysInMonth(year, month); let csvContent = "\uFEFF"; let header = [escapeCsvField("Aluno"), escapeCsvField("No.")]; for (let day = 1; day <= daysInMonth; day++) { header.push(escapeCsvField(String(day))); } header.push(escapeCsvField("Presente")); header.push(escapeCsvField("Falta")); header.push(escapeCsvField("Falta Just.")); header.push(escapeCsvField("Dias Não Letivos")); header.push(escapeCsvField("% Freq.")); csvContent += header.join(",") + "\r\n"; students.forEach(student => { let row = [escapeCsvField(student.name), escapeCsvField(student.number || '')]; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; for (let day = 1; day <= daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellValue = ''; if (isWeekend) { cellValue = ''; } else if (status === 'H') { cellValue = 'H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellValue = 'P'; studentP++; } else if (status === 'F') { if (justification) { cellValue = 'FJ'; studentFJ++; } else { cellValue = 'F'; studentF++; } } else { cellValue = '-'; } } row.push(escapeCsvField(cellValue)); } const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) + '%' : ''; row.push(escapeCsvField(studentP)); row.push(escapeCsvField(studentF)); row.push(escapeCsvField(studentFJ)); row.push(escapeCsvField(studentH)); row.push(escapeCsvField(frequency)); csvContent += row.join(",") + "\r\n"; }); const encodedUri = encodeURI(`data:text/csv;charset=utf-8,${csvContent}`); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `frequencia_${className}_${year}_${monthName}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
-             const exportMonthlyAttendancePDF = async (classId, year, month, button) => { const students = getStudentsByClass(classId); if (students.length === 0) { alert("Nenhum aluno na turma para exportar para PDF."); return; } const currentClass = findClassById(classId); const classNameSanitized = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const monthName = monthNames[month]; const filename = `frequencia_${classNameSanitized}_${year}_${monthName}.pdf`; const daysInMonth = getDaysInMonth(year, month); let tableHTML = ` <style> body { font-family: sans-serif; font-size: 7pt; } .pdf-table { border-collapse: collapse; width: 100%; margin-top: 8px; table-layout: fixed; } .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 2px 3px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; } .pdf-table th { background-color: #f2f2f2; font-weight: bold; font-size: 7pt; } .pdf-table td { font-size: 7pt; } .pdf-table td.student-col { text-align: left; min-width: 90px; white-space: normal; } .pdf-table th.student-col { min-width: 90px; } .pdf-table th.day-col, .pdf-table td.day-col { min-width: 15px; max-width:16px; } .pdf-table td.weekend { background-color: #eee; } .pdf-table td.status-H { background-color: #e2e3e5; color: #495057; font-style: italic; } .pdf-table th.summary-col, .pdf-table td.summary-col { font-weight: bold; min-width: 20px; max-width: 25px; font-size: 6pt; } .pdf-table .number { font-weight: bold; display: inline-block; min-width: 12px; text-align: right; margin-right: 3px;} h4 { text-align: center; margin-bottom: 6px; font-size: 10pt; } </style> <h4>Frequência Mensal - Turma: ${sanitizeHTML(currentClass.name)} - ${monthName}/${year}</h4> <table class="pdf-table"> <thead> <tr> <th class="student-col">Aluno</th>`; for (let day = 1; day <= daysInMonth; day++) { tableHTML += `<th class="day-col">${day}</th>`; } tableHTML += `<th class="summary-col">P</th><th class="summary-col">F</th><th class="summary-col">FJ</th><th class="summary-col">H</th><th class="summary-col">%</th></tr></thead><tbody>`; students.forEach(student => { tableHTML += `<tr><td class="student-col"><span class="number">${student.number || '-.'}</span>${sanitizeHTML(student.name)}</td>`; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; for (let day = 1; day <= daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = ''; let cellClass = 'day-col'; if (isWeekend) { cellClass += ' weekend'; } else if (status === 'H') { cellContent = 'H'; cellClass += ' status-H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellContent = 'P'; studentP++; } else if (status === 'F') { if (justification) { cellContent = 'FJ'; studentFJ++; } else { cellContent = 'F'; studentF++; } } else { cellContent = '-'; } } tableHTML += `<td class="${cellClass}">${cellContent}</td>`; } const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) : '-'; tableHTML += `<td class="summary-col">${studentP}</td>`; tableHTML += `<td class="summary-col">${studentF}</td>`; tableHTML += `<td class="summary-col">${studentFJ}</td>`; tableHTML += `<td class="summary-col">${studentH}</td>`; tableHTML += `<td class="summary-col">${frequency}${frequency !== '-' ? '%' : ''}</td>`; tableHTML += `</tr>`; }); tableHTML += `</tbody></table>`; const opt = { margin: [5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 0.9 }, html2canvas: { scale: 2, useCORS: true, logging: false, }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } }; const originalButtonText = button.innerHTML; button.disabled = true; button.innerHTML = '<span class="icon">⏳</span>'; try { console.log("Generating PDF with options:", opt); await html2pdf().set(opt).from(tableHTML).save(); console.log("PDF de frequência gerado com sucesso."); } catch (error) { console.error("Erro ao gerar PDF de frequência:", error); alert("Ocorreu um erro ao gerar o PDF de frequência. Verifique o console para detalhes."); } finally { button.disabled = false; button.innerHTML = originalButtonText; } };
+             const exportMonthlyAttendancePDF = async (classId, year, month, button) => {
+                 const students = getStudentsByClass(classId);
+                 if (students.length === 0) {
+                     alert("Nenhum aluno na turma para exportar para PDF.");
+                     return;
+                 }
+                 const currentClass = findClassById(classId);
+                 const classNameSanitized = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma';
+                 const monthName = monthNames[month];
+                 const filename = `frequencia_${classNameSanitized}_${year}_${monthName}.pdf`;
+                 const daysInMonth = getDaysInMonth(year, month);
+                 let tableHTML = `
+            <style>
+                body { font-family: sans-serif; font-size: 7pt; }
+                .pdf-table { border-collapse: collapse; width: 100%; margin-top: 8px; table-layout: fixed; }
+                .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 2px 3px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; }
+                .pdf-table th { background-color: #f2f2f2; font-weight: bold; font-size: 7pt; }
+                .pdf-table td { font-size: 7pt; }
+                .pdf-table td.student-col { text-align: left; min-width: 90px; white-space: normal; }
+                .pdf-table th.student-col { min-width: 90px; }
+                .pdf-table th.day-col, .pdf-table td.day-col { min-width: 15px; max-width:16px; }
+                .pdf-table td.weekend { background-color: #eee; }
+                .pdf-table td.status-H { background-color: #e2e3e5; color: #495057; font-style: italic; }
+                 .pdf-table th.summary-col, .pdf-table td.summary-col { font-weight: bold; min-width: 20px; max-width: 25px; font-size: 6pt; }
+                 .pdf-table .number { font-weight: bold; display: inline-block; min-width: 12px; text-align: right; margin-right: 3px;}
+                 h4 { text-align: center; margin-bottom: 6px; font-size: 10pt; }
+             </style>
+             <h4>Frequência Mensal - Turma: ${sanitizeHTML(currentClass.name)} - ${monthName}/${year}</h4>
+             <table class="pdf-table">
+                 <thead>
+                     <tr>
+                         <th class="student-col">Aluno</th>`;
+                 for (let day = 1; day <= daysInMonth; day++) { tableHTML += `<th class="day-col">${day}</th>`; }
+                 tableHTML += `<th class="summary-col">P</th><th class="summary-col">F</th><th class="summary-col">FJ</th><th class="summary-col">H</th><th class="summary-col">%</th></tr></thead><tbody>`;
+                 students.forEach(student => {
+                     tableHTML += `<tr><td class="student-col"><span class="number">${student.number || '-.'}</span>${sanitizeHTML(student.name)}</td>`;
+                     let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0;
+                     for (let day = 1; day <=daysInMonth; day++) {
+                         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                         const attendanceRecord = student.attendance[dateStr];
+                         const status = attendanceRecord?.status;
+                         const justification = attendanceRecord?.justification || '';
+                         const dayOfWeek = getDayOfWeek(year, month, day);
+                         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                         let cellContent = '';
+                         let cellClass = 'day-col';
+                         if (isWeekend) {
+                             cellClass += ' weekend';
+                         } else if (status === 'H') {
+                             cellContent = 'H';
+                             cellClass += ' status-H';
+                             studentH++;
+                         } else {
+                             studentPossibleDays++;
+                             if (status === 'P') {
+                                 cellContent = 'P';
+                                 studentP++;
+                             } else if (status === 'F') {
+                                 if (justification) {
+                                     cellContent = 'FJ';
+                                     studentFJ++;
+                                 } else {
+                                     cellContent = 'F';
+                                     studentF++;
+                                 }
+                             } else {
+                                 cellContent = '-';
+                             }
+                         }
+                         tableHTML += `<td class="${cellClass}">${cellContent}</td>`;
+                     }
+                     const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) : '-';
+                     tableHTML += `<td class="summary-col">${studentP}</td>`;
+                     tableHTML += `<td class="summary-col">${studentF}</td>`;
+                     tableHTML += `<td class="summary-col">${studentFJ}</td>`;
+                     tableHTML += `<td class="summary-col">${studentH}</td>`;
+                     tableHTML += `<td class="summary-col">${frequency}${frequency !== '-' ? '%' : ''}</td>`;
+                     tableHTML += `</tr>`;
+                 });
+                 tableHTML += `</tbody></table>`;
+
+                 const opt = {
+                     margin: [5, 5, 5, 5],
+                     filename: filename,
+                     image: { type: 'jpeg', quality: 0.9 },
+                     html2canvas: { scale: 2, useCORS: true, logging: false, },
+                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                 };
+
+                 const originalButtonText = button.innerHTML;
+                 button.disabled = true;
+                 button.innerHTML = '<span class="icon">⏳</span>';
+                 try {
+                     console.log("Generating PDF with options:", opt);
+                     await html2pdf().set(opt).from(tableHTML).save();
+                     console.log("PDF de frequência gerado com sucesso.");
+                 } catch (error) {
+                     console.error("Erro ao gerar PDF de frequência:", error);
+                     alert("Ocorreu um erro ao gerar o PDF de frequência. Verifique o console para detalhes.");
+                 } finally {
+                     button.disabled = false;
+                     button.innerHTML = originalButtonText;
+                 }
+             };
              const performSearch = (term) => { term = term.toLowerCase().trim(); if (!term) { hideModal(); return; } const results = { schools: [], classes: [], students: [] }; results.schools = appData.schools.filter(s => s.name.toLowerCase().includes(term)); results.classes = appData.classes.filter(c => c.name.toLowerCase().includes(term) || (c.subject && c.subject.toLowerCase().includes(term))); results.students = appData.students.filter(s => s.name.toLowerCase().includes(term) || (s.number && String(s.number) === term)); renderSearchResults(results, term); };
              const renderSearchResults = (results, term) => { let resultsHtml = `<p>Resultados para: <strong>${sanitizeHTML(term)}</strong></p><div class="item-list mt-1">`; let count = 0; const renderItem = (item, type, details = '') => { count++; const itemSchoolId = type === 'school' ? item.id : (item.schoolId || findClassById(item.classId)?.schoolId); const itemClassId = type === 'student' ? item.classId : (type === 'class' ? item.id : ''); return `<div class="list-item search-result-item" data-type="${type}" data-id="${item.id}" ${itemSchoolId ? `data-school-id="${itemSchoolId}"` : ''} ${itemClassId ? `data-class-id="${itemClassId}"` : ''}> <div class="item-info">${sanitizeHTML(item.name)} ${details ? `<small style='display:block; color: var(--text-secondary);'>${sanitizeHTML(details)}</small>` : ''}</div> <span class="result-type">${type.charAt(0).toUpperCase() + type.slice(1)}</span> </div>`; }; if (results.schools.length > 0) { resultsHtml += `<h5>Escolas</h5>`; results.schools.forEach(s => resultsHtml += renderItem(s, 'school')); } if (results.classes.length > 0) { resultsHtml += `<h5 class="mt-2">Turmas</h5>`; results.classes.forEach(c => { const school = findSchoolById(c.schoolId); resultsHtml += renderItem(c, 'class', `(${c.subject || 'N/A'}) - ${school?.name || '?'}`); }); } if (results.students.length > 0) { resultsHtml += `<h5 class="mt-2">Alunos</h5>`; results.students.forEach(s => { const cls = findClassById(s.classId); const school = findSchoolById(cls?.schoolId); resultsHtml += renderItem(s, 'student', `${s.number || '-'}. ${cls?.name || '?'} / ${school?.name || '?'}`); }); } if (count === 0) { resultsHtml += `<p style="text-align:center; padding: 1rem;">Nenhum resultado encontrado.</p>`; } resultsHtml += `</div>`; showModal(`Resultados da Busca`, resultsHtml, '', 'search-results-modal'); modalBody.querySelectorAll('.search-result-item').forEach(item => { item.addEventListener('click', () => { const type = item.dataset.type; const id = item.dataset.id; const classId = item.dataset.classId; const schoolId = item.dataset.schoolId; hideModal(); searchInput.value = ''; if (type === 'school') { selectSchool(id); showSection('classes-section'); } else if (type === 'class') { if(schoolId) selectSchool(schoolId); selectClass(id); showSection('class-details-section'); } else if (type === 'student') { if(schoolId) selectSchool(schoolId); if(classId) selectClass(classId); showSection('class-details-section'); setTimeout(() => { const studentElement = studentListContainer.querySelector(`.list-item[data-id="${id}"]`); studentElement?.scrollIntoView({ behavior: 'smooth', block: 'center' }); studentElement?.classList.add('active'); setTimeout(() => studentElement?.classList.remove('active'), 2000); }, 300); } }); }); };
              const toggleClassNotesEdit = (showEdit) => { classNotesDisplay.classList.toggle('hidden', showEdit); classNotesEdit.classList.toggle('hidden', !showEdit); if (showEdit) { const currentClass = findClassById(currentClassId); classNotesTextarea.value = currentClass?.notes || ''; classNotesTextarea.focus(); } };
@@ -1001,10 +1539,10 @@
                  });
              }
 
-             // --- Touch Swipe Logic (Existente, sem mudanças aqui) ---
-             let touchStartX = 0; let touchEndX = 0; let touchStartY = 0; let isSwiping = false; const swipeThreshold = 110; const verticalThreshold = 60; mainContent.addEventListener('touchstart', (e) => { const targetTagName = e.target.tagName.toLowerCase(); const isInteractive = ['input', 'button', 'select', 'textarea', 'a'].includes(targetTagName); const isInScrollable = e.target.closest('.table-scroll-wrapper, .modal-body, .list-item-actions, #monthly-attendance-table-wrapper, #student-observations-list, .classroom-container, .unassigned-students-list'); if (isInteractive || isInScrollable) { isSwiping = false; return; } touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; touchEndX = touchStartX; isSwiping = true; }, { passive: true }); mainContent.addEventListener('touchmove', (e) => { if (!isSwiping) return; touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY; if (Math.abs(touchEndY - touchStartY) > verticalThreshold) { isSwiping = false; } }, { passive: true }); mainContent.addEventListener('touchend', (e) => { if (!isSwiping) { touchStartX = 0; touchEndX = 0; touchStartY = 0; return; } isSwiping = false; const deltaX = touchEndX - touchStartX; const deltaY = e.changedTouches[0].screenY - touchStartY; if (Math.abs(deltaX) > swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.8) { const visibleNavButtons = Array.from(navButtons).filter(btn => !btn.disabled && !btn.parentElement.classList.contains('hidden')); const currentActiveIndex = visibleNavButtons.findIndex(btn => btn.classList.contains('active')); if (currentActiveIndex === -1) return; let nextIndex; if (deltaX < 0) { nextIndex = currentActiveIndex + 1; if (nextIndex >= visibleNavButtons.length) return; } else { nextIndex = currentActiveIndex - 1; if (nextIndex < 0) return; } const targetButton = visibleNavButtons[nextIndex]; if(targetButton) { targetButton.click(); } } touchStartX = 0; touchEndX = 0; touchStartY = 0; });
+             // --- Touch Swipe Logic ---
+             let touchStartX = 0; let touchEndX = 0; let touchStartY = 0; let isSwiping = false; const swipeThreshold = 110; const verticalThreshold = 60; mainContent.addEventListener('touchstart', (e) => { const targetTagName = e.target.tagName.toLowerCase(); const isInteractive = ['input', 'button', 'select', 'textarea', 'a'].includes(targetTagName); const isInScrollable = e.target.closest('.table-scroll-wrapper, .modal-body, .list-item-actions, #monthly-attendance-table-wrapper, #student-observations-list, .classroom-container, .unassigned-students-list, .school-quorum-info'); if (isInteractive || isInScrollable) { isSwiping = false; return; } touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; touchEndX = touchStartX; isSwiping = true; }, { passive: true }); mainContent.addEventListener('touchmove', (e) => { if (!isSwiping) return; touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY; if (Math.abs(touchEndY - touchStartY) > verticalThreshold) { isSwiping = false; } }, { passive: true }); mainContent.addEventListener('touchend', (e) => { if (!isSwiping) { touchStartX = 0; touchEndX = 0; touchStartY = 0; return; } isSwiping = false; const deltaX = touchEndX - touchStartX; const deltaY = e.changedTouches[0].screenY - touchStartY; if (Math.abs(deltaX) > swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.8) { const visibleNavButtons = Array.from(navButtons).filter(btn => !btn.disabled && !btn.parentElement.classList.contains('hidden')); const currentActiveIndex = visibleNavButtons.findIndex(btn => btn.classList.contains('active')); if (currentActiveIndex === -1) return; let nextIndex; if (deltaX < 0) { nextIndex = currentActiveIndex + 1; if (nextIndex >= visibleNavButtons.length) return; } else { nextIndex = currentActiveIndex - 1; if (nextIndex < 0) return; } const targetButton = visibleNavButtons[nextIndex]; if(targetButton) { targetButton.click(); } } touchStartX = 0; touchEndX = 0; touchStartY = 0; });
 
-             // --- Notification Functions (Existentes, sem mudanças aqui) ---
+             // --- Notification Functions ---
               const notificationMessages = { start: ["🚀 Preparar... Apontar... Aula! Sua aula ({CLASS}) na {SCHOOL} começa em 5 minutos.", "☕ Último gole de café? Sua aula ({CLASS}) na {SCHOOL} começa em 5 minutos!", "🔔 O sino quase tocou! Aula ({CLASS}) na {SCHOOL} em 5 minutos. ", "🏃 Corre, professor! Faltam 5 minutos para a aula ({CLASS}) na {SCHOOL} começar.", "✨ Hora de brilhar! Sua aula ({CLASS}) na {SCHOOL} inicia em 5 minutos.", "⏰ Tic-tac... 5 minutos para o início da aula ({CLASS}) na {SCHOOL}!"], end: ["🏁 Quase lá! Sua aula ({CLASS}) na {SCHOOL} termina em 5 minutos.", "😮‍💨 Ufa! Só mais 5 minutinhos de aula ({CLASS}) na {SCHOOL}.", "🔔 O sino da liberdade (quase)! Aula ({CLASS}) na {SCHOOL} acaba em 5 minutos.", "🎯 Missão quase completa! A aula ({CLASS}) na {SCHOOL} termina em 5 minutos.", "👏 Bom trabalho! Reta final da aula ({CLASS}) na {SCHOOL} - 5 minutos restantes.", "⏳ Contagem regressiva: 5 minutos para o fim da aula ({CLASS}) na {SCHOOL}."] };
              const getRandomMessage = (type, scheduleItem) => { const messages = notificationMessages[type]; if (!messages || messages.length === 0) return "Alerta de Horário!"; const randomIndex = Math.floor(Math.random() * messages.length); let message = messages[randomIndex]; const school = findSchoolById(scheduleItem.schoolId); message = message.replace('{CLASS}', sanitizeHTML(scheduleItem.note || '')); message = message.replace('{SCHOOL}', sanitizeHTML(school?.name || 'escola')); return message; };
              const showNotification = (message) => { if (!notificationBanner || !notificationMessage) return; notificationMessage.innerHTML = message; notificationBanner.classList.add('show'); playSound(); setTimeout(hideNotification, 10000); };
@@ -1015,109 +1553,24 @@
              const stopNotificationChecker = () => { if (notificationCheckInterval) { clearInterval(notificationCheckInterval); notificationCheckInterval = null; console.log("Stopped notification checker."); } };
              const updateNotificationSettingsUI = () => { if (enableGlobalNotificationsCheckbox && enableNotificationSoundCheckbox) { enableGlobalNotificationsCheckbox.checked = appData.settings.globalNotificationsEnabled; enableNotificationSoundCheckbox.checked = appData.settings.notificationSoundEnabled; enableNotificationSoundCheckbox.disabled = !appData.settings.globalNotificationsEnabled; } };
 
-             // --- Custom Sound UI and Logic (Existentes, sem mudanças aqui) ---
+             // --- Custom Sound UI and Logic ---
              const updateCustomSoundUI = () => { if (!customSoundFilenameDisplay || !currentCustomSoundDisplay || !currentCustomSoundName || !removeCustomSoundButton) return; const soundName = localStorage.getItem('superProfessorPro_customSoundName'); if (appData.settings.customNotificationSound && soundName) { customSoundFilenameDisplay.textContent = soundName; customSoundFilenameDisplay.title = soundName; currentCustomSoundName.textContent = soundName; currentCustomSoundDisplay.classList.remove('hidden'); } else { appData.settings.customNotificationSound = null; localStorage.removeItem('superProfessorPro_customSoundName'); customSoundFilenameDisplay.textContent = 'Nenhum arquivo escolhido'; customSoundFilenameDisplay.title = ''; currentCustomSoundDisplay.classList.add('hidden'); currentCustomSoundName.textContent = ''; } if (customNotificationSoundInput) customNotificationSoundInput.value = null; };
              const handleCustomSoundUpload = (event) => { const file = event.target.files[0]; if (!file) { return; } if (!file.type.startsWith('audio/')) { alert('Por favor, selecione um arquivo de áudio válido (MP3, WAV, OGG, etc.).'); updateCustomSoundUI(); return; } const fileSizeMB = file.size / 1024 / 1024; if (fileSizeMB > MAX_CUSTOM_SOUND_SIZE_MB) { alert(`Arquivo muito grande (${fileSizeMB.toFixed(1)}MB). O limite é ${MAX_CUSTOM_SOUND_SIZE_MB}MB.`); updateCustomSoundUI(); return; } const reader = new FileReader(); reader.onload = (e) => { appData.settings.customNotificationSound = e.target.result; localStorage.setItem('superProfessorPro_customSoundName', file.name); saveData(); updateCustomSoundUI(); alert(`Som "${file.name}" carregado com sucesso!`); }; reader.onerror = (e) => { console.error("Erro ao ler arquivo de áudio:", e); alert("Ocorreu um erro ao tentar carregar o arquivo de som."); updateCustomSoundUI(); }; reader.readAsDataURL(file); };
              const removeCustomSound = () => { if (confirm("Remover o som de notificação personalizado?")) { appData.settings.customNotificationSound = null; localStorage.removeItem('superProfessorPro_customSoundName'); saveData(); updateCustomSoundUI(); alert("Som personalizado removido."); } };
 
-             // --- Attendance Action Buttons (Existentes, sem mudanças aqui) ---
+             // --- Attendance Action Buttons ---
               const markAllStudentsPresent = () => { const date = attendanceDateInput.value; if (!currentClassId || !date) { alert("Selecione uma turma e uma data primeiro."); return; } const studentsInClass = getStudentsByClass(currentClassId); if (studentsInClass.length === 0) return; console.log(`Action: Marking all present for class ${currentClassId} on ${date}`); studentsInClass.forEach(student => { if (!student.attendance[date]) student.attendance[date] = { status: null, justification: '' }; if (student.attendance[date].status !== 'H') { student.attendance[date].status = 'P'; student.attendance[date].justification = ''; } }); renderAttendanceTable(currentClassId, date); console.log("Data updated for Mark All Present. Remember to Save."); };
               const toggleNonSchoolDay = () => { const date = attendanceDateInput.value; if (!currentClassId || !date) { alert("Selecione uma turma e uma data primeiro."); return; } const studentsInClass = getStudentsByClass(currentClassId); if (studentsInClass.length === 0) return; const isCurrentlyNonSchool = studentsInClass.every(std => std.attendance[date]?.status === 'H'); if (isCurrentlyNonSchool) { if (confirm(`Deseja desmarcar ${formatDate(date)} como dia NÃO LETIVO?\nA presença dos alunos será resetada para esta data.`)) { studentsInClass.forEach(student => { if (!student.attendance[date]) student.attendance[date] = {}; student.attendance[date].status = null; student.attendance[date].justification = ''; }); console.log("Action: Unmarked Non-School Day in data."); renderAttendanceTable(currentClassId, date); alert(`Dia ${formatDate(date)} desmarcado como não letivo. Clique em Salvar Presença para confirmar.`); } } else { if (confirm(`Deseja marcar ${formatDate(date)} como dia NÃO LETIVO para esta turma?\nToda a presença registrada nesta data será substituída por 'H'.`)) { studentsInClass.forEach(student => { if (!student.attendance[date]) student.attendance[date] = {}; student.attendance[date].status = 'H'; student.attendance[date].justification = ''; }); console.log("Action: Marked Non-School Day in data."); renderAttendanceTable(currentClassId, date); alert(`Dia ${formatDate(date)} marcado como não letivo. Clique em Salvar Presença para confirmar.`); } } };
 
-             // --- Classroom Map Functions (Existentes, sem mudanças aqui) ---
-             const renderClassroomMap = (classId, isEditing = false) => {
-                 const cls = findClassById(classId);
-                 if (!cls) { console.error("Class not found for map:", classId); classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro: Turma não encontrada.</p>'; classroomContainerEdit.innerHTML = ''; mapEditArea.classList.add('hidden'); return; }
-                 const layout = cls.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] };
-                 const currentLayoutData = isEditing ? tempClassroomLayout : layout;
-                 const students = getStudentsByClass(classId);
-                 const container = isEditing ? classroomContainerEdit : classroomContainerDisplay;
-                 container.innerHTML = '';
-
-                 const teacherDeskClone = teacherDeskTemplate.content.cloneNode(true);
-                 const teacherDeskElement = teacherDeskClone.querySelector('.teacher-desk');
-                 const gridClone = classroomGridTemplate.content.cloneNode(true);
-                 const gridContainerElement = gridClone.querySelector('.classroom-map-grid');
-
-                 teacherDeskElement.className = 'teacher-desk';
-                 teacherDeskElement.classList.add(`position-${currentLayoutData.teacherDeskPosition}`);
-                 gridContainerElement.style.gridTemplateColumns = `repeat(${currentLayoutData.cols}, auto)`;
-
-                 container.appendChild(teacherDeskElement);
-                 container.appendChild(gridContainerElement);
-
-                 const seatTemplate = document.getElementById('seat-template');
-                 const emptySeatPlaceholder = "Toque/Arraste Aluno";
-                 if (isEditing) clearSeatSelection();
-
-                 if (currentLayoutData.rows > 0 && currentLayoutData.cols > 0) {
-                     for (let r = 1; r <= currentLayoutData.rows; r++) {
-                         for (let c = 1; c <= currentLayoutData.cols; c++) {
-                             const seatData = currentLayoutData.seats.find(s => s.row === r && s.col === c);
-                             const studentId = seatData?.studentId;
-                             const student = studentId ? findStudentById(studentId) : null;
-                             const seatClone = seatTemplate.content.cloneNode(true);
-                             const seatElement = seatClone.querySelector('.seat');
-                             seatElement.dataset.row = r; seatElement.dataset.col = c;
-                             const numberSpan = seatElement.querySelector('.seat-student-number');
-                             const nameSpan = seatElement.querySelector('.seat-student-name');
-                             const placeholderSpan = seatElement.querySelector('.seat-placeholder-text');
-                             numberSpan.textContent = ''; nameSpan.textContent = ''; placeholderSpan.textContent = ''; placeholderSpan.classList.remove('seat-placeholder-text');
-                             seatElement.classList.remove('occupied', 'empty', 'selected-for-assignment');
-                             seatElement.removeAttribute('data-student-id'); seatElement.setAttribute('draggable', 'false');
-
-                             if (student) {
-                                 seatElement.classList.add('occupied'); seatElement.dataset.studentId = student.id;
-                                 numberSpan.textContent = student.number ? `${student.number}.` : ''; nameSpan.textContent = sanitizeHTML(student.name);
-                                 if (isEditing) { seatElement.setAttribute('draggable', 'true'); seatElement.addEventListener('dragstart', handleSeatDragStart); seatElement.addEventListener('click', handleOccupiedSeatClick); seatElement.style.cursor = 'grab'; }
-                                 else { seatElement.style.cursor = 'default'; }
-                             } else {
-                                 seatElement.classList.add('empty');
-                                 if (isEditing) { seatElement.addEventListener('click', handleSeatClickForAssignment); placeholderSpan.textContent = emptySeatPlaceholder; placeholderSpan.classList.add('seat-placeholder-text'); seatElement.style.cursor = 'pointer'; }
-                                 else { seatElement.style.cursor = 'default'; }
-                             }
-                             if (isEditing) { seatElement.addEventListener('dragover', handleDragOver); seatElement.addEventListener('dragleave', handleDragLeave); seatElement.addEventListener('drop', handleDropOnSeat); }
-                             gridContainerElement.appendChild(seatElement);
-                         }
-                     }
-                 } else if (!isEditing) {
-                      gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p>';
-                 } else {
-                      gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Dimensões inválidas (0 fileiras ou colunas).</p>';
-                 }
-
-
-                 if (isEditing) { renderUnassignedStudents(classId); }
-                 classroomContainerDisplay.classList.toggle('hidden', isEditing);
-                 mapEditArea.classList.toggle('hidden', !isEditing);
-             };
-             const editClassroomMap = () => {
-                 const cls = findClassById(currentClassId); if (!cls) return;
-                 tempClassroomLayout = JSON.parse(JSON.stringify(cls.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }));
-                 clearSeatSelection();
-                 mapRowsInput.value = tempClassroomLayout.rows; mapColsInput.value = tempClassroomLayout.cols; teacherDeskPositionSelect.value = tempClassroomLayout.teacherDeskPosition;
-                 classroomMapEditControls.classList.remove('hidden');
-                 renderClassroomMap(currentClassId, true);
-                 mapRowsInput.removeEventListener('input', handleDimensionChange);
-                 mapColsInput.removeEventListener('input', handleDimensionChange);
-                 teacherDeskPositionSelect.removeEventListener('change', handleTeacherDeskChange);
-                 mapRowsInput.addEventListener('input', handleDimensionChange);
-                 mapColsInput.addEventListener('input', handleDimensionChange);
-                 teacherDeskPositionSelect.addEventListener('change', handleTeacherDeskChange);
-             };
-             const cancelClassroomMapEdit = () => {
-                 tempClassroomLayout = null; clearSeatSelection();                 classroomMapEditControls.classList.add('hidden');
-                 renderClassroomMap(currentClassId, false); // Renderiza no container de display
-                 mapRowsInput.removeEventListener('input', handleDimensionChange);
-                 mapColsInput.removeEventListener('input', handleDimensionChange);
-                 teacherDeskPositionSelect.removeEventListener('change', handleTeacherDeskChange);
-             };
+             // --- Classroom Map Functions ---
+             const editClassroomMap = () => { const cls = findClassById(currentClassId); if (!cls) return; tempClassroomLayout = JSON.parse(JSON.stringify(cls.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] })); clearSeatSelection(); mapRowsInput.value = tempClassroomLayout.rows; mapColsInput.value = tempClassroomLayout.cols; teacherDeskPositionSelect.value = tempClassroomLayout.teacherDeskPosition; classroomMapEditControls.classList.remove('hidden'); renderClassroomMap(currentClassId, true); mapRowsInput.removeEventListener('input', handleDimensionChange); mapColsInput.removeEventListener('input', handleDimensionChange); teacherDeskPositionSelect.removeEventListener('change', handleTeacherDeskChange); mapRowsInput.addEventListener('input', handleDimensionChange); mapColsInput.addEventListener('input', handleDimensionChange); teacherDeskPositionSelect.addEventListener('change', handleTeacherDeskChange); };
+             const cancelClassroomMapEdit = () => { tempClassroomLayout = null; clearSeatSelection(); classroomMapEditControls.classList.add('hidden'); renderClassroomMap(currentClassId, false); mapRowsInput.removeEventListener('input', handleDimensionChange); mapColsInput.removeEventListener('input', handleDimensionChange); teacherDeskPositionSelect.removeEventListener('change', handleTeacherDeskChange); };
              const saveClassroomLayout = () => { if (!currentClassId || !tempClassroomLayout) return; const cls = findClassById(currentClassId); if (!cls) return; const newLayout = { rows: parseInt(mapRowsInput.value) || 5, cols: parseInt(mapColsInput.value) || 6, teacherDeskPosition: teacherDeskPositionSelect.value || 'top-center', seats: tempClassroomLayout.seats }; if (newLayout.rows < 1 || newLayout.rows > 20 || newLayout.cols < 1 || newLayout.cols > 20) { alert("Fileiras e Colunas devem estar entre 1 e 20."); return; } cls.classroomLayout = newLayout; saveData(); tempClassroomLayout = null; cancelClassroomMapEdit(); alert("Mapa da sala salvo!"); };
              const handleDimensionChange = () => { if (!tempClassroomLayout) return; const newRows = parseInt(mapRowsInput.value) || tempClassroomLayout.rows; const newCols = parseInt(mapColsInput.value) || tempClassroomLayout.cols; if (newRows !== tempClassroomLayout.rows || newCols !== tempClassroomLayout.cols) { const oldSeats = tempClassroomLayout.seats; tempClassroomLayout.rows = newRows; tempClassroomLayout.cols = newCols; tempClassroomLayout.seats = oldSeats.filter(seat => seat.row <= newRows && seat.col <= newCols); renderClassroomMap(currentClassId, true); } };
              const handleTeacherDeskChange = () => { if (!tempClassroomLayout) return; tempClassroomLayout.teacherDeskPosition = teacherDeskPositionSelect.value; renderClassroomMap(currentClassId, true); };
              const renderUnassignedStudents = (classId) => { if (!tempClassroomLayout) return; const allStudents = getStudentsByClass(classId); const assignedStudentIds = new Set(tempClassroomLayout.seats.map(s => s.studentId).filter(id => id)); unassignedStudentsContainer.innerHTML = '<h5>Alunos sem lugar (Clique aqui após selecionar mesa vazia)</h5>'; const studentTemplate = document.getElementById('draggable-student-template'); allStudents.forEach(student => { if (!assignedStudentIds.has(student.id)) { const clone = studentTemplate.content.cloneNode(true); const studentDiv = clone.querySelector('.draggable-student'); studentDiv.dataset.studentId = student.id; studentDiv.querySelector('.student-number').textContent = student.number ? `${student.number}.` : ''; studentDiv.querySelector('.student-name').textContent = sanitizeHTML(student.name); const oldNode = studentDiv; studentDiv.replaceWith(oldNode.cloneNode(true)); const newNode = unassignedStudentsContainer.appendChild(oldNode); newNode.addEventListener('dragstart', handleStudentListDragStart); newNode.addEventListener('click', handleUnassignedStudentClickForAssignment); } }); };
 
-             // --- Drag and Drop Handlers (Existentes, sem mudanças aqui) ---
+             // --- Drag and Drop Handlers ---
              const handleStudentListDragStart = (e) => { draggedElement = e.target; draggedStudentId = e.target.dataset.studentId; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', draggedStudentId); setTimeout(() => draggedElement?.classList.add('dragging'), 0); clearSeatSelection(); console.log(`Drag Start (List): Student ID ${draggedStudentId}`); };
              const handleSeatDragStart = (e) => { draggedElement = e.target; draggedStudentId = e.target.dataset.studentId; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', draggedStudentId); setTimeout(() => draggedElement?.classList.add('dragging'), 0); clearSeatSelection(); console.log(`Drag Start (Seat): Student ID ${draggedStudentId} from Row ${e.target.dataset.row}, Col ${e.target.dataset.col}`); };
              const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const target = e.target.closest('.seat, .unassigned-students-list'); if (target) { const targetIsSeat = target.classList.contains('seat'); const targetIsUnassigned = target.classList.contains('unassigned-students-list'); const draggingFromSeat = draggedElement && draggedElement.classList.contains('seat'); if (targetIsSeat && !target.classList.contains('occupied')) { target.classList.add('drag-over'); } else if (targetIsSeat && target.classList.contains('occupied') && draggedStudentId !== target.dataset.studentId) { target.classList.add('drag-over'); } else if (targetIsUnassigned && draggingFromSeat) { target.classList.add('drag-over'); } } };
@@ -1125,7 +1578,7 @@
              const handleDropOnSeat = (e) => { e.preventDefault(); const targetSeat = e.target.closest('.seat'); if (!targetSeat || !draggedStudentId || !tempClassroomLayout) return; targetSeat.classList.remove('drag-over'); const targetRow = parseInt(targetSeat.dataset.row); const targetCol = parseInt(targetSeat.dataset.col); const studentBeingDroppedId = e.dataTransfer.getData('text/plain') || draggedStudentId; console.log(`Drop: Student ${studentBeingDroppedId} onto Row ${targetRow}, Col ${targetCol}`); const existingStudentIdInTarget = targetSeat.dataset.studentId; tempClassroomLayout.seats = tempClassroomLayout.seats.filter(seat => seat.studentId !== studentBeingDroppedId); if (existingStudentIdInTarget && existingStudentIdInTarget !== studentBeingDroppedId) { console.log(` -> Target occupied by ${existingStudentIdInTarget}. Unassigning ${existingStudentIdInTarget}.`); tempClassroomLayout.seats = tempClassroomLayout.seats.filter(seat => !(seat.row === targetRow && seat.col === targetCol)); } let seatEntry = tempClassroomLayout.seats.find(s => s.row === targetRow && s.col === targetCol); if (!seatEntry) { seatEntry = { row: targetRow, col: targetCol, studentId: null }; tempClassroomLayout.seats.push(seatEntry); } else if (seatEntry.studentId && seatEntry.studentId !== studentBeingDroppedId){ seatEntry.studentId = null; } seatEntry.studentId = studentBeingDroppedId; console.log(" -> Updated Temp Layout (Drop on Seat):", JSON.parse(JSON.stringify(tempClassroomLayout.seats))); renderClassroomMap(currentClassId, true); draggedElement?.classList.remove('dragging'); draggedStudentId = null; draggedElement = null; };
              const handleDropOnUnassignedList = (e) => { e.preventDefault(); const targetList = e.target.closest('.unassigned-students-list'); if (!targetList || !draggedStudentId || !tempClassroomLayout) return; targetList.classList.remove('drag-over'); const studentBeingDroppedId = e.dataTransfer.getData('text/plain') || draggedStudentId; console.log(`Drop: Student ${studentBeingDroppedId} onto Unassigned List`); const wasSeatOccupied = tempClassroomLayout.seats.some(seat => seat.studentId === studentBeingDroppedId); if (!wasSeatOccupied) { console.log(" -> Student was already unassigned. No change needed."); draggedElement?.classList.remove('dragging'); draggedStudentId = null; draggedElement = null; return; } tempClassroomLayout.seats = tempClassroomLayout.seats.filter(seat => seat.studentId !== studentBeingDroppedId); console.log(" -> Updated Temp Layout (Drop on Unassigned):", JSON.parse(JSON.stringify(tempClassroomLayout.seats))); renderClassroomMap(currentClassId, true); draggedElement?.classList.remove('dragging'); draggedStudentId = null; draggedElement = null; };
 
-             // --- Click-to-Assign Handlers (Existentes, sem mudanças aqui) ---
+             // --- Click-to-Assign Handlers ---
              const clearSeatSelection = () => { if (selectedSeatForAssignment) { selectedSeatForAssignment.classList.remove('selected-for-assignment'); selectedSeatForAssignment = null; console.log("Seat selection cleared."); } };
              const handleSeatClickForAssignment = (event) => { const clickedSeat = event.currentTarget; if (!clickedSeat.classList.contains('empty') || !tempClassroomLayout) return; if (selectedSeatForAssignment === clickedSeat) { clearSeatSelection(); } else { clearSeatSelection(); selectedSeatForAssignment = clickedSeat; selectedSeatForAssignment.classList.add('selected-for-assignment'); console.log(`Seat selected for assignment: Row ${clickedSeat.dataset.row}, Col ${clickedSeat.dataset.col}`); } };
              const handleOccupiedSeatClick = (event) => { const clickedSeat = event.currentTarget; if (!tempClassroomLayout || !clickedSeat.classList.contains('occupied')) return; const studentIdToUnassign = clickedSeat.dataset.studentId; const row = parseInt(clickedSeat.dataset.row); const col = parseInt(clickedSeat.dataset.col); if (!studentIdToUnassign) return; const student = findStudentById(studentIdToUnassign); if (confirm(`Desassociar aluno ${sanitizeHTML(student?.name || studentIdToUnassign)} desta mesa (R${row}, C${col})?`)) { console.log(`Click Unassign: Student ${studentIdToUnassign} from Row ${row}, Col ${col}`); tempClassroomLayout.seats = tempClassroomLayout.seats.filter(seat => !(seat.row === row && seat.col === col)); clearSeatSelection(); renderClassroomMap(currentClassId, true); } };
@@ -1134,7 +1587,7 @@
             // Function to toggle card collapse state
             const toggleCardCollapse = (button) => { const card = button.closest('.card'); const icon = button.querySelector('.icon'); if (card && icon) { const isCollapsed = card.classList.toggle('collapsed'); icon.classList.toggle('icon-chevron-down', isCollapsed); icon.classList.toggle('icon-chevron-up', !isCollapsed); button.title = isCollapsed ? 'Mostrar' : 'Esconder'; } };
 
-            // --- Tool Functions (Sorteador, Cronômetro, Gerador de Grupos) - Existentes, sem mudanças ---
+            // --- Tool Functions (Sorteador, Cronômetro, Gerador de Grupos) ---
             const openNameSorterModal = () => { const title = "Sorteador de Nomes"; let content = ''; let footer = ''; const currentClass = currentClassId ? findClassById(currentClassId) : null; const students = currentClass ? getStudentsByClass(currentClassId) : []; if (!currentClass) { content = '<p>Por favor, selecione uma turma na aba "Detalhes" para usar o sorteador.</p>'; } else if (students.length === 0) { content = `<p>Não há alunos cadastrados na turma "${sanitizeHTML(currentClass.name)}".</p>`; } else { sorterStudentList = [...students]; sorterAvailableStudents = [...students]; sorterDrawnStudents = []; content = `<p class="mb-1 text-sm text-secondary">Turma: ${sanitizeHTML(currentClass.name)}</p> <div id="sorter-result-display">-- Clique em Sortear --</div> <div class="sorter-controls mt-2"> <div class="checkbox-group mb-0"> <input type="checkbox" id="sorter-no-repeat"> <label for="sorter-no-repeat">Sortear sem Repetição</label> </div> <span id="sorter-remaining-count" class="sorter-info hidden">${students.length} restantes</span> </div>`; footer = `<button type="button" id="reset-sorter-button" class="secondary"><span class="icon">🔄</span> Reiniciar</button> <button type="button" id="sort-next-button" class="success"><span class="icon icon-sorteio"></span> Sortear Próximo</button>`; } showModal(title, content, footer, 'name-sorter-modal'); if (currentClass && students.length > 0) { const sortButton = document.getElementById('sort-next-button'); const resetButton = document.getElementById('reset-sorter-button'); const noRepeatCheckbox = document.getElementById('sorter-no-repeat'); const remainingCountDisplay = document.getElementById('sorter-remaining-count'); const resultDisplay = document.getElementById('sorter-result-display'); const updateRemainingCount = () => { if (noRepeatCheckbox.checked) { remainingCountDisplay.textContent = `${sorterAvailableStudents.length} restantes`; remainingCountDisplay.classList.remove('hidden'); sortButton.disabled = sorterAvailableStudents.length === 0; } else { remainingCountDisplay.classList.add('hidden'); sortButton.disabled = false; } }; sortButton.addEventListener('click', () => sortNextName(resultDisplay, noRepeatCheckbox.checked, updateRemainingCount)); resetButton.addEventListener('click', () => resetSorter(resultDisplay, updateRemainingCount)); noRepeatCheckbox.addEventListener('change', () => resetSorter(resultDisplay, updateRemainingCount)); } };
             const sortNextName = (displayElement, noRepeat, updateCountCallback) => { let listToDrawFrom = noRepeat ? sorterAvailableStudents : sorterStudentList; if (listToDrawFrom.length === 0) { displayElement.textContent = "Fim!"; updateCountCallback(); return; } const randomIndex = Math.floor(Math.random() * listToDrawFrom.length); const drawnStudent = listToDrawFrom[randomIndex]; displayElement.innerHTML = `<span style="font-weight:normal; font-size: 0.8em; display:block;">${drawnStudent.number || '-.'}</span> ${sanitizeHTML(drawnStudent.name)}`; if (noRepeat) { sorterDrawnStudents.push(drawnStudent); sorterAvailableStudents.splice(randomIndex, 1); } updateCountCallback(); };
             const resetSorter = (displayElement, updateCountCallback) => { sorterAvailableStudents = [...sorterStudentList]; sorterDrawnStudents = []; displayElement.textContent = "-- Reiniciado --"; updateCountCallback(); };
@@ -1149,296 +1602,25 @@
             const generateGroups = (studentList, resultsContainer) => { const method = document.querySelector('input[name="group-method"]:checked').value; const numberInput = document.getElementById('group-number-input'); const sizeInput = document.getElementById('group-size-input'); const shuffledStudents = shuffleArray([...studentList]); let groups = []; resultsContainer.innerHTML = ''; try { if (method === 'number') { const numGroups = parseInt(numberInput.value); if (isNaN(numGroups) || numGroups < 2 || numGroups > shuffledStudents.length) { alert("Número de grupos inválido. Deve ser entre 2 e o número de alunos."); return; } for (let i = 0; i < numGroups; i++) groups.push([]); let currentGroupIndex = 0; shuffledStudents.forEach(student => { groups[currentGroupIndex].push(student); currentGroupIndex = (currentGroupIndex + 1) % numGroups; }); } else { const groupSize = parseInt(sizeInput.value); if (isNaN(groupSize) || groupSize < 1) { alert("Tamanho do grupo inválido. Deve ser pelo menos 1."); return; } for (let i = 0; i < shuffledStudents.length; i += groupSize) { groups.push(shuffledStudents.slice(i, i + groupSize)); } } if (groups.length > 0) { groups.forEach((group, index) => { const groupDiv = document.createElement('div'); groupDiv.classList.add('generated-group'); const groupTitle = document.createElement('h5'); groupTitle.textContent = `Grupo ${index + 1}`; groupDiv.appendChild(groupTitle); const ul = document.createElement('ul'); group.forEach(student => { const li = document.createElement('li'); li.innerHTML = `<span class="student-number">${student.number || '-.'}</span> ${sanitizeHTML(student.name)}`; ul.appendChild(li); }); groupDiv.appendChild(ul); resultsContainer.appendChild(groupDiv); }); } else { resultsContainer.innerHTML = '<p class="text-secondary text-center mt-2">Não foi possível gerar grupos com essas opções.</p>'; } } catch (error) { console.error("Erro ao gerar grupos:", error); resultsContainer.innerHTML = '<p class="text-danger text-center mt-2">Ocorreu um erro ao gerar os grupos.</p>'; } };
 
             // --- Advanced Calculator Functions ---
-             const updateCalculatorDisplay = () => {
-                 if(calculatorDisplay) {
-                    calculatorDisplay.textContent = calculator.displayValue.replace('.', ','); // Display comma
-                 }
-             };
-
-             const resetCalculator = () => {
-                 calculator.displayValue = '0';
-                 calculator.firstOperand = null;
-                 calculator.waitingForSecondOperand = false;
-                 calculator.operator = null;
-                 calculator.weightedPairs = [];
-                 if(weightedAverageResult) weightedAverageResult.textContent = '--';
-                 renderWeightedPairsList();
-                 updateCalculatorDisplay();
-                 console.log('Calculator reset');
-             };
-
-             const inputDigit = (digit) => {
-                 const { displayValue, waitingForSecondOperand } = calculator;
-                 if (waitingForSecondOperand) {
-                     calculator.displayValue = digit;
-                     calculator.waitingForSecondOperand = false;
-                 } else {
-                     // Prevent leading zeros unless it's the only digit
-                     calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
-                 }
-                 updateCalculatorDisplay();
-             };
-
-             const inputDecimal = () => {
-                 if (calculator.waitingForSecondOperand) {
-                     calculator.displayValue = '0.';
-                     calculator.waitingForSecondOperand = false;
-                     updateCalculatorDisplay();
-                     return;
-                 }
-                 if (!calculator.displayValue.includes('.')) {
-                     calculator.displayValue += '.';
-                 }
-                 updateCalculatorDisplay();
-             };
-
-             const handleOperator = (nextOperator) => {
-                 const { firstOperand, displayValue, operator } = calculator;
-                 // Convert display value with comma back to dot for calculation
-                 const inputValue = parseFloat(displayValue.replace(',', '.'));
-
-                 if (operator && calculator.waitingForSecondOperand) {
-                     calculator.operator = nextOperator;
-                     console.log('Operator changed to', nextOperator);
-                     return;
-                 }
-
-                 if (firstOperand === null && !isNaN(inputValue)) {
-                     calculator.firstOperand = inputValue;
-                 } else if (operator) {
-                     const result = performCalculation[operator](firstOperand, inputValue);
-                     // Use dot internally, convert to comma only for display
-                     const resultString = Number.isFinite(result) ? String(result) : 'Erro';
-                     calculator.displayValue = resultString; // Store internal value with dot
-                     calculator.firstOperand = result;
-                     updateCalculatorDisplay(); // This function will handle comma display
-                 }
-
-                 calculator.waitingForSecondOperand = true;
-                 calculator.operator = nextOperator;
-                 console.log('State after operator:', JSON.parse(JSON.stringify(calculator)));
-             };
-
-             const performCalculation = {
-                 // Keep internal representation simple
-                 'divide': (first, second) => second === 0 ? NaN : first / second,
-                 'multiply': (first, second) => first * second,
-                 'add': (first, second) => first + second,
-                 'subtract': (first, second) => first - second,
-                 '=': (first, second) => second, // For final calculation trigger
-             };
-
-             const clearAll = () => {
-                 resetCalculator();
-             };
-
-             const clearEntry = () => {
-                if (calculator.waitingForSecondOperand) {
-                    // If result of previous op is shown, C acts like AC
-                    resetCalculator();
-                } else {
-                    calculator.displayValue = '0';
-                    // Don't reset firstOperand or operator here
-                }
-                 updateCalculatorDisplay();
-             };
-
-             const backspace = () => {
-                if (calculator.waitingForSecondOperand) return; // Don't backspace if result is shown
-                 calculator.displayValue = calculator.displayValue.slice(0, -1);
-                 if (calculator.displayValue === '' || calculator.displayValue === '-') {
-                     calculator.displayValue = '0';
-                 }
-                 updateCalculatorDisplay();
-             };
-
-             const handleCalculatorButtonClick = (event) => {
-                const { target } = event;
-                if (!target.matches('button')) return; // Exit if the click wasn't on a button
-
-                const action = target.dataset.action;
-                const value = target.dataset.value;
-                const operator = target.dataset.operator;
-
-                console.log(`Button Click: action=${action}, value=${value}, operator=${operator}`);
-
-
-                if (value !== undefined) { inputDigit(value); }
-                else if (operator !== undefined) { handleOperator(operator); }
-                else if (action === 'decimal') { inputDecimal(); }
-                else if (action === 'clearAll') { clearAll(); }
-                else if (action === 'clearEntry') { clearEntry(); }
-                else if (action === 'backspace') { backspace(); }
-                else if (action === 'calculate') {
-                    if (calculator.operator && calculator.firstOperand !== null) {
-                        handleOperator(calculator.operator); // Perform calculation with current operator
-                        calculator.operator = null; // Reset operator after '='
-                        calculator.waitingForSecondOperand = false; // Allow new number input
-                    }
-                 }
-             };
+             const updateCalculatorDisplay = () => { if(calculatorDisplay) { calculatorDisplay.textContent = calculator.displayValue.replace('.', ','); } };
+             const resetCalculator = () => { calculator.displayValue = '0'; calculator.firstOperand = null; calculator.waitingForSecondOperand = false; calculator.operator = null; calculator.weightedPairs = []; if(weightedAverageResult) weightedAverageResult.textContent = '--'; renderWeightedPairsList(); updateCalculatorDisplay(); console.log('Calculator reset'); };
+             const inputDigit = (digit) => { const { displayValue, waitingForSecondOperand } = calculator; if (waitingForSecondOperand) { calculator.displayValue = digit; calculator.waitingForSecondOperand = false; } else { calculator.displayValue = displayValue === '0' ? digit : displayValue + digit; } updateCalculatorDisplay(); };
+             const inputDecimal = () => { if (calculator.waitingForSecondOperand) { calculator.displayValue = '0.'; calculator.waitingForSecondOperand = false; updateCalculatorDisplay(); return; } if (!calculator.displayValue.includes('.')) { calculator.displayValue += '.'; } updateCalculatorDisplay(); };
+             const handleOperator = (nextOperator) => { const { firstOperand, displayValue, operator } = calculator; const inputValue = parseFloat(displayValue.replace(',', '.')); if (operator && calculator.waitingForSecondOperand) { calculator.operator = nextOperator; console.log('Operator changed to', nextOperator); return; } if (firstOperand === null && !isNaN(inputValue)) { calculator.firstOperand = inputValue; } else if (operator) { const result = performCalculation[operator](firstOperand, inputValue); const resultString = Number.isFinite(result) ? String(result) : 'Erro'; calculator.displayValue = resultString; calculator.firstOperand = result; updateCalculatorDisplay(); } calculator.waitingForSecondOperand = true; calculator.operator = nextOperator; console.log('State after operator:', JSON.parse(JSON.stringify(calculator))); };
+             const performCalculation = { 'divide': (first, second) => second === 0 ? NaN : first / second, 'multiply': (first, second) => first * second, 'add': (first, second) => first + second, 'subtract': (first, second) => first - second, '=': (first, second) => second, };
+             const clearAll = () => { resetCalculator(); };
+             const clearEntry = () => { if (calculator.waitingForSecondOperand) { resetCalculator(); } else { calculator.displayValue = '0'; } updateCalculatorDisplay(); };
+             const backspace = () => { if (calculator.waitingForSecondOperand) return; calculator.displayValue = calculator.displayValue.slice(0, -1); if (calculator.displayValue === '' || calculator.displayValue === '-') { calculator.displayValue = '0'; } updateCalculatorDisplay(); };
+             const handleCalculatorButtonClick = (event) => { const { target } = event; if (!target.matches('button')) return; const action = target.dataset.action; const value = target.dataset.value; const operator = target.dataset.operator; console.log(`Button Click: action=${action}, value=${value}, operator=${operator}`); if (value !== undefined) { inputDigit(value); } else if (operator !== undefined) { handleOperator(operator); } else if (action === 'decimal') { inputDecimal(); } else if (action === 'clearAll') { clearAll(); } else if (action === 'clearEntry') { clearEntry(); } else if (action === 'backspace') { backspace(); } else if (action === 'calculate') { if (calculator.operator && calculator.firstOperand !== null) { handleOperator(calculator.operator); calculator.operator = null; calculator.waitingForSecondOperand = false; } } };
 
             // --- Weighted Average Functions ---
-            const addWeightedPair = () => {
-                const gradeStr = weightedGradeInput.value.trim().replace(',', '.');
-                const weightStr = weightedWeightInput.value.trim().replace(',', '.');
-                const grade = parseFloat(gradeStr);
-                const weight = parseFloat(weightStr);
-
-                if (isNaN(grade)) {
-                    alert("Por favor, insira uma nota válida.");
-                    weightedGradeInput.focus();
-                    return;
-                }
-                 if (isNaN(weight) || weight <= 0) {
-                    alert("Por favor, insira um peso válido (maior que zero).");
-                     weightedWeightInput.focus();
-                    return;
-                }
-
-                calculator.weightedPairs.push({ grade, weight });
-                renderWeightedPairsList();
-                weightedGradeInput.value = '';
-                weightedWeightInput.value = '';
-                weightedGradeInput.focus();
-                weightedAverageResult.textContent = '--'; // Clear previous result
-            };
-
-            const renderWeightedPairsList = () => {
-                if (!weightedPairsList) return;
-                weightedPairsList.innerHTML = ''; // Clear the list
-                if (calculator.weightedPairs.length === 0) {
-                    weightedPairsList.innerHTML = '<p>Nenhum par adicionado.</p>';
-                    if (calculateWeightedAvgButton) calculateWeightedAvgButton.disabled = true;
-                    return;
-                }
-
-                if (calculateWeightedAvgButton) calculateWeightedAvgButton.disabled = false;
-                const template = document.getElementById('weighted-pair-item-template');
-                calculator.weightedPairs.forEach((pair, index) => {
-                    const clone = template.content.cloneNode(true);
-                    const li = clone.querySelector('.pair-item');
-                    li.dataset.index = index;
-                    const textSpan = li.querySelector('span');
-                    // Display with comma
-                    textSpan.querySelector('strong:nth-child(1)').textContent = String(pair.grade).replace('.', ',');
-                    textSpan.querySelector('strong:nth-child(2)').textContent = String(pair.weight).replace('.', ',');
-
-                    const deleteButton = li.querySelector('.delete-pair-button');
-                    // Ensure listener is attached correctly
-                    deleteButton.addEventListener('click', () => removeWeightedPair(index));
-
-                    weightedPairsList.appendChild(clone);
-                });
-            };
-
-            const removeWeightedPair = (index) => {
-                if (index >= 0 && index < calculator.weightedPairs.length) {
-                    calculator.weightedPairs.splice(index, 1);
-                    renderWeightedPairsList();
-                    if(weightedAverageResult) weightedAverageResult.textContent = '--'; // Clear result as list changed
-                }
-            };
-
-            const calculateWeightedAverage = () => {
-                 if (!weightedAverageResult) return;
-                if (calculator.weightedPairs.length === 0) {
-                    weightedAverageResult.textContent = '--';
-                    return;
-                }
-
-                let totalWeightedSum = 0;
-                let totalWeight = 0;
-
-                calculator.weightedPairs.forEach(pair => {
-                    totalWeightedSum += pair.grade * pair.weight;
-                    totalWeight += pair.weight;
-                });
-
-                if (totalWeight === 0) {
-                    weightedAverageResult.textContent = 'Erro (Peso 0)';
-                    return;
-                }
-
-                const average = totalWeightedSum / totalWeight;
-                // Limit to 2 decimal places for display, use comma
-                weightedAverageResult.textContent = `Média: ${average.toFixed(2).replace('.', ',')}`;
-            };
-
-            const switchCalculatorMode = (mode) => {
-                 calculator.mode = mode;
-                 resetCalculator(); // Reset state when switching modes
-                 if (mode === 'standard') {
-                     standardCalcSection?.classList.remove('hidden');
-                     weightedCalcSection?.classList.add('hidden');
-                     calcModeStandardBtn?.classList.add('active');
-                     calcModeWeightedBtn?.classList.remove('active');
-                 } else { // weighted
-                     standardCalcSection?.classList.add('hidden');
-                     weightedCalcSection?.classList.remove('hidden');
-                     calcModeStandardBtn?.classList.remove('active');
-                     calcModeWeightedBtn?.classList.add('active');
-                 }
-            };
-
-             const openAdvancedCalculatorModal = () => {
-                 resetCalculator(); // Ensure clean state on open
-                 switchCalculatorMode('standard'); // Default to standard mode
-                 calculatorModal?.classList.add('show');
-
-                 // --- Add Listeners Specific to Calculator ---
-                 // Remove previous listeners might not be strictly needed if elements are stable
-                 // Re-attach listeners to ensure they point to the current elements/functions
-                 const currentCalcButtonsContainer = document.querySelector('#calculator-standard-section .calculator-buttons');
-                 currentCalcButtonsContainer?.removeEventListener('click', handleCalculatorButtonClick); // Remove old before adding new
-                 currentCalcButtonsContainer?.addEventListener('click', handleCalculatorButtonClick);
-
-
-                 if(calcModeStandardBtn) calcModeStandardBtn.onclick = () => switchCalculatorMode('standard');
-                 if(calcModeWeightedBtn) calcModeWeightedBtn.onclick = () => switchCalculatorMode('weighted');
-                 if(addPairButton) addPairButton.onclick = addWeightedPair;
-                 if(calculateWeightedAvgButton) calculateWeightedAvgButton.onclick = calculateWeightedAverage;
-
-                 // Listener for closing the modal (added for robustness)
-                 calculatorModal?.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
-                     btn.onclick = hideModal; // Overwrite any previous onclick
-                 });
-                 // Listener for background click
-                 calculatorModal?.addEventListener('click', (e) => {
-                     if (e.target === calculatorModal) {
-                         hideModal();
-                     }
-                 }, { once: false }); // Add persistently
-             };
-
-             const openToolModal = (toolType) => { // Generalized tool opener
-                 if (toolType === 'advanced-calculator') {
-                    openAdvancedCalculatorModal();
-                    return; // Don't show the generic modal
-                 }
-
-                let title = "Ferramenta";
-                let content = "<p>Funcionalidade em desenvolvimento.</p>";
-                let modalClass = '';
-                let footer = '';
-
-                 switch (toolType) {
-                     case 'name-sorter':
-                         openNameSorterModal(); // Use specific function
-                         return; // Don't show the generic modal
-                     case 'timer-stopwatch':
-                         openTimerModal(); // Use specific function
-                         return; // Don't show the generic modal
-                     case 'group-generator':
-                         openGroupGeneratorModal(); // Use specific function
-                         return; // Don't show the generic modal
-                     // Keep placeholder for truly undeveloped tools
-                     default:
-                         title = "Funcionalidade Indisponível";
-                         content = "<p>Esta ferramenta ainda não foi implementada.</p>";
-                 }
-                 showModal(title, content, footer, modalClass);
-             };
+            const addWeightedPair = () => { const gradeStr = weightedGradeInput.value.trim().replace(',', '.'); const weightStr = weightedWeightInput.value.trim().replace(',', '.'); const grade = parseFloat(gradeStr); const weight = parseFloat(weightStr); if (isNaN(grade)) { alert("Por favor, insira uma nota válida."); weightedGradeInput.focus(); return; } if (isNaN(weight) || weight <= 0) { alert("Por favor, insira um peso válido (maior que zero)."); weightedWeightInput.focus(); return; } calculator.weightedPairs.push({ grade, weight }); renderWeightedPairsList(); weightedGradeInput.value = ''; weightedWeightInput.value = ''; weightedGradeInput.focus(); weightedAverageResult.textContent = '--'; };
+            const renderWeightedPairsList = () => { if (!weightedPairsList) return; weightedPairsList.innerHTML = ''; if (calculator.weightedPairs.length === 0) { weightedPairsList.innerHTML = '<p>Nenhum par adicionado.</p>'; if (calculateWeightedAvgButton) calculateWeightedAvgButton.disabled = true; return; } if (calculateWeightedAvgButton) calculateWeightedAvgButton.disabled = false; const template = document.getElementById('weighted-pair-item-template'); calculator.weightedPairs.forEach((pair, index) => { const clone = template.content.cloneNode(true); const li = clone.querySelector('.pair-item'); li.dataset.index = index; const textSpan = li.querySelector('span'); textSpan.querySelector('strong:nth-child(1)').textContent = String(pair.grade).replace('.', ','); textSpan.querySelector('strong:nth-child(2)').textContent = String(pair.weight).replace('.', ','); const deleteButton = li.querySelector('.delete-pair-button'); deleteButton.addEventListener('click', () => removeWeightedPair(index)); weightedPairsList.appendChild(clone); }); };
+            const removeWeightedPair = (index) => { if (index >= 0 && index < calculator.weightedPairs.length) { calculator.weightedPairs.splice(index, 1); renderWeightedPairsList(); if(weightedAverageResult) weightedAverageResult.textContent = '--'; } };
+            const calculateWeightedAverage = () => { if (!weightedAverageResult) return; if (calculator.weightedPairs.length === 0) { weightedAverageResult.textContent = '--'; return; } let totalWeightedSum = 0; let totalWeight = 0; calculator.weightedPairs.forEach(pair => { totalWeightedSum += pair.grade * pair.weight; totalWeight += pair.weight; }); if (totalWeight === 0) { weightedAverageResult.textContent = 'Erro (Peso 0)'; return; } const average = totalWeightedSum / totalWeight; weightedAverageResult.textContent = `Média: ${average.toFixed(2).replace('.', ',')}`; };
+            const switchCalculatorMode = (mode) => { calculator.mode = mode; resetCalculator(); if (mode === 'standard') { standardCalcSection?.classList.remove('hidden'); weightedCalcSection?.classList.add('hidden'); calcModeStandardBtn?.classList.add('active'); calcModeWeightedBtn?.classList.remove('active'); } else { standardCalcSection?.classList.add('hidden'); weightedCalcSection?.classList.remove('hidden'); calcModeStandardBtn?.classList.remove('active'); calcModeWeightedBtn?.classList.add('active'); } };
+             const openAdvancedCalculatorModal = () => { resetCalculator(); switchCalculatorMode('standard'); calculatorModal?.classList.add('show'); const currentCalcButtonsContainer = document.querySelector('#calculator-standard-section .calculator-buttons'); currentCalcButtonsContainer?.removeEventListener('click', handleCalculatorButtonClick); currentCalcButtonsContainer?.addEventListener('click', handleCalculatorButtonClick); if(calcModeStandardBtn) calcModeStandardBtn.onclick = () => switchCalculatorMode('standard'); if(calcModeWeightedBtn) calcModeWeightedBtn.onclick = () => switchCalculatorMode('weighted'); if(addPairButton) addPairButton.onclick = addWeightedPair; if(calculateWeightedAvgButton) calculateWeightedAvgButton.onclick = calculateWeightedAverage; calculatorModal?.querySelectorAll('[data-dismiss="modal"]').forEach(btn => { btn.onclick = hideModal; }); calculatorModal?.addEventListener('click', (e) => { if (e.target === calculatorModal) { hideModal(); } }, { once: false }); };
+             const openToolModal = (toolType) => { if (toolType === 'advanced-calculator') { openAdvancedCalculatorModal(); return; } let title = "Ferramenta"; let content = "<p>Funcionalidade em desenvolvimento.</p>"; let modalClass = ''; let footer = ''; switch (toolType) { case 'name-sorter': openNameSorterModal(); return; case 'timer-stopwatch': openTimerModal(); return; case 'group-generator': openGroupGeneratorModal(); return; default: title = "Funcionalidade Indisponível"; content = "<p>Esta ferramenta ainda não foi implementada.</p>"; } showModal(title, content, footer, modalClass); };
 
 
             // --- Event Listeners Globais ---
@@ -1448,38 +1630,18 @@
             addClassButton.addEventListener('click', () => { if(currentSchoolId) openClassModal(); else alert("Selecione uma escola primeiro!"); });
             backToSchoolsButton.addEventListener('click', () => { currentSchoolId = null; currentClassId = null; showSection('schools-section'); });
             backToClassesButton.addEventListener('click', () => { if (tempClassroomLayout) { cancelClassroomMapEdit(); } showSection('classes-section'); });
-             // Generic modal close listener
-             modal.addEventListener('click', (e) => {
-                 if (e.target === modal || e.target.closest('.close-button[data-dismiss="modal"]') || e.target.matches('button[data-dismiss="modal"]')) {
-                     // Check if it's a specific tool modal needing cleanup before calling generic hide
-                     if (modal.querySelector('.timer-modal .modal-content')) { pauseStopwatch(); }
-                     // Add other generic tool cleanup here if needed
-                     hideModal(); // Hide the generic modal
-                 }
-             });
-             // Specific listener for calculator modal background/close button click (moved from openAdvancedCalculatorModal for consistency)
-            //  calculatorModal?.addEventListener('click', (e) => {
-            //       if (e.target === calculatorModal || e.target.closest('.close-button[data-dismiss="modal"]') || e.target.matches('button[data-dismiss="modal"]')) {
-            //          hideModal(); // Use the generic hide function which now also handles the calc modal
-            //      }
-            //  });
-             // Combine modal closing logic:
+             // Combined modal close handler
              const combinedModalCloseHandler = (e) => {
-                 const targetModal = e.currentTarget; // The modal that triggered the event
+                 const targetModal = e.currentTarget;
                  if (e.target === targetModal || e.target.closest('.close-button[data-dismiss="modal"]') || e.target.matches('button[data-dismiss="modal"]')) {
                      if (targetModal.id === 'generic-modal' && targetModal.querySelector('.timer-modal .modal-content')) {
                          pauseStopwatch();
                      }
-                     // Add cleanup for other generic modals if necessary
-
-                     // Regardless of which modal, call hideModal which hides both
                      hideModal();
                  }
              };
             modal.addEventListener('click', combinedModalCloseHandler);
             calculatorModal.addEventListener('click', combinedModalCloseHandler);
-
-
             document.getElementById('add-student-button').addEventListener('click', () => { if(currentClassId) openStudentModal(); else alert("Selecione uma turma primeiro!"); });
             gradeSetSelect.addEventListener('change', (e) => { if(currentClassId) { renderGradesTable(currentClassId, e.target.value); } });
             manageGradeStructureButton.addEventListener('click', openGradeStructureModal);
@@ -1515,22 +1677,22 @@
              unassignedStudentsContainer.addEventListener('dragleave', handleDragLeave);
              unassignedStudentsContainer.addEventListener('drop', handleDropOnUnassignedList);
              classDetailsSection.addEventListener('click', (e) => { const toggleButton = e.target.closest('.card-toggle-button'); if (toggleButton) { toggleCardCollapse(toggleButton); } });
-             // Listener for Tools Grid
-             toolsGrid?.addEventListener('click', (e) => {
-                 const toolCard = e.target.closest('.tool-card');
-                 if (toolCard && toolCard.dataset.tool) {
-                     const toolType = toolCard.dataset.tool;
-                     openToolModal(toolType); // Use the generalized opener
-                 }
-             });
+             toolsGrid?.addEventListener('click', (e) => { const toolCard = e.target.closest('.tool-card'); if (toolCard && toolCard.dataset.tool) { const toolType = toolCard.dataset.tool; openToolModal(toolType); } });
 
              window.addEventListener('beforeunload', saveAppState);
 
             // --- Inicialização ---
-            loadData();
+            const dataWasLoaded = loadData();
+            // REMOVIDO: Chamada para gerar dados fictícios
+            // if (!dataWasLoaded || appData.schools.length === 0) {
+            //      generateDummyDataForQuorum(); // Não chama mais
+            // }
             restoreAppState();
             renderScheduleList();
-            renderSchoolList();
+            renderSchoolList(); // Renderiza escolas com quórum
+            applyTheme(appData.settings.theme);
+            updateNotificationSettingsUI();
+            updateCustomSoundUI();
             const todayStr = getCurrentDateString();
             if (attendanceDateInput) attendanceDateInput.value = todayStr;
             if (lessonPlanDateInput) lessonPlanDateInput.value = todayStr;
@@ -1538,19 +1700,22 @@
             else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); }
             showSection(currentSection || 'schedule-section');
             if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
-            updateCustomSoundUI();
 
         });
             // --- Service Worker Registration ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        // Confirme se o caminho está EXATAMENTE correto!
-        navigator.serviceWorker.register('/super_professor-pro/pwabuilder-sw.js')
+        // Confirme se o caminho está EXATAMENTE correto! Ajuste se necessário.
+        // Assumindo que o HTML está na raiz ou em um diretório como 'super_professor-pro'
+        navigator.serviceWorker.register('/super_professor-pro/pwabuilder-sw.js') // Verifique este caminho!
           .then(registration => {
             console.log('ServiceWorker registration successful with scope: ', registration.scope);
           })
           .catch(err => {
             console.log('ServiceWorker registration failed: ', err);
+             if (err.message.includes('404')) {
+                console.warn("Service Worker file not found. Make sure 'pwabuilder-sw.js' is in the correct directory relative to the HTML file's location in the server/repository root.");
+             }
           });
       });
     }
