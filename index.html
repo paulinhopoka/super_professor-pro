@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Professor Pro</title> <!-- Título original mantido -->
+    <title>Super Professor Pro</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <!-- Incluir html2pdf.js via CDN -->
@@ -13,127 +13,45 @@
 </head>
 <body>
 
-    <div id="notification-banner"> <span id="notification-message">Mensagem...</span> <button id="notification-close-button" type="button">&times;</button> </div>
+    <div id="notification-banner"> <span id="notification-message">Mensagem...</span> <button id="notification-close-button" type="button">×</button> </div>
     <audio id="notification-sound-default" preload="auto"> <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUReT18AAAAAAAAAAAAAAAAAAAAAAP////8AAAAA///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8=" type="audio/wav"> </audio>
     <header class="app-header"> <div class="header-top-row"> <h1>Super Professor Pro</h1> <div id="header-info" class="header-info"></div> </div> <input type="search" id="search-input" placeholder="Buscar aluno, turma, escola..."> </header>
     <main class="app-content" id="main-content">
-        <!-- Seções Horários, Escolas, Turmas, Ferramentas, Contato, Configurações (mantidas como no original) -->
         <section id="schedule-section" class="section"> <h2><span class="icon icon-horario"></span>Meus Horários</h2> <button type="button" id="add-schedule-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button> <div id="schedule-list"><p style="text-align: center; padding: 1rem;">Nenhum horário cadastrado.</p></div> <p class="footer-message">Feito com ❤️ para professores</p> </section>
         <section id="schools-section" class="section"> <h2><span class="icon icon-escola"></span>Minhas Escolas</h2> <button type="button" id="add-school-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button> <div id="school-list"><p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p></div> </section>
         <section id="classes-section" class="section"> <h2> <button type="button" id="back-to-schools-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button> <span class="icon icon-turmas"></span>Turmas - <span id="classes-school-name">Selecione Escola</span> </h2> <button type="button" id="add-class-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button> <div id="class-list"><p style="text-align: center; padding: 1rem;">Selecione uma escola.</p></div> </section>
-
-        <!-- Seção Detalhes da Turma MODIFICADA -->
-        <section id="class-details-section" class="section">
-            <!-- NOVO: Cabeçalho Sticky -->
-            <div id="class-details-header">
-                 <!-- Botão Voltar Mantido -->
-                 <button type="button" id="back-to-classes-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button>
-                 <!-- Título centralizado -->
-                 <h2><span class="icon icon-alunos"></span><span id="class-details-title">Detalhes da Turma</span></h2>
-                 <!-- NOVO: Botão de Ajuda -->
-                 <button type="button" id="details-help-button" class="icon-button" title="Ajuda">
-                     <span class="icon icon-ajuda icon-only"></span>
-                 </button>
-            </div>
-
-            <!-- Card Alunos com ID -->
-            <div class="card" id="students-card">
-                <div class="card-header">
-                    <h3><span class="icon icon-alunos"></span>Alunos</h3>
-                    <div class="options">
-                        <!-- Botão Add Aluno mantido -->
-                        <button type="button" id="add-student-button" class="success"><span class="icon icon-adicionar"></span> Novo Aluno</button>
-                        <button type="button" class="card-toggle-button" title="Esconder Alunos"><span class="icon icon-chevron-up"></span></button>
-                    </div>
-                </div>
-                <div id="student-list-container" class="card-content collapsible-content">
-                    <p style="text-align: center; padding: 1rem;">Nenhum aluno nesta turma.</p>
-                </div>
-            </div>
-
-            <!-- Card Mapa da Sala (Mantido do original) -->
-            <div class="card">
-                <div class="card-header">
-                    <h3><span class="icon icon-mapa"></span>Mapa da Sala</h3>
-                    <div class="options">
-                        <button type="button" id="edit-map-button" class="secondary icon-button" title="Editar Mapa"><span class="icon icon-editar icon-only"></span></button>
-                        <button type="button" class="card-toggle-button" title="Esconder Mapa"><span class="icon icon-chevron-up"></span></button>
-                    </div>
-                </div>
-                <div class="card-content collapsible-content">
-                     <div id="classroom-map-edit-controls" class="classroom-map-edit-controls hidden"> <div class="form-group"> <label for="map-rows-input">Fileiras:</label> <input type="number" id="map-rows-input" min="1" max="20" value="5"> </div> <div class="form-group"> <label for="map-cols-input">Colunas:</label> <input type="number" id="map-cols-input" min="1" max="20" value="6"> </div> <div class="form-group"> <label for="teacher-desk-position-select">Mesa Prof.:</label> <select id="teacher-desk-position-select"> <option value="top-center">Topo (Centro)</option> <option value="top-left">Topo (Esquerda)</option> <option value="top-right">Topo (Direita)</option> <option value="bottom-center">Fundo (Centro)</option> <option value="bottom-left">Fundo (Esquerda)</option> <option value="bottom-right">Fundo (Direita)</option> <option value="left-center">Esquerda (Centro)</option> <option value="left-top">Esquerda (Topo)</option> <option value="left-bottom">Esquerda (Fundo)</option> <option value="right-center">Direita (Centro)</option> <option value="right-top">Direita (Topo)</option> <option value="right-bottom">Direita (Fundo)</option> </select> </div> <div class="form-group" style="margin-left: auto;"> <button type="button" id="cancel-map-edit-button" class="secondary">Cancelar</button> <button type="button" id="save-map-button" class="success"><span class="icon icon-salvar"></span> Salvar Mapa</button> </div> </div> <div id="map-edit-area" class="map-edit-area hidden"> <div id="unassigned-students-container" class="unassigned-students-list" droppable="true"> <h5>Alunos sem lugar (Clique aqui após selecionar mesa vazia)</h5> </div> <div id="classroom-container-edit" class="classroom-container"> </div> </div> <div id="classroom-container-display" class="classroom-container"> <div class="teacher-desk">🧑‍🏫</div> <div class="classroom-map-grid"> <p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p> </div> </div>
-                 </div>
-             </div>
-
-            <!-- Card Presença com ID -->
-            <div class="card" id="attendance-card">
-                <div class="card-header">
-                    <h3><span class="icon icon-presenca"></span>Presença</h3>
-                    <div class="options">
-                        <label for="attendance-date" class="mb-0 mr-1 align-center">Data:</label>
-                        <input type="date" id="attendance-date" style="width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;">
-                        <button type="button" id="view-monthly-attendance-button" class="secondary icon-button ml-1" title="Ver Frequência Mensal"><span class="icon icon-calendario icon-only"></span></button>
-                        <button type="button" class="card-toggle-button" title="Esconder Presença"><span class="icon icon-chevron-up"></span></button>
-                    </div>
-                </div>
-                <div class="card-content collapsible-content">
-                     <div id="attendance-actions-container" class="attendance-actions-container hidden"> <button type="button" id="mark-all-present-button" class="success"> <span class="icon icon-todos-presentes"></span>Todos P. </button> <button type="button" id="mark-non-school-day-button" class="secondary"> <span class="icon icon-nao-letivo"></span>Não Letivo </button> </div>
-                     <div class="table-scroll-wrapper">
-                        <div id="attendance-table-container"><p style="padding: 1rem; text-align: center;">Selecione uma data.</p></div>
-                     </div>
-                    <button type="button" id="save-attendance-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Presença</button>
-                 </div>
-            </div>
-
-            <!-- Card Notas (Mantido do original) -->
-            <div class="card">
-                <div class="card-header">
-                    <h3><span class="icon icon-notas"></span>Notas e Médias</h3>
-                    <div class="options">
-                        <label for="grade-set-select" class="mb-0 align-center">Conjunto:</label>
-                        <select id="grade-set-select"> <option value="">--</option> </select>
-                        <button type="button" id="manage-grade-structure-button" class="secondary icon-button" title="Gerenciar Estrutura de Notas"><span class="icon icon-estrutura icon-only"></span></button>
-                        <div class="export-buttons"> <button type="button" id="export-grades-csv-button" class="secondary icon-button hidden" title="Exportar Notas (CSV)"><span class="icon">📤</span></button> <button type="button" id="export-grades-pdf-button" class="secondary icon-button hidden" title="Exportar Notas (PDF)"><span class="icon icon-pdf"></span></button> </div>
-                        <button type="button" class="card-toggle-button" title="Esconder Notas"><span class="icon icon-chevron-up"></span></button>
-                    </div>
-                </div>
-                <div class="card-content collapsible-content">
-                     <div class="table-scroll-wrapper"> <div id="grades-table-container"><p style="padding: 1rem; text-align: center;">Selecione um conjunto de notas ou configure a estrutura.</p></div> </div> <button type="button" id="save-grades-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Notas</button>
-                 </div>
-            </div>
-
-            <!-- Card Planejamento (Mantido do original) -->
+        <section id="class-details-section" class="section"> <h2 id="class-details-header"> <button type="button" id="back-to-classes-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button> <span id="class-details-title">Detalhes da Turma</span> </h2>
+            <div class="card"> <div class="card-header"> <h3><span class="icon icon-alunos"></span>Alunos</h3> <div class="options"> <button type="button" id="add-student-button" class="success"><span class="icon icon-adicionar"></span> Novo Aluno</button> <button type="button" class="card-toggle-button" title="Esconder Alunos"><span class="icon icon-chevron-up"></span></button> </div> </div> <div id="student-list-container" class="card-content collapsible-content"><p style="text-align: center; padding: 1rem;">Nenhum aluno nesta turma.</p></div> </div>
+            <div class="card"> <div class="card-header"> <h3><span class="icon icon-mapa"></span>Mapa da Sala</h3> <div class="options"> <button type="button" id="edit-map-button" class="secondary icon-button" title="Editar Mapa"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Esconder Mapa"><span class="icon icon-chevron-up"></span></button> </div> </div> <div class="card-content collapsible-content"> <div id="classroom-map-edit-controls" class="classroom-map-edit-controls hidden"> <div class="form-group"> <label for="map-rows-input">Fileiras:</label> <input type="number" id="map-rows-input" min="1" max="20" value="5"> </div> <div class="form-group"> <label for="map-cols-input">Colunas:</label> <input type="number" id="map-cols-input" min="1" max="20" value="6"> </div> <div class="form-group"> <label for="teacher-desk-position-select">Mesa Prof.:</label> <select id="teacher-desk-position-select"> <option value="top-center">Topo (Centro)</option> <option value="top-left">Topo (Esquerda)</option> <option value="top-right">Topo (Direita)</option> <option value="bottom-center">Fundo (Centro)</option> <option value="bottom-left">Fundo (Esquerda)</option> <option value="bottom-right">Fundo (Direita)</option> <option value="left-center">Esquerda (Centro)</option> <option value="left-top">Esquerda (Topo)</option> <option value="left-bottom">Esquerda (Fundo)</option> <option value="right-center">Direita (Centro)</option> <option value="right-top">Direita (Topo)</option> <option value="right-bottom">Direita (Fundo)</option> </select> </div> <div class="form-group" style="margin-left: auto;"> <button type="button" id="cancel-map-edit-button" class="secondary">Cancelar</button> <button type="button" id="save-map-button" class="success"><span class="icon icon-salvar"></span> Salvar Mapa</button> </div> </div> <div id="map-edit-area" class="map-edit-area hidden"> <div id="unassigned-students-container" class="unassigned-students-list" droppable="true"> <h5>Alunos sem lugar (Clique aqui após selecionar mesa vazia)</h5> </div> <div id="classroom-container-edit" class="classroom-container"> </div> </div> <div id="classroom-container-display" class="classroom-container"> <div class="teacher-desk">🧑‍🏫</div> <div class="classroom-map-grid"> <p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p> </div> </div> </div> </div>
+            <div class="card"> <div class="card-header"> <h3><span class="icon icon-presenca"></span>Presença</h3> <div class="options"> <label for="attendance-date" class="mb-0 mr-1 align-center">Data:</label> <input type="date" id="attendance-date" style="width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;"> <button type="button" id="view-monthly-attendance-button" class="secondary icon-button ml-1" title="Ver Frequência Mensal"><span class="icon icon-calendario icon-only"></span></button> <button type="button" class="card-toggle-button" title="Esconder Presença"><span class="icon icon-chevron-up"></span></button> </div> </div> <div class="card-content collapsible-content"> <div id="attendance-actions-container" class="attendance-actions-container hidden"> <button type="button" id="mark-all-present-button" class="success"> <span class="icon icon-todos-presentes"></span>Todos P. </button> <button type="button" id="mark-non-school-day-button" class="secondary"> <span class="icon icon-nao-letivo"></span>Não Letivo </button> </div> <div class="table-scroll-wrapper"> <div id="attendance-table-container"><p style="padding: 1rem; text-align: center;">Selecione uma data.</p></div> </div> <button type="button" id="save-attendance-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Presença</button> </div> </div>
+            <div class="card"> <div class="card-header"> <h3><span class="icon icon-notas"></span>Notas e Médias</h3> <div class="options"> <label for="grade-set-select" class="mb-0 align-center">Conjunto:</label> <select id="grade-set-select"> <option value="">--</option> </select> <button type="button" id="manage-grade-structure-button" class="secondary icon-button" title="Gerenciar Estrutura de Notas"><span class="icon icon-estrutura icon-only"></span></button> <div class="export-buttons"> <button type="button" id="export-grades-csv-button" class="secondary icon-button hidden" title="Exportar Notas (CSV)"><span class="icon">📤</span></button> <button type="button" id="export-grades-pdf-button" class="secondary icon-button hidden" title="Exportar Notas (PDF)"><span class="icon icon-pdf"></span></button> </div> <button type="button" class="card-toggle-button" title="Esconder Notas"><span class="icon icon-chevron-up"></span></button> </div> </div> <div class="card-content collapsible-content"> <div class="table-scroll-wrapper"> <div id="grades-table-container"><p style="padding: 1rem; text-align: center;">Selecione um conjunto de notas ou configure a estrutura.</p></div> </div> <button type="button" id="save-grades-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Notas</button> </div> </div>
              <div class="card"> <div class="card-header"> <h3><span class="icon icon-plano"></span>Planejamento da Aula</h3> <div class="options"> <label for="lesson-plan-date" class="mb-0 mr-1 align-center">Data:</label> <input type="date" id="lesson-plan-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;"> <button type="button" class="card-toggle-button" title="Esconder Planejamento"><span class="icon icon-chevron-up"></span></button> </div> </div> <div class="card-content collapsible-content"> <textarea id="lesson-plan-textarea" placeholder="Digite o conteúdo/tópico da aula para esta data..."></textarea> <button type="button" id="save-lesson-plan-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Plano</button> </div> </div>
-
-            <!-- Card Anotações da Turma (Mantido do original) -->
              <div class="card"> <div class="card-header"> <h3><span class="icon icon-anotacao"></span>Anotações da Turma</h3> <div class="options"> <button type="button" id="edit-class-notes-button" class="secondary icon-button" title="Editar Anotações"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Esconder Anotações"><span class="icon icon-chevron-up"></span></button> </div> </div> <div id="class-notes-display" class="card-content collapsible-content"> <p id="class-notes-content">Nenhuma anotação para esta turma.</p> </div> <div id="class-notes-edit" class="hidden card-content collapsible-content"> <textarea id="class-notes-textarea" placeholder="Digite suas anotações sobre a turma..."></textarea> <div class="text-right mt-1 mb-1"> <button type="button" id="cancel-class-notes-button" class="secondary">Cancelar</button> <button type="button" id="save-class-notes-button" class="success"><span class="icon icon-salvar"></span> Salvar</button> </div> </div> </div>
         </section>
-
-        <!-- Outras Seções (Mantidas como no original) -->
         <section id="tools-section" class="section"> <h2><span class="icon icon-ferramentas"></span>Ferramentas</h2> <div class="tools-grid"> <button type="button" class="tool-card" data-tool="name-sorter"> <span class="icon icon-sorteio"></span> <span class="tool-card-title">Sorteador de Nomes</span> </button> <button type="button" class="tool-card" data-tool="timer-stopwatch"> <span class="icon icon-cronometro"></span> <span class="tool-card-title">Cronômetro/ Timer</span> </button> <button type="button" class="tool-card" data-tool="group-generator"> <span class="icon icon-grupos"></span> <span class="tool-card-title">Gerador de Grupos</span> </button> <button type="button" class="tool-card" data-tool="advanced-calculator"> <span class="icon icon-calculadora-avancada"></span> <span class="tool-card-title">Calculadora Avançada</span> </button> </div> <p class="footer-message">Feito com ❤️ para professores</p> </section>
         <section id="contact-section" class="section"> <h2><span class="icon icon-contato"></span>Contato & Apoio</h2> <div class="card"> <h3 style="text-align: center; color: var(--accent-primary);">Gostou do App? Apoie o Desenvolvedor!</h3> <p class="mt-2">Olá, Professor(a)! 👋</p> <p>O Super Professor Pro foi criado com muito carinho e dedicação para ser uma ferramenta útil e gratuita no seu dia a dia.</p> <p>Se este app tem facilitado sua rotina e você gostaria de incentivar a continuidade do projeto (novas funcionalidades, melhorias e correções!), considere fazer uma contribuição voluntária via PIX.</p> <p>É como pagar um cafezinho ☕ pelo bom trabalho! Qualquer valor é bem-vindo e ajuda muito a manter a ferramenta evoluindo.</p> <h4 class="text-center">PIX Copia e Cola:</h4> <div id="pix-key-text" class="pix-key-container">00020126580014BR.GOV.BCB.PIX01365787c86e-c2cb-44ac-8799-428e17e6b4635204000053039865802BR5925Paulo Ricardo Correa de A6009SAO PAULO6214051058aRkBp4Fm6304175C</div> <button type="button" id="copy-pix-button" class="success"> <span class="icon icon-copiar"></span> Copiar Código PIX </button> <p class="text-center mt-2"><strong>Muito obrigado pelo seu apoio!</strong></p> <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;"> <p>Para dúvidas, sugestões ou reporte de erros:</p> <p style="text-align: center;"> <a href="mailto:paulinhoandroidnf@gmail.com">paulinhoandroidnf@gmail.com</a> </p> </div> <p class="footer-message">Feito com ❤️ para professores</p> </section>
         <section id="settings-section" class="section"> <h2><span class="icon icon-config"></span>Configurações</h2> <div class="card"> <h3>Temas</h3> <div id="theme-selector" style="display: flex; flex-wrap: wrap; gap: 5px;"> <button type="button" class="theme-button" data-theme="theme-light">Claro</button> <button type="button" class="theme-button" data-theme="theme-dark">Escuro</button> <button type="button" class="theme-button" data-theme="theme-forest-green">Verde Floresta</button> <button type="button" class="theme-button" data-theme="theme-math-master">Mestre da Matemática</button> <button type="button" class="theme-button" data-theme="theme-historic-scroll">Papiro Histórico</button> <button type="button" class="theme-button" data-theme="theme-alchemist">O Alquimista</button> </div> </div> <div class="card mt-2"> <h3>Dados</h3> <div style="display: flex; flex-direction: column; gap: 10px;"> <button type="button" id="export-data-button" class="secondary"><span class="icon">📤</span> Exportar Dados (JSON)</button> <label for="import-data-input" class="button-like secondary" style="cursor: pointer;"><span class="icon">📥</span> Importar Dados (JSON)</label> <input type="file" id="import-data-input" accept=".json" class="hidden"> <button type="button" id="clear-data-button" class="danger"><span class="icon">⚠️</span> Limpar Todos os Dados</button> </div> </div> <div class="card mt-2"> <h3>Notificações de Horários</h3> <div class="checkbox-group"> <input type="checkbox" id="enable-global-notifications"> <label for="enable-global-notifications">Ativar Notificações Globais</label> </div> <div class="checkbox-group"> <input type="checkbox" id="enable-notification-sound"> <label for="enable-notification-sound">Ativar Som nas Notificações</label> </div> <div class="custom-sound-container"> <label for="custom-notification-sound-input">Som Personalizado (Opcional - máx 2MB):</label> <div class="custom-sound-input-group"> <label for="custom-notification-sound-input" class="button-like secondary" style="cursor: pointer;"><span class="icon icon-arquivo"></span> Escolher arquivo</label> <span id="custom-sound-filename">Nenhum arquivo escolhido</span> <input type="file" id="custom-notification-sound-input" accept="audio/*" class="hidden"> </div> <div id="current-custom-sound-display" class="hidden"> <span id="current-custom-sound-name"></span> <button type="button" id="remove-custom-sound-button" class="danger icon-button" title="Remover Som Personalizado"><span class="icon icon-excluir icon-only"></span></button> </div> </div> <p class="text-sm text-secondary mt-1"> Notificações podem ser ativadas/desativadas individualmente para cada horário na tela "Meus Horários" (clicando no 🔔/🔕). Elas aparecerão 5 minutos antes do início e do fim da aula programada. </p> </div> <p class="footer-message">Feito com ❤️ para professores</p> </section>
     </main>
-
-    <!-- Navegação (Mantida como no original) -->
     <nav class="app-nav"> <button type="button" class="nav-button" data-section="schedule-section"><span class="icon icon-horario"></span>Horários</button> <button type="button" class="nav-button" data-section="schools-section"><span class="icon icon-escola"></span>Escolas</button> <button type="button" class="nav-button" data-section="classes-section" id="nav-classes-button" disabled><span class="icon icon-turmas"></span>Turmas</button> <button type="button" class="nav-button" data-section="class-details-section" id="nav-details-button" disabled><span class="icon icon-alunos"></span>Detalhes</button> <button type="button" class="nav-button" data-section="tools-section"><span class="icon icon-ferramentas"></span>Ferramentas</button> <button type="button" class="nav-button" data-section="contact-section"><span class="icon icon-contato"></span>Contato</button> <button type="button" class="nav-button" data-section="settings-section"><span class="icon icon-config"></span>Config</button> </nav>
 
-    <!-- Modal Genérico (Mantido) -->
-    <div id="generic-modal" class="modal"> <div class="modal-content"> <div class="modal-header"> <h2 id="modal-title">Título do Modal</h2> <button type="button" class="close-button" data-dismiss="modal">&times;</button> </div> <div id="modal-body" class="modal-body"></div> <div id="modal-footer" class="modal-footer"> <button type="button" data-dismiss="modal" class="secondary">Fechar</button> </div> </div> </div>
+    <!-- Generic Modal -->
+    <div id="generic-modal" class="modal"> <div class="modal-content"> <div class="modal-header"> <h2 id="modal-title">Título do Modal</h2> <button type="button" class="close-button" data-dismiss="modal">×</button> </div> <div id="modal-body" class="modal-body"></div> <div id="modal-footer" class="modal-footer"> <button type="button" data-dismiss="modal" class="secondary">Fechar</button> </div> </div> </div>
 
-    <!-- Modal Calculadora (Mantido) -->
+    <!-- Advanced Calculator Modal -->
     <div id="advanced-calculator-modal" class="modal calculator-modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="calculator-modal-title">Calculadora Avançada</h2>
-                <button type="button" class="close-button" data-dismiss="modal">&times;</button>
+                <button type="button" class="close-button" data-dismiss="modal">×</button>
             </div>
             <div class="modal-body">
                 <div class="calculator-mode-selector">
                     <button type="button" id="calc-mode-standard" class="active" data-mode="standard">Padrão</button>
                     <button type="button" id="calc-mode-weighted" data-mode="weighted">Média Ponderada</button>
                 </div>
-                 <div id="calculator-standard-section">
+
+                <!-- Standard Calculator Section -->
+                <div id="calculator-standard-section">
                     <div id="calculator-display" class="calculator-display">0</div>
                     <div class="calculator-buttons">
                         <button type="button" class="danger util" data-action="clearAll">AC</button>
@@ -161,7 +79,9 @@
                         <button type="button" class="eq" data-action="calculate">=</button>
                     </div>
                 </div>
-                 <div id="calculator-weighted-section" class="weighted-average-section hidden">
+
+                <!-- Weighted Average Section -->
+                <div id="calculator-weighted-section" class="weighted-average-section hidden">
                     <h5>Adicionar Notas e Pesos</h5>
                     <div class="grade-weight-input-group">
                         <input type="number" id="weighted-grade-input" placeholder="Nota" step="any">
@@ -186,84 +106,66 @@
 
 
     <!-- Templates -->
-     <!-- Template Escola (Mantido do original) -->
+     <!-- MODIFICADO: Template de Escola com Footer para Quorum -->
      <template id="school-item-template">
         <div class="list-item school-item" data-id="">
+            <!-- Linha Principal: Nome e Botões -->
             <div class="school-item-main-row">
-                <div class="item-info"> <h4 class="school-name">Nome da Escola</h4> </div>
-                <div class="list-item-actions"> <button type="button" class="view-classes-button button-like primary" title="Ver Turmas"><span class="icon icon-turmas"></span> Turmas</button> <button type="button" class="edit-school-button secondary icon-button" title="Editar Escola"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="delete-school-button danger icon-button" title="Excluir Escola"><span class="icon icon-excluir icon-only"></span></button> </div>
+                <div class="item-info"> <!-- Container do nome -->
+                    <h4 class="school-name">Nome da Escola</h4>
+                </div>
+                <div class="list-item-actions">
+                    <button type="button" class="view-classes-button button-like primary" title="Ver Turmas"><span class="icon icon-turmas"></span> Turmas</button>
+                    <button type="button" class="edit-school-button secondary icon-button" title="Editar Escola"><span class="icon icon-editar icon-only"></span></button>
+                    <button type="button" class="delete-school-button danger icon-button" title="Excluir Escola"><span class="icon icon-excluir icon-only"></span></button>
+                </div>
             </div>
-            <div class="school-quorum-info"> <label class="text-sm" for="quorum-date-input-ID_ESCOLA">Quórum:</label> <input type="date" class="quorum-date-input" id="quorum-date-input-ID_ESCOLA"> <select class="quorum-shift-select"> <option value="Geral">Geral</option> <option value="Manhã">Manhã</option> <option value="Tarde">Tarde</option> <option value="Noite">Noite</option> <option value="Integral">Integral</option> </select> <span class="quorum-display">--/-- (--%)</span> </div>
+            <!-- Linha Inferior: Quórum -->
+            <div class="school-quorum-info">
+                <label class="text-sm" for="quorum-date-input-ID_ESCOLA">Quórum:</label> <!-- ID único será gerado no JS -->
+                <input type="date" class="quorum-date-input" id="quorum-date-input-ID_ESCOLA">
+                <select class="quorum-shift-select">
+                    <option value="Geral">Geral</option>
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Noite">Noite</option>
+                    <option value="Integral">Integral</option>
+                </select>
+                <span class="quorum-display">--/-- (--%)</span>
+            </div>
         </div>
     </template>
-    <!-- Template Turma (Mantido do original) -->
+    <!-- Template de Turma (Restaurado ao original) -->
     <template id="class-item-template">
         <div class="list-item" data-id="">
-            <div class="item-info"> <h4 class="class-name"></h4> <p class="class-details"></p> </div>
-            <div class="list-item-actions"> <button type="button" class="view-details-button primary" title="Ver Detalhes"><span class="icon icon-alunos"></span> Ver</button> <button type="button" class="edit-class-button secondary icon-button" title="Editar Turma"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="delete-class-button danger icon-button" title="Excluir Turma"><span class="icon icon-excluir icon-only"></span></button> </div>
-        </div>
-    </template>
-
-    <!-- NOVO: Template de Aluno MODIFICADO -->
-    <template id="student-list-item-template">
-        <div class="list-item" data-id="">
-            <div class="list-item-content-wrapper">
-                <div class="list-item-main-row">
-                    <span class="student-number"></span>
-                    <span class="student-name"></span>
-                    <!-- Botão para expandir/recolher -->
-                    <button type="button" class="expand-actions-button" title="Ações">
-                        <span class="icon icon-chevron-down icon-only"></span>
-                    </button>
-                </div>
-                <!-- Área que será mostrada/escondida -->
-                <div class="list-item-hidden-actions">
-                    <button type="button" class="action-button set-representative-button" title="Rep./Remover Rep.">
-                        <span class="icon icon-representante icon-only"></span>
-                    </button>
-                    <button type="button" class="action-button set-vice-button" title="Vice/Remover Vice">
-                        <span class="icon icon-vice icon-only"></span>
-                    </button>
-                    <button type="button" class="action-button notes-student-button warning" title="Observações">
-                        <span class="icon icon-anotacao icon-only"></span>
-                    </button>
-                    <button type="button" class="action-button edit-student-button secondary" title="Editar">
-                        <span class="icon icon-editar icon-only"></span>
-                    </button>
-                    <button type="button" class="action-button move-student-button secondary" title="Mover Aluno"> <!-- Renomeado p/ clareza -->
-                        <span class="icon icon-mover icon-only"></span> <!-- Ícone correto -->
-                    </button>
-                    <button type="button" class="action-button delete-student-button danger" title="Excluir">
-                        <span class="icon icon-excluir icon-only"></span>
-                    </button>
-                </div>
+            <div class="item-info">
+                <h4 class="class-name"></h4>
+                <p class="class-details"></p>
+            </div>
+            <div class="list-item-actions">
+                <button type="button" class="view-details-button primary" title="Ver Detalhes"><span class="icon icon-alunos"></span> Ver</button>
+                <button type="button" class="edit-class-button secondary icon-button" title="Editar Turma"><span class="icon icon-editar icon-only"></span></button>
+                <button type="button" class="delete-class-button danger icon-button" title="Excluir Turma"><span class="icon icon-excluir icon-only"></span></button>
             </div>
         </div>
     </template>
-
-    <!-- Templates de Notas e Presença (Mantidos do original) -->
+    <!-- Template de Aluno (Restaurado ao original) -->
+    <template id="student-list-item-template">
+        <div class="list-item" data-id="">
+            <span class="student-number" style="font-weight: bold; margin-right: 10px; min-width: 30px; text-align: right;"></span>
+            <span class="student-name" style="white-space: normal; word-break: break-word; flex-grow: 1; margin-right: 10px;"></span>
+            <div class="list-item-actions">
+                <button type="button" class="edit-student-button secondary icon-button" title="Editar Aluno"><span class="icon icon-editar icon-only"></span></button>
+                <button type="button" class="delete-student-button danger icon-button" title="Excluir Aluno"><span class="icon icon-excluir icon-only"></span></button>
+                <button type="button" class="notes-student-button warning icon-button" title="Observações do Aluno"><span class="icon icon-anotacao icon-only"></span></button>
+                <button type="button" class="move-student-button secondary icon-button" title="Mover Aluno para Outra Turma"><span class="icon icon-mover icon-only"></span></button>
+            </div>
+        </div>
+    </template>
     <template id="grades-header-template"> <th class="student-col">Aluno</th> <th class="sum-col">Soma</th> <th class="avg-col">Média</th> </template>
     <template id="grades-row-template"> <tr> <td class="student-col"> <span class="student-number" style="font-weight:bold; margin-right: 5px;"></span> <span class="student-name"></span> </td> <td class="sum-col sum">--</td> <td class="avg-col average">--</td> </tr> </template>
     <template id="attendance-row-template"> <tr> <td class="student-col"> <span class="student-number"></span> <span class="student-name"></span> </td> <td class="attendance-status"></td> </tr> </template>
-
-    <!-- NOVO: Template de Observação MODIFICADO -->
-    <template id="observation-item-template">
-        <div class="observation-item" data-index="">
-            <div class="observation-details">
-                <span class="observation-info">
-                    <span class="category"></span> <!-- Categoria será inserida aqui -->
-                    <span class="observation-date"></span>
-                </span>
-                <p class="observation-text"></p>
-                <span class="observation-suspension-dates hidden"></span> <!-- Para datas de suspensão -->
-            </div>
-            <button type="button" class="delete-observation-button danger icon-button" title="Excluir">
-                <span class="icon icon-excluir icon-only"></span>
-            </button>
-        </div>
-    </template>
-
-    <!-- Outros Templates (Mantidos do original) -->
+    <template id="observation-item-template"> <div class="observation-item" data-index=""> <div class="observation-details"> <span class="observation-date"></span> <p class="observation-text"></p> </div> <button type="button" class="delete-observation-button danger icon-button" title="Excluir Observação"><span class="icon icon-excluir icon-only"></span></button> </div> </template>
     <template id="schedule-item-template"> <div class="schedule-item" data-id=""> <span class="schedule-time"></span> <div class="schedule-info"> <div class="school-name"></div> <div class="note"></div> </div> <div class="schedule-actions"> <button type="button" class="notification-toggle-button" title="Ativar/Desativar Notificações"> <span class="icon notification-indicator"></span> </button> <button type="button" class="edit-schedule-button secondary icon-button" title="Editar Horário"> <span class="icon icon-editar icon-only"></span> </button> <button type="button" class="delete-schedule-button danger icon-button" title="Excluir Horário"> <span class="icon icon-excluir icon-only"></span> </button> </div> </div> </template>
     <template id="grade-label-item-template"> <div class="grade-label-item"> <input type="text" class="gs-label" value="" placeholder="Nome da Avaliação (Ex: Prova 1)"> <button type="button" class="delete-gs-label-button danger icon-button" title="Excluir Instrumento"><span class="icon icon-excluir icon-only"></span></button> </div> </template>
     <template id="color-range-item-template"> <div class="color-range-item"> <label>De:</label> <input type="number" class="gs-color-min" step="0.1" placeholder="0.0" value=""> <label>Até:</label> <input type="number" class="gs-color-max" step="0.1" placeholder="10.0" value=""> <label>Cor:</label> <input type="color" class="gs-color-input" value="#ffffff"> <button type="button" class="delete-color-range-button danger icon-button" title="Excluir Faixa"> <span class="icon icon-excluir icon-only"></span> </button> </div> </template>
@@ -271,10 +173,16 @@
     <template id="draggable-student-template"> <div class="draggable-student" draggable="true"> <span class="student-number"></span> <span class="student-name"></span> </div> </template>
     <template id="teacher-desk-template"> <div class="teacher-desk">🧑‍🏫</div> </template>
     <template id="classroom-grid-template"> <div class="classroom-map-grid"></div> </template>
-    <template id="weighted-pair-item-template"> <li class="pair-item" data-index=""> <span>Nota: <strong></strong>, Peso: <strong></strong></span> <button type="button" class="delete-pair-button danger icon-button" title="Remover Par"><span class="icon icon-excluir icon-only"></span></button> </li> </template>
+    <!-- Template for Weighted Pair Item -->
+    <template id="weighted-pair-item-template">
+        <li class="pair-item" data-index="">
+            <span>Nota: <strong></strong>, Peso: <strong></strong></span>
+            <button type="button" class="delete-pair-button danger icon-button" title="Remover Par"><span class="icon icon-excluir icon-only"></span></button>
+        </li>
+    </template>
 
-    <!-- Link para o arquivo JavaScript externo (Mantido no final) -->
+    <!-- Link para o arquivo JavaScript externo -->
     <script src="script.js"></script>
 
 </body>
-</html>
+                                                                 </html>
