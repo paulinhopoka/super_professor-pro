@@ -34,9 +34,9 @@ body {
     --bg-tertiary: #e9ecef;
     --bg-secondary-alpha: rgba(248, 249, 250, 0.98);
     --bg-tertiary-alpha: rgba(233, 236, 239, 0.96);
-    --bg-details-sticky-alpha: rgba(255, 255, 255, 0.97); /* Era --bg-sticky-alpha no polimento */
-    --bg-modal-alpha: var(--bg-primary); /* Opaco no light */
-    --bg-notification: #4caf50; /* Green for notifications */
+    --bg-details-sticky-alpha: rgba(255, 255, 255, 0.97);
+    --bg-modal-alpha: var(--bg-primary);
+    --bg-notification: #4caf50;
     --text-notification: #ffffff;
 
     --text-primary: #212529;
@@ -45,7 +45,7 @@ body {
     --accent-secondary: #6c757d;
     --accent-success: #28a745;
     --accent-danger: #dc3545;
-    --accent-warning: #ffc107; /* Amarelo para FJ */
+    --accent-warning: #ffc107;
     --border-color: #dee2e6;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --input-bg: #fff;
@@ -56,13 +56,10 @@ body {
     --theme-background-opacity: 1;
     --theme-background-blend-mode: normal;
     --theme-background-filter: none;
-     /* Grade Colors (Light) - Fallback if no custom ranges */
      --grade-low-bg: #f8d7da; --grade-low-text: #721c24;
      --grade-medium-bg: #fff3cd; --grade-medium-text: #856404;
      --grade-high-bg: #d4edda; --grade-high-text: #155724;
-     /* Attendance Colors (Light) */
-     --attendance-holiday-bg: #e2e3e5; --attendance-holiday-text: #495057; /* Non-school day */
-     /* Classroom Map Colors */
+     --attendance-holiday-bg: #e2e3e5; --attendance-holiday-text: #495057;
      --map-seat-bg: var(--input-bg);
      --map-seat-border: var(--input-border);
      --map-seat-text: var(--text-secondary);
@@ -72,17 +69,13 @@ body {
      --map-teacher-desk-border: var(--accent-secondary);
      --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 30%, transparent);
      --map-seat-selected-border: var(--accent-warning);
-     /* Teacher Desk Dimensions */
      --teacher-desk-width: 80px;
      --teacher-desk-height: 45px;
      --teacher-desk-border-width: 3px;
-     /* Seat Dimensions */
      --seat-width: 65px;
      --seat-height: 45px;
      --seat-gap: 6px;
-     /* Tools Grid */
      --tool-card-min-width: 130px;
-     /* Calculator */
     --calc-display-bg: var(--bg-tertiary-alpha);
     --calc-button-bg: var(--accent-primary);
     --calc-button-text: #ffffff;
@@ -96,11 +89,8 @@ body {
     --calc-mode-button-text: var(--text-secondary);
     --calc-mode-button-active-bg: var(--accent-primary);
     --calc-mode-button-active-text: #ffffff;
-    /* Touch Feedback */
     --active-scale: 0.96;
     --active-opacity: 0.9;
-
-    /* --- Variáveis adicionadas do Polimento (Mantidas) --- */
     --suspended-bg: rgba(220, 53, 69, 0.08);
     --rep-gold-start: #ffd700; --rep-gold-end: #fca311;
     --vice-silver-start: #e0e0e0; --vice-silver-end: #adb5bd;
@@ -111,18 +101,22 @@ body {
     --cat-advertencia-border: #fd7e14; --cat-advertencia-bg: #ffe8d6; --cat-advertencia-text: #8a4d0f;
     --cat-suspensao-border: #dc3545; --cat-suspensao-bg: #f8d7da; --cat-suspensao-text: #721c24;
     --angle: 0deg;
+
+    /* **** NOVO: Variáveis para cores dos badges de programas **** */
+    --program-bolsa-familia-bg: #28a745; /* Verde (success) */
+    --program-bolsa-familia-text: #ffffff;
+    --program-pe-de-meia-bg: #007bff;    /* Azul (primary) */
+    --program-pe-de-meia-text: #ffffff;
+    --program-default-bg: var(--accent-secondary);
+    --program-default-text: #ffffff;
 }
 
-/* Pseudo-elemento para background pattern com opacidade */
 body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: var(--theme-background-image); background-color: transparent; background-repeat: repeat; background-attachment: fixed; background-size: auto; background-position: center; opacity: var(--theme-background-opacity); mix-blend-mode: var(--theme-background-blend-mode); filter: var(--theme-background-filter); z-index: -1; pointer-events: none; transition: opacity 0.4s ease; }
 
-/* --- TEMAS (Sem alterações aqui, apenas garantindo que as vars certas sejam usadas) --- */
-/* Theme Light - Usa as vars padrão definidas no :root */
  body.theme-light {
-    --bg-sticky-alpha: rgba(248, 249, 250, 0.98); /* Fundo sticky padrão */
-    --bg-details-sticky-alpha: rgba(255, 255, 255, 0.97); /* Fundo sticky Detalhes (Branco com blur) */
-    --bg-modal-alpha: var(--bg-primary); /* Modal opaco */
-    /* Restante das vars light */
+    --bg-sticky-alpha: rgba(248, 249, 250, 0.98);
+    --bg-details-sticky-alpha: rgba(255, 255, 255, 0.97);
+    --bg-modal-alpha: var(--bg-primary);
     --theme-background-image: none; --theme-background-opacity: 0; --grade-low-bg: #f8d7da; --grade-low-text: #721c24; --grade-medium-bg: #fff3cd; --grade-medium-text: #856404; --grade-high-bg: #d4edda; --grade-high-text: #155724; --attendance-holiday-bg: #e2e3e5; --attendance-holiday-text: #495057; --bg-notification: #4caf50; --text-notification: #ffffff;
  }
  body.theme-light button.absent.justified.selected { color: var(--text-primary); }
@@ -131,7 +125,6 @@ body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; heigh
  body.theme-light .monthly-attendance-table td.status-P { background-color: var(--grade-high-bg); color: var(--grade-high-text); }
  body.theme-light .monthly-attendance-table td.status-H { background-color: var(--attendance-holiday-bg); color: var(--attendance-holiday-text); font-style: italic; }
  body.theme-light .seat-placeholder-text { color: var(--map-seat-text); }
- /* --- CORREÇÃO: Mantendo estilos originais da calculadora padrão no tema light --- */
  body.theme-light .calculator-buttons button.num { background-color: var(--accent-primary); color: #fff; }
  body.theme-light .calculator-buttons button.op { background-color: #6c757d; color: #fff; }
  body.theme-light .calculator-buttons button.util { background-color: #adb5bd; color: var(--text-primary); }
@@ -141,8 +134,15 @@ body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; heigh
  body.theme-light .calculator-modal .pairs-list { background-color: var(--bg-tertiary-alpha); }
  body.theme-light .calculator-modal .pair-item { background-color: var(--bg-secondary-alpha); }
 
-/* Theme Dark */
-body.theme-dark { --bg-primary: #212529; --bg-secondary: #343a40; --bg-tertiary: #495057; --bg-secondary-alpha: rgba(52, 58, 64, 0.97); --bg-tertiary-alpha: rgba(73, 80, 87, 0.96); --bg-sticky-alpha: rgba(52, 58, 64, 0.98); /* Fundo sticky padrão escuro */ --bg-details-sticky-alpha: rgba(52, 58, 64, 0.97); /* Fundo sticky Detalhes escuro com blur */ --bg-modal-alpha: #2c3034; --text-primary: #f8f9fa; --text-secondary: #adb5bd; --accent-primary: #3b82f6; --accent-secondary: #6b7280; --accent-success: #22c55e; --accent-danger: #ef4444; --accent-warning: #f59e0b; --border-color: #4b5563; --shadow-color: rgba(255, 255, 255, 0.08); --input-bg: #374151; --input-border: #4b5563; --theme-background-image: none; --theme-background-opacity: 0; --grade-low-bg: color-mix(in srgb, var(--accent-danger) 25%, transparent); --grade-low-text: #f8f9fa; --grade-medium-bg: color-mix(in srgb, var(--accent-warning) 30%, transparent); --grade-medium-text: #111827; --grade-high-bg: color-mix(in srgb, var(--accent-success) 25%, transparent); --grade-high-text: #f8f9fa; --attendance-holiday-bg: #495057; --attendance-holiday-text: #ced4da; --bg-notification: #22c55e; --text-notification: #111827; --map-seat-bg: var(--input-bg); --map-seat-border: var(--input-border); --map-seat-text: var(--text-secondary); --map-seat-occupied-bg: color-mix(in srgb, var(--accent-primary) 20%, transparent); --map-seat-occupied-text: var(--text-primary); --map-teacher-desk-bg: var(--bg-tertiary); --map-teacher-desk-border: var(--accent-secondary); --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 35%, transparent); --map-seat-selected-border: var(--accent-warning); --calc-button-bg: var(--accent-primary); --calc-button-text: #ffffff; --calc-op-button-bg: color-mix(in srgb, var(--accent-primary) 70%, #000000); --calc-util-button-bg: var(--accent-secondary); --calc-danger-button-bg: var(--accent-danger); --calc-warn-button-bg: var(--accent-warning); --calc-mode-button-bg: var(--bg-tertiary); --calc-mode-button-text: var(--text-secondary); --calc-mode-button-active-bg: var(--accent-primary); --calc-mode-button-active-text: #ffffff; /* --- Variaveis escuras polimento (Mantidas) --- */ --suspended-bg: rgba(239, 68, 68, 0.1); --rep-gold-start: #facc15; --rep-gold-end: #f59e0b; --vice-silver-start: #9ca3af; --vice-silver-end: #6b7280; --highlight-bg: rgba(59, 130, 246, 0.15); --cat-anotacao-border: #6b7280; --cat-anotacao-bg: #495057; --cat-anotacao-text: #e5e7eb; --cat-observacao-border: #3b82f6; --cat-observacao-bg: #374151; --cat-observacao-text: #93c5fd; --cat-ocorrencia-border: #f59e0b; --cat-ocorrencia-bg: #4a402a; --cat-ocorrencia-text: #fcd34d; --cat-advertencia-border: #f97316; --cat-advertencia-bg: #573d24; --cat-advertencia-text: #fdba74; --cat-suspensao-border: #ef4444; --cat-suspensao-bg: #5c2d30; --cat-suspensao-text: #fca5a5; }
+body.theme-dark { --bg-primary: #212529; --bg-secondary: #343a40; --bg-tertiary: #495057; --bg-secondary-alpha: rgba(52, 58, 64, 0.97); --bg-tertiary-alpha: rgba(73, 80, 87, 0.96); --bg-sticky-alpha: rgba(52, 58, 64, 0.98); --bg-details-sticky-alpha: rgba(52, 58, 64, 0.97); --bg-modal-alpha: #2c3034; --text-primary: #f8f9fa; --text-secondary: #adb5bd; --accent-primary: #3b82f6; --accent-secondary: #6b7280; --accent-success: #22c55e; --accent-danger: #ef4444; --accent-warning: #f59e0b; --border-color: #4b5563; --shadow-color: rgba(255, 255, 255, 0.08); --input-bg: #374151; --input-border: #4b5563; --theme-background-image: none; --theme-background-opacity: 0; --grade-low-bg: color-mix(in srgb, var(--accent-danger) 25%, transparent); --grade-low-text: #f8f9fa; --grade-medium-bg: color-mix(in srgb, var(--accent-warning) 30%, transparent); --grade-medium-text: #111827; --grade-high-bg: color-mix(in srgb, var(--accent-success) 25%, transparent); --grade-high-text: #f8f9fa; --attendance-holiday-bg: #495057; --attendance-holiday-text: #ced4da; --bg-notification: #22c55e; --text-notification: #111827; --map-seat-bg: var(--input-bg); --map-seat-border: var(--input-border); --map-seat-text: var(--text-secondary); --map-seat-occupied-bg: color-mix(in srgb, var(--accent-primary) 20%, transparent); --map-seat-occupied-text: var(--text-primary); --map-teacher-desk-bg: var(--bg-tertiary); --map-teacher-desk-border: var(--accent-secondary); --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 35%, transparent); --map-seat-selected-border: var(--accent-warning); --calc-button-bg: var(--accent-primary); --calc-button-text: #ffffff; --calc-op-button-bg: color-mix(in srgb, var(--accent-primary) 70%, #000000); --calc-util-button-bg: var(--accent-secondary); --calc-danger-button-bg: var(--accent-danger); --calc-warn-button-bg: var(--accent-warning); --calc-mode-button-bg: var(--bg-tertiary); --calc-mode-button-text: var(--text-secondary); --calc-mode-button-active-bg: var(--accent-primary); --calc-mode-button-active-text: #ffffff; --suspended-bg: rgba(239, 68, 68, 0.1); --rep-gold-start: #facc15; --rep-gold-end: #f59e0b; --vice-silver-start: #9ca3af; --vice-silver-end: #6b7280; --highlight-bg: rgba(59, 130, 246, 0.15); --cat-anotacao-border: #6b7280; --cat-anotacao-bg: #495057; --cat-anotacao-text: #e5e7eb; --cat-observacao-border: #3b82f6; --cat-observacao-bg: #374151; --cat-observacao-text: #93c5fd; --cat-ocorrencia-border: #f59e0b; --cat-ocorrencia-bg: #4a402a; --cat-ocorrencia-text: #fcd34d; --cat-advertencia-border: #f97316; --cat-advertencia-bg: #573d24; --cat-advertencia-text: #fdba74; --cat-suspensao-border: #ef4444; --cat-suspensao-bg: #5c2d30; --cat-suspensao-text: #fca5a5;
+    /* **** NOVO: Cores dos badges de programas para tema escuro **** */
+    --program-bolsa-familia-bg: #166534; /* Verde mais escuro */
+    --program-bolsa-familia-text: #dcfce7; /* Texto claro */
+    --program-pe-de-meia-bg: #1e40af;    /* Azul mais escuro */
+    --program-pe-de-meia-text: #dbeafe;   /* Texto claro */
+    --program-default-bg: var(--accent-secondary);
+    --program-default-text: var(--text-primary);
+ }
  body.theme-dark button.warning { color: #111827; }
  body.theme-dark button.absent.justified.selected { color: #111827; }
  body.theme-dark .monthly-attendance-table td.status-F { background-color: var(--grade-low-bg); color: var(--grade-low-text); }
@@ -150,7 +150,6 @@ body.theme-dark { --bg-primary: #212529; --bg-secondary: #343a40; --bg-tertiary:
  body.theme-dark .monthly-attendance-table td.status-P { background-color: var(--grade-high-bg); color: var(--grade-high-text); }
  body.theme-dark .monthly-attendance-table td.status-H { background-color: var(--attendance-holiday-bg); color: var(--attendance-holiday-text); font-style: italic; }
  body.theme-dark .seat-placeholder-text { color: var(--map-seat-text); }
- /* --- CORREÇÃO: Mantendo estilos originais da calculadora padrão no tema dark --- */
  body.theme-dark .calculator-buttons button.num { background-color: var(--accent-primary); color: #fff; }
  body.theme-dark .calculator-buttons button.op { background-color: #6b7280; color: #fff; }
  body.theme-dark .calculator-buttons button.util { background-color: #4b5563; color: #fff; }
@@ -160,57 +159,48 @@ body.theme-dark { --bg-primary: #212529; --bg-secondary: #343a40; --bg-tertiary:
  body.theme-dark .calculator-modal .pairs-list { background-color: var(--bg-tertiary-alpha); }
  body.theme-dark .calculator-modal .pair-item { background-color: var(--bg-secondary-alpha); border-color: var(--input-border); }
 
-/* ... outros temas inalterados ... */
 body.theme-forest-green { --bg-primary: #f0fff4; --bg-secondary: #dff1e5; --bg-tertiary: #c8e6d1; --bg-secondary-alpha: var(--bg-secondary); --bg-tertiary-alpha: var(--bg-tertiary); --bg-sticky-alpha: var(--bg-secondary); --bg-details-sticky-alpha: rgba(232, 245, 233, 0.97); --bg-modal-alpha: #e8f5e9; --text-primary: #1e3a1f; --text-secondary: #4a7c59; --accent-primary: #588157; --accent-secondary: #3a5a40; --accent-warning: #e9c46a; --border-color: #a3c9a8; --shadow-color: rgba(58, 90, 64, 0.15); --input-bg: #ffffff; --input-border: #a3c9a8; --theme-background-image: none; --theme-background-opacity: 0; --grade-low-bg: #f1dede; --grade-low-text: #a94442; --grade-medium-bg: #faf2cc; --grade-medium-text: #8a6d3b; --grade-high-bg: #dff1e5; --grade-high-text: #3c763d; --attendance-holiday-bg: #d1e7dd; --attendance-holiday-text: #4a7c59; --bg-notification: #588157; --text-notification: #ffffff; --map-seat-bg: var(--input-bg); --map-seat-border: var(--input-border); --map-seat-text: var(--text-secondary); --map-seat-occupied-bg: color-mix(in srgb, var(--accent-primary) 15%, transparent); --map-seat-occupied-text: var(--text-primary); --map-teacher-desk-bg: var(--bg-tertiary); --map-teacher-desk-border: var(--accent-secondary); --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 30%, transparent); --map-seat-selected-border: var(--accent-warning); --calc-button-bg: var(--accent-primary); --calc-button-text: #ffffff; --calc-op-button-bg: color-mix(in srgb, var(--accent-primary) 85%, #ffffff); --calc-util-button-bg: var(--accent-secondary); --calc-danger-button-bg: #c1666b; --calc-warn-button-bg: var(--accent-warning); --calc-mode-button-bg: var(--bg-tertiary); --calc-mode-button-text: var(--text-secondary); --calc-mode-button-active-bg: var(--accent-primary); --calc-mode-button-active-text: #ffffff; }
  body.theme-forest-green button.warning { color: var(--text-primary); }
  body.theme-forest-green button.absent.justified.selected { color: var(--text-primary); }
- /* ... (restante dos estilos específicos do tema forest-green) ... */
 
 body.theme-math-master { --bg-primary: #e0f7ff; --bg-secondary: #ccecf7; --bg-tertiary: #b8e5f0; --bg-secondary-alpha: rgba(204, 236, 247, 0.96); --bg-tertiary-alpha: rgba(184, 229, 240, 0.94); --bg-sticky-alpha: rgba(204, 236, 247, 0.98); --bg-details-sticky-alpha: rgba(224, 247, 255, 0.97); --bg-modal-alpha: #e0f7ff; --text-primary: #00405a; --text-secondary: #40788c; --accent-primary: #006688; --accent-secondary: #5a9cb0; --accent-warning: #fca311; --border-color: #a8d8e6; --input-bg: #ffffff; --input-border: #8fc5d6; --theme-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cstyle%3E text %7B fill: %23006688; opacity: 0.06; font-weight: 500; font-family: 'Cambria Math', 'Latin Modern Math', serif; %7D path, line %7B stroke: %23006688; opacity: 0.05; stroke-width: 1px; fill: none; %7D %3C/style%3E%3Ctext x='15' y='40' font-size='18' transform='rotate(-12 15,40)'%3Eƒ(x)%3C/text%3E%3Ctext x='100' y='30' font-size='22'%3E∑%3C/text%3E%3Cpath d='M 70 60 q 20 25 40 0 t 40 0' stroke-dasharray='3 3'/%3E%3Ctext x='30' y='110' font-size='20'%3E∫%3C/text%3E%3Cpath d='M 110 80 c -15 15 -15 40 0 55' /%3E%3Ctext x='130' y='145' font-size='16'%3E2πr%3C/text%3E%3Ctext x='60' y='135' font-size='24'%3E±%3C/text%3E%3Cline x1='10' y1='140' x2='40' y2='150'/%3E%3C/svg%3E"); --theme-background-opacity: 1; --theme-background-blend-mode: overlay; --theme-background-filter: grayscale(10%); --grade-low-bg: #f8d7da; --grade-low-text: #721c24; --grade-medium-bg: #fff3cd; --grade-medium-text: #856404; --grade-high-bg: #d4edda; --grade-high-text: #155724; --attendance-holiday-bg: #b8e5f0; --attendance-holiday-text: #00405a; --bg-notification: #006688; --text-notification: #ffffff; --map-seat-bg: var(--input-bg); --map-seat-border: var(--input-border); --map-seat-text: var(--text-secondary); --map-seat-occupied-bg: color-mix(in srgb, var(--accent-primary) 15%, transparent); --map-seat-occupied-text: var(--text-primary); --map-teacher-desk-bg: var(--bg-tertiary); --map-teacher-desk-border: var(--accent-secondary); --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 30%, transparent); --map-seat-selected-border: var(--accent-warning); --calc-button-bg: #0077a0; --calc-button-text: #ffffff; --calc-op-button-bg: #005577; --calc-util-button-bg: var(--accent-secondary); --calc-danger-button-bg: #d9534f; --calc-warn-button-bg: var(--accent-warning); --calc-mode-button-bg: var(--bg-tertiary); --calc-mode-button-text: var(--text-secondary); --calc-mode-button-active-bg: var(--accent-primary); --calc-mode-button-active-text: #ffffff; }
  body.theme-math-master button.warning { color: var(--text-primary); }
- body.theme-math-master button.absent.justified.selected { color: #fff; } /* Ou #111827 dependendo do contraste desejado */
- /* ... (restante dos estilos específicos do tema math-master) ... */
+ body.theme-math-master button.absent.justified.selected { color: #fff; }
 
 body.theme-historic-scroll { --bg-primary: #fdf6e3; --bg-secondary: #f5efdc; --bg-tertiary: #ebe3cd; --bg-secondary-alpha: rgba(245, 239, 220, 0.97); --bg-tertiary-alpha: rgba(235, 227, 205, 0.96); --bg-sticky-alpha: rgba(245, 239, 220, 0.98); --bg-details-sticky-alpha: rgba(253, 246, 227, 0.97); --bg-modal-alpha: #fdf6e3; --text-primary: #654b28; --text-secondary: #8c785e; --accent-primary: #8b4513; --accent-secondary: #a0522d; --accent-warning: #d4a373; --border-color: #d2b48c; --input-bg: #fffaf0; --input-border: #deb887; --theme-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cstyle%3E text %7B fill: %238b4513; opacity: 0.08; font-family: 'Segoe UI Symbol', sans-serif; %7D path %7B stroke: %238b4513; opacity: 0.07; stroke-width: 0.7px; fill: none; %7D %3C/style%3E%3Ctext x='20' y='45' font-size='30'%3E𓂀%3C/text%3E %3C!-- Eye of Horus --%3E%3Ctext x='120' y='35' font-size='26'%3E𓆗%3C/text%3E %3C!-- Cobra --%3E%3Cpath d='M 60 70 h 50 v 15 h -50 z' /%3E%3Ctext x='30' y='120' font-size='28'%3E𓅊%3C/text%3E %3C!-- Bird --%3E%3Cpath d='M 100 90 l 25 50 l -50 0 z' /%3E%3Ctext x='130' y='150' font-size='24'%3E𓍑%3C/text%3E%3C!-- Staff --%3E%3Ctext x='70' y='140' font-size='22'%3E🏺%3C/text%3E%3C/svg%3E"); --theme-background-opacity: 1; --theme-background-blend-mode: multiply; --theme-background-filter: sepia(25%); --grade-low-bg: #f1dede; --grade-low-text: #a94442; --grade-medium-bg: #faf2cc; --grade-medium-text: #8a6d3b; --grade-high-bg: #dff1e5; --grade-high-text: #3c763d; --attendance-holiday-bg: #ebe3cd; --attendance-holiday-text: #654b28; --bg-notification: #8b4513; --text-notification: #fdf6e3; --map-seat-bg: var(--input-bg); --map-seat-border: var(--input-border); --map-seat-text: var(--text-secondary); --map-seat-occupied-bg: color-mix(in srgb, var(--accent-primary) 15%, transparent); --map-seat-occupied-text: var(--text-primary); --map-teacher-desk-bg: var(--bg-tertiary); --map-teacher-desk-border: var(--accent-secondary); --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 30%, transparent); --map-seat-selected-border: var(--accent-warning); --calc-button-bg: var(--accent-primary); --calc-button-text: #fdf6e3; --calc-op-button-bg: var(--accent-secondary); --calc-util-button-bg: #b08968; --calc-danger-button-bg: #ae2012; --calc-warn-button-bg: var(--accent-warning); --calc-mode-button-bg: var(--bg-tertiary); --calc-mode-button-text: var(--text-secondary); --calc-mode-button-active-bg: var(--accent-primary); --calc-mode-button-active-text: #fdf6e3; }
  body.theme-historic-scroll button.warning { color: var(--text-primary); }
  body.theme-historic-scroll button.absent.justified.selected { color: var(--text-primary); }
- /* ... (restante dos estilos específicos do tema historic-scroll) ... */
 
-body.theme-alchemist { --bg-primary: #2a2a3e; --bg-secondary: #3a3a52; --bg-tertiary: #4a4a66; --bg-secondary-alpha: rgba(58, 58, 82, 0.97); --bg-tertiary-alpha: rgba(74, 74, 102, 0.95); --bg-sticky-alpha: rgba(58, 58, 82, 0.98); --bg-details-sticky-alpha: rgba(58, 58, 82, 0.97); --bg-modal-alpha: #2a2a3e; --text-primary: #e0e0ff; --text-secondary: #a0a0cc; --accent-primary: #ffd700; --accent-secondary: #c0c0c0; --accent-success: #32cd32; --accent-danger: #dc143c; --accent-warning: #ff8c00; --border-color: #5a5a7a; --shadow-color: rgba(0, 0, 0, 0.25); --input-bg: #4a4a66; --input-border: #6a6a8a; --theme-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Cstyle%3E text %7B fill: %23ffd700; opacity: 0.07; font-size: 24px; %7D path, circle %7B stroke: %23ffd700; opacity: 0.06; stroke-width: 0.8px; fill: none; %7D %3C/style%3E%3Ctext x='20' y='45'%3E☉%3C/text%3E%3Ccircle cx='95' cy='35' r='12'/%3E%3Cpath d='M 90 35 h 10 M 95 30 v 10'/%3E%3Ctext x='30' y='110' font-size='28'%3E△%3C/text%3E%3Cpath d='M 70 85 l 40 0 l -20 35 z' transform='rotate(180 90 102.5)'/%3E%3Ctext x='120' y='135' font-size='20'%3E♃%3C/text%3E%3Ctext x='65' y='70' font-size='28'%3E☾%3C/text%3E%3Ctext x='100' y='80' font-size='22'%3E⚕%3C/text%3E%3C/svg%3E"); --theme-background-opacity: 1; --theme-background-blend-mode: overlay; --grade-low-bg: color-mix(in srgb, var(--accent-danger) 25%, transparent); --grade-low-text: #f8f9fa; --grade-medium-bg: color-mix(in srgb, var(--accent-warning) 30%, transparent); --grade-medium-text: #1a1a2e; --grade-high-bg: color-mix(in srgb, var(--accent-success) 25%, transparent); --grade-high-text: #f8f9fa; --attendance-holiday-bg: #4a4a66; --attendance-holiday-text: #a0a0cc; --bg-notification: #ffd700; --text-notification: #2a2a3e; --map-seat-bg: var(--input-bg); --map-seat-border: var(--input-border); --map-seat-text: var(--text-secondary); --map-seat-occupied-bg: color-mix(in srgb, var(--accent-primary) 20%, transparent); --map-seat-occupied-text: var(--text-primary); --map-teacher-desk-bg: var(--bg-tertiary); --map-teacher-desk-border: var(--accent-secondary); --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 35%, transparent); --map-seat-selected-border: var(--accent-warning); --calc-button-bg: #6a6a8a; --calc-button-text: #e0e0ff; --calc-op-button-bg: #5a5a7a; --calc-util-button-bg: var(--accent-secondary); --calc-danger-button-bg: var(--accent-danger); --calc-warn-button-bg: var(--accent-warning); --calc-mode-button-bg: var(--bg-tertiary); --calc-mode-button-text: var(--text-secondary); --calc-mode-button-active-bg: var(--accent-primary); --calc-mode-button-active-text: #2a2a3e; }
+body.theme-alchemist { --bg-primary: #2a2a3e; --bg-secondary: #3a3a52; --bg-tertiary: #4a4a66; --bg-secondary-alpha: rgba(58, 58, 82, 0.97); --bg-tertiary-alpha: rgba(74, 74, 102, 0.95); --bg-sticky-alpha: rgba(58, 58, 82, 0.98); --bg-details-sticky-alpha: rgba(58, 58, 82, 0.97); --bg-modal-alpha: #2a2a3e; --text-primary: #e0e0ff; --text-secondary: #a0a0cc; --accent-primary: #ffd700; --accent-secondary: #c0c0c0; --accent-success: #32cd32; --accent-danger: #dc143c; --accent-warning: #ff8c00; --border-color: #5a5a7a; --shadow-color: rgba(0, 0, 0, 0.25); --input-bg: #4a4a66; --input-border: #6a6a8a; --theme-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Cstyle%3E text %7B fill: %23ffd700; opacity: 0.07; font-size: 24px; %7D path, circle %7B stroke: %23ffd700; opacity: 0.06; stroke-width: 0.8px; fill: none; %7D %3C/style%3E%3Ctext x='20' y='45'%3E☉%3C/text%3E%3Ccircle cx='95' cy='35' r='12'/%3E%3Cpath d='M 90 35 h 10 M 95 30 v 10'/%3E%3Ctext x='30' y='110' font-size='28'%3E△%3C/text%3E%3Cpath d='M 70 85 l 40 0 l -20 35 z' transform='rotate(180 90 102.5)'/%3E%3Ctext x='120' y='135' font-size='20'%3E♃%3C/text%3E%3Ctext x='65' y='70' font-size='28'%3E☾%3C/text%3E%3Ctext x='100' y='80' font-size='22'%3E⚕%3C/text%3E%3C/svg%3E"); --theme-background-opacity: 1; --theme-background-blend-mode: overlay; --grade-low-bg: color-mix(in srgb, var(--accent-danger) 25%, transparent); --grade-low-text: #f8f9fa; --grade-medium-bg: color-mix(in srgb, var(--accent-warning) 30%, transparent); --grade-medium-text: #1a1a2e; --grade-high-bg: color-mix(in srgb, var(--accent-success) 25%, transparent); --grade-high-text: #f8f9fa; --attendance-holiday-bg: #4a4a66; --attendance-holiday-text: #a0a0cc; --bg-notification: #ffd700; --text-notification: #2a2a3e; --map-seat-bg: var(--input-bg); --map-seat-border: var(--input-border); --map-seat-text: var(--text-secondary); --map-seat-occupied-bg: color-mix(in srgb, var(--accent-primary) 20%, transparent); --map-seat-occupied-text: var(--text-primary); --map-teacher-desk-bg: var(--bg-tertiary); --map-teacher-desk-border: var(--accent-secondary); --map-drag-over-bg: color-mix(in srgb, var(--accent-success) 35%, transparent); --map-seat-selected-border: var(--accent-warning); --calc-button-bg: #6a6a8a; --calc-button-text: #e0e0ff; --calc-op-button-bg: #5a5a7a; --calc-util-button-bg: var(--accent-secondary); --calc-danger-button-bg: var(--accent-danger); --calc-warn-button-bg: var(--accent-warning); --calc-mode-button-bg: var(--bg-tertiary); --calc-mode-button-text: var(--text-secondary); --calc-mode-button-active-bg: var(--accent-primary); --calc-mode-button-active-text: #2a2a3e;
+     /* **** NOVO: Cores dos badges de programas para tema alquimista **** */
+    --program-bolsa-familia-bg: var(--accent-success);
+    --program-bolsa-familia-text: #1a1a2e; /* Texto escuro para contraste com verde claro */
+    --program-pe-de-meia-bg: var(--accent-secondary); /* Usar prata para Pé de Meia */
+    --program-pe-de-meia-text: #1a1a2e;   /* Texto escuro para contraste */
+}
  body.theme-alchemist button.warning { color: #1a1a2e; }
  body.theme-alchemist button.absent.justified.selected { color: #1a1a2e; }
- /* --- CORREÇÃO: Mantendo estilos originais da calculadora padrão no tema alchemist --- */
- body.theme-alchemist .calculator-buttons button.num { background-color: #6a6a8a; color: #e0e0ff; } /* Mantem original do tema */
- body.theme-alchemist .calculator-buttons button.op { background-color: #5a5a7a; color: #e0e0ff; } /* Mantem original do tema */
- body.theme-alchemist .calculator-buttons button.util { background-color: var(--accent-secondary); color: #1a1a2e; } /* Ajustado para contraste */
+ body.theme-alchemist .calculator-buttons button.num { background-color: #6a6a8a; color: #e0e0ff; }
+ body.theme-alchemist .calculator-buttons button.op { background-color: #5a5a7a; color: #e0e0ff; }
+ body.theme-alchemist .calculator-buttons button.util { background-color: var(--accent-secondary); color: #1a1a2e; }
  body.theme-alchemist .calculator-buttons button.danger { background-color: var(--accent-danger); color: #fff; }
  body.theme-alchemist .calculator-buttons button.warn { background-color: var(--accent-warning); color: #1a1a2e; }
- body.theme-alchemist .calculator-buttons button.eq { background-color: var(--accent-success); color: #1a1a2e; } /* Ajustado para contraste */
- /* ... (restante dos estilos específicos do tema alchemist) ... */
-/* --- FIM TEMAS --- */
+ body.theme-alchemist .calculator-buttons button.eq { background-color: var(--accent-success); color: #1a1a2e; }
 
-/* --- Estilos Gerais (Mantidos, mas revisados para não conflitar) --- */
-/* ... (maioria dos estilos gerais como h1-h6, p, a, etc., são mantidos) ... */
 
-/* --- Botões Globais (Estilo Original) --- */
-button, .button-like {
-    padding: 0.6rem 1.2rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.2, 0, 0.38, 0.9), opacity 0.2s ease; background-color: var(--accent-primary); color: #fff; margin: 0.25rem; display: inline-flex; align-items: center; justify-content: center; text-align: center; vertical-align: middle; line-height: 1.4; user-select: none;
-}
+button, .button-like { padding: 0.6rem 1.2rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.2, 0, 0.38, 0.9), opacity 0.2s ease; background-color: var(--accent-primary); color: #fff; margin: 0.25rem; display: inline-flex; align-items: center; justify-content: center; text-align: center; vertical-align: middle; line-height: 1.4; user-select: none; }
 button:hover, .button-like:hover { opacity: 0.85; }
 button:active, .button-like:active { transform: scale(var(--active-scale)); opacity: var(--active-opacity); }
 button:disabled, .button-like:disabled { opacity: 0.6; cursor: not-allowed; background-color: var(--accent-secondary); }
-/* ... (estilos .secondary, .danger, .success, .warning originais) ... */
 button.secondary, .button-like.secondary { background-color: var(--accent-secondary); color: #fff; }
 button.danger, .button-like.danger { background-color: var(--accent-danger); color: #fff; }
 button.success, .button-like.success { background-color: var(--accent-success); color: #fff; }
 button.warning, .button-like.warning { background-color: var(--accent-warning); color: var(--text-primary); }
-/* --- Botões Ícone Globais (Estilo Original) --- */
 button.icon-button, .button-like.icon-button { padding: 0.4rem; font-size: 1.1rem; line-height: 1; background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 5px; margin: 0 2px; }
 button.icon-button:hover, .button-like.icon-button:hover { color: var(--accent-primary); background-color: var(--bg-tertiary-alpha); border-color: var(--accent-primary); }
 button.icon-button:active, .button-like.icon-button:active { transform: scale(0.92); opacity: 1; background-color: color-mix(in srgb, var(--bg-tertiary-alpha) 80%, black); }
 button.icon-button:disabled { background-color: transparent; border-color: var(--border-color); color: var(--text-secondary); opacity: 0.5; }
 
-/* --- Inputs Globais (Estilo Original) --- */
 input[type="text"], input[type="time"], input[type="number"], input[type="date"], select, textarea, input[type="search"], input[type="color"] { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid var(--input-border); border-radius: 5px; background-color: var(--input-bg); color: var(--text-primary); font-size: 1rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 input[type="color"] { padding: 0.2rem; height: 40px; width: 50px; vertical-align: middle; cursor: pointer;}
 input:focus, select:focus, textarea:focus, input[type="search"]:focus, input[type="color"]:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 20%, transparent); }
@@ -221,7 +211,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .form-group { margin-bottom: 1rem; }
 .checkbox-group { margin-bottom: 0.5rem; padding: 5px 0; display: flex; align-items: center;}
 
-/* Layout Principal (Header, Content, Nav) - Mantidos Inalterados */
 .app-header { background-color: var(--bg-secondary-alpha); padding: 0.6rem 1rem; border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 4px var(--shadow-color); position: sticky; top: 0; z-index: 1000; flex-shrink: 0; transition: background-color 0.4s ease; display: flex; flex-direction: column; gap: 0.5rem; }
 .header-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 0.8rem; min-height: 2em; }
 .app-header h1 { margin: 0; font-size: 1.3rem; color: var(--accent-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; min-width: 0; flex-basis: auto; }
@@ -240,8 +229,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .section.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- ESTILOS CARD (Original - Mantido para outras seções) --- */
-/* Estilos .card originais do style.css */
 .card { background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px var(--shadow-color); transition: box-shadow 0.3s ease, background-color 0.4s ease, padding-bottom 0.3s ease; }
 .card:hover { box-shadow: 0 5px 12px color-mix(in srgb, var(--shadow-color) 150%, black); }
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 5px; }
@@ -256,8 +243,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; }
 .item-list { list-style: none; padding: 0; }
 
-/* --- ESTILOS GERAIS DO LIST ITEM (Original - Mantido para Escolas, Turmas, etc.) --- */
-/* Estilos .list-item originais */
 .list-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 0.75rem 1rem; background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 0.5rem; cursor: pointer; transition: background-color 0.25s ease, transform 0.15s ease; flex-direction: row; }
  .list-item:hover { background-color: var(--bg-tertiary-alpha); }
  .list-item:active { transform: scale(0.98); background-color: var(--bg-tertiary-alpha); }
@@ -267,7 +252,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .list-item-actions { flex-shrink: 0; display: flex; gap: 3px; align-self: flex-start; }
 .list-item-actions button, .list-item-actions .button-like { margin-left: 0; padding: 0.3rem; font-size: 1rem; }
 
-/* --- ESTILOS ESPECÍFICOS PARA SCHOOL ITEM (Mantido Inalterado) --- */
 .list-item.school-item { display: flex; flex-direction: column; align-items: stretch; padding-bottom: 0.5rem; gap: 0.75rem; }
 .school-item-main-row { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
 .school-item .item-info { flex-grow: 1; margin-right: 10px; overflow: hidden; }
@@ -285,15 +269,12 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .quorum-display.no-data { color: var(--accent-danger); opacity: 0.8; }
 .quorum-display.no-data::before { opacity: 0.6; }
 
-/* Search Results (Mantido Inalterado) */
 .search-result-item .item-info { margin-right: 0.5rem; }
 .search-result-item .result-type { font-size: 0.75rem; color: var(--text-secondary); background-color: var(--bg-tertiary); padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: auto; flex-shrink: 0; }
 
-/* --- ESTILOS MODAL (Original) --- */
-/* Estilos .modal originais */
 .modal { display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; animation: modalFadeIn 0.3s ease-out; }
 .modal.show { display: flex; }
-.modal-content { background-color: var(--bg-modal-alpha); margin: auto; padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; width: 95%; max-width: 500px; /* Default original */ max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 8px 25px var(--shadow-color); animation: modalSlideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); transition: background-color 0.4s ease; }
+.modal-content { background-color: var(--bg-modal-alpha); margin: auto; padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; width: 95%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 8px 25px var(--shadow-color); animation: modalSlideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); transition: background-color 0.4s ease; }
  .monthly-attendance-modal .modal-content { max-width: 95%; width: auto; }
  .name-sorter-modal .modal-content { max-width: 450px; }
  .timer-modal .modal-content { max-width: 400px; }
@@ -313,33 +294,25 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .modal-footer button { margin-left: 0; }
 @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modalSlideIn { from { transform: translateY(-25px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-.justification-modal .modal-body textarea { min-height: 100px; /* Tamanho menor para justificação */ }
+.justification-modal .modal-body textarea { min-height: 100px; }
 .text-sm { font-size: 0.8rem; }
 
-
-/* --- Tabela de Dados (Geral - Mantido Inalterado) --- */
-/* (Estilos .table-scroll-wrapper, .data-table, th, td, etc. inalterados) */
 .table-scroll-wrapper { width: 100%; overflow-x: auto; margin-top: 0.5rem; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--bg-primary); }
 .data-table { width: 100%; min-width: 280px; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; word-wrap: break-word; border: none; }
 .data-table th, .data-table td { border: 1px solid var(--border-color); padding: 0.5rem 0.4rem; text-align: left; vertical-align: middle; white-space: nowrap; }
 .data-table th { background-color: var(--bg-tertiary); font-weight: 600; position: sticky; top: 0; z-index: 2; font-size: 0.8rem; }
-/* Sticky aplicado apenas na tabela de detalhes */
 #class-details-section #attendance-table-container .data-table th:first-child,
 #class-details-section #attendance-table-container .data-table td:first-child { position: sticky; left: 0; z-index: 1; background-color: var(--bg-sticky-alpha); border-right: 1px solid var(--border-color); white-space: normal; }
 #class-details-section #attendance-table-container .data-table th:first-child { z-index: 3; }
-/* Sticky aplicado na tabela de notas */
 #grades-table-container .data-table th:first-child,
 #grades-table-container .data-table td:first-child { position: sticky; left: 0; z-index: 1; background-color: var(--bg-sticky-alpha); border-right: 1px solid var(--border-color); white-space: normal; }
 #grades-table-container .data-table th:first-child { z-index: 3; }
-/* --- Fim Modificação Sticky --- */
 .data-table td input[type="number"], .data-table td select { padding: 0.3rem; margin-bottom: 0; font-size: 0.85rem; width: 55px; max-width: 100%; border-radius: 3px; text-align: center; border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-primary); }
 .data-table td input.grade-input { transition: background-color 0.3s ease, color 0.3s ease; }
 .data-table td select { width: 80px; }
 .data-table td button { padding: 0.2rem 0.4rem; font-size: 0.75rem; margin: 0 1px; min-width: 30px; }
 .data-table td textarea { display: none; }
 
-
-/* --- Estilos de Tabela de Presença Específicos para #class-details-section --- */
 #class-details-section #attendance-table-container .data-table .attendance-status { width: 90px; text-align: center; vertical-align: middle; flex-shrink: 0; border-left: none; }
 #class-details-section #attendance-table-container .data-table .attendance-status.status-H { font-weight: bold; font-style: italic; color: var(--attendance-holiday-text); background-color: var(--attendance-holiday-bg); cursor: default; }
 #class-details-section #attendance-table-container .data-table .student-col { width: auto; min-width: 160px; white-space: normal; word-break: break-word; display: flex; align-items: center; gap: 5px; padding-left: 0.6rem; border-right: none; }
@@ -353,7 +326,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #class-details-section .data-table tr.suspended-student.clickable-suspended:hover td { background-color: color-mix(in srgb, var(--suspended-bg) 80%, black) !important; }
 #class-details-section .data-table tr.suspended-student td.attendance-status { font-weight: bold; }
 
-/* --- Estilos Tabela de Notas (Mantido Inalterado) --- */
 #grades-table-container .data-table .grade-col { width: 55px; text-align: center; }
 #grades-table-container .data-table .sum-col { width: 60px; text-align: center; }
 #grades-table-container .data-table .avg-col { width: 60px; text-align: center; font-weight: bold; transition: background-color 0.3s ease, color 0.3s ease; }
@@ -362,22 +334,18 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .data-table td.average.grade-medium { background-color: var(--grade-medium-bg); color: var(--grade-medium-text); }
 .data-table td.average.grade-high { background-color: var(--grade-high-bg); color: var(--grade-high-text); }
 
-/* --- Attendance Buttons Styling (Específico para #class-details-section) --- */
 #class-details-section .attendance-toggle { padding: 0.3rem 0.45rem; margin: 0 1px; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent; cursor: pointer; transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 0.2em; line-height: 1; vertical-align: middle; min-width: 34px; }
 #class-details-section .attendance-toggle .icon { margin-right: 0.2em; font-size: 0.9em; }
 #class-details-section .attendance-toggle.selected { border-width: 2px; border-style: solid; transform: scale(1.02); }
 #class-details-section .attendance-toggle.present.selected { background-color: var(--accent-success); border-color: var(--accent-success); color: #fff; }
 #class-details-section .attendance-toggle.absent.selected:not(.justified) { background-color: var(--accent-danger); border-color: var(--accent-danger); color: #fff; }
-#class-details-section .attendance-toggle.absent.justified.selected { background-color: var(--accent-warning); border-color: var(--accent-warning); /* Cor do texto definida pelo tema */ }
+#class-details-section .attendance-toggle.absent.justified.selected { background-color: var(--accent-warning); border-color: var(--accent-warning); }
 #class-details-section .attendance-toggle:disabled { opacity: 0.5 !important; cursor: not-allowed !important; background-color: transparent !important; border-color: transparent !important; transform: none !important; color: var(--text-secondary) !important; }
 
-/* --- Attendance Actions Container (Mantido Inalterado) --- */
 .attendance-actions-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 0.5rem; margin-bottom: 0.8rem; }
 .attendance-actions-container button { margin: 0; padding: 0.4rem 0.7rem; font-size: 0.8rem; flex-grow: 1; flex-basis: 0; max-width: 50%; white-space: nowrap; }
 .attendance-actions-container button .icon { margin-right: 0.3em; }
 
-/* --- Monthly Attendance (Mantido Inalterado) --- */
-/* (Estilos #monthly-attendance-controls, .monthly-attendance-table, etc., inalterados) */
 #monthly-attendance-controls { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 0.5rem; }
 #monthly-attendance-controls .date-selectors { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 #monthly-attendance-controls label { margin-bottom: 0; }
@@ -401,8 +369,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
  .chart-bar:hover::after { opacity: 1; }
 .chart-label { font-size: 0.7rem; margin-top: 3px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50px; }
 
-/* --- Student Observations (Estilos do Polimento, aplicados apenas via classe .student-notes-modal) --- */
-/* (Todos os estilos .observation-item, etc., foram prefixados com .student-notes-modal) */
 .student-notes-modal #student-observations-list { max-height: 35vh; overflow-y: auto; margin-bottom: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem; border: none; background: none; padding: 0; }
 .student-notes-modal .observation-item { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 5px; padding: 0.7rem 0.8rem; margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border-left-width: 5px; transition: border-left-color 0.3s, background-color 0.3s; }
 .student-notes-modal .observation-item .observation-details { flex-grow: 1; }
@@ -426,7 +392,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .student-notes-modal .observation-item.category-suspensao { border-left-color: var(--cat-suspensao-border); }
 .student-notes-modal .observation-item.category-suspensao .category { background-color: var(--cat-suspensao-bg); color: var(--cat-suspensao-text); }
 
-/* Ajustes específicos (Mantidos Inalterados) */
 #save-grades-button, #save-attendance-button, #save-lesson-plan-button, #save-monthly-attendance-button, #save-map-button { margin-top: 0.8rem !important; }
 .fab-button { position: fixed; bottom: calc(var(--nav-height) + var(--fab-bottom-margin)); right: 20px; width: 50px; height: 50px; border-radius: 50%; font-size: 1.8rem; line-height: 1; box-shadow: 0 4px 10px var(--shadow-color); z-index: 1010; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease; }
 .fab-button:active { transform: scale(0.9); opacity: var(--active-opacity); }
@@ -435,7 +400,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #classes-section h2 span:not(.icon):not(.back-button) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; text-align: center; }
 .icon { display: inline-block; font-style: normal; font-variant: normal; text-rendering: auto; -webkit-font-smoothing: antialiased; margin-right: 0.4em; line-height: 1; flex-shrink: 0; vertical-align: middle; }
 .icon-only { margin-right: 0 !important; }
-/* Ícones (Mantidos) */
 .icon-horario::before { content: "🕒"; font-size: 1.1em; } .icon-escola::before { content: "🏫"; font-size: 1.1em; } .icon-turmas::before { content: "📚"; font-size: 1.1em; } .icon-alunos::before { content: "🧑‍🎓"; font-size: 1.1em; } .icon-notas::before { content: "📊"; font-size: 1.1em; } .icon-config::before { content: "⚙️"; font-size: 1.1em; } .icon-contato::before { content: "✉️"; font-size: 1.1em; } .icon-editar::before { content: "✏️"; } .icon-excluir::before { content: "🗑️"; } .icon-anotacao::before { content: "📝"; } .icon-salvar::before { content: "💾"; } .icon-voltar::before { content: "⬅️"; } .icon-presenca::before { content: "✔️"; } .icon-falta::before { content: "❌"; } .icon-justificar::before { content: "💬"; } .icon-adicionar::before { content: "➕"; font-size: 1.1em; } .icon-estrutura::before { content: "🧱"; } .icon-calendario::before { content: "📅"; } .icon-plano::before { content: "🗒️"; } .icon-copiar::before { content: "📋"; } .icon-pdf::before { content: "📄"; font-size: 1.0em;}
 .icon-mover::before { content: "🔁"; font-size: 1.0em; }
 .icon-todos-presentes::before { content: "👥✔️"; font-size: 1.0em; }
@@ -458,26 +422,12 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
  .icon-transferir::before { content: "🔁"; }
  .icon-suspensao::before { content: "🚫"; }
 
-
 .hidden { display: none !important; } .text-center { text-align: center; } .text-right { text-align: right; } .mt-1 { margin-top: 0.5rem !important; } .mt-2 { margin-top: 1rem; } .mb-0 { margin-bottom: 0; } .mb-1 { margin-bottom: 0.5rem; } .mb-2 { margin-bottom: 1rem; } .mr-1 { margin-right: 0.5rem; } .ml-1 { margin-left: 0.5rem; } .d-flex { display: flex; } .justify-between { justify-content: space-between; } .align-center { align-items: center; } .w-100 { width: 100%; }
 .list-item.active { background-color: var(--bg-tertiary-alpha); border-left: 4px solid var(--accent-primary); }
 
-/* Schedule List specific styles */
 .schedule-day-group { margin-bottom: 1.5rem; }
 .schedule-day-title { font-size: 1.2rem; font-weight: 600; color: var(--accent-primary); margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 2px solid var(--accent-primary); text-align: left; justify-content: flex-start; gap: 0; }
-.schedule-item {
-    display: flex;
-    flex-wrap: wrap; /* Allow wrapping for progress bar */
-    align-items: center;
-    padding: 0.6rem 0.8rem;
-    background-color: var(--bg-secondary-alpha);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    margin-bottom: 0.5rem;
-    position: relative; /* Needed for progress bar positioning */
-    overflow: hidden; /* Hide overflowing progress bar */
-    transition: background-color 0.3s ease, border-color 0.3s ease; /* Added transition */
-}
+.schedule-item { display: flex; flex-wrap: wrap; align-items: center; padding: 0.6rem 0.8rem; background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 0.5rem; position: relative; overflow: hidden; transition: background-color 0.3s ease, border-color 0.3s ease; padding-bottom: calc(0.6rem + 5px); }
 .schedule-time { font-weight: 600; width: 100px; flex-shrink: 0; }
 .schedule-info { flex-grow: 1; margin: 0 0.8rem; }
 .schedule-info .school-name { font-weight: 500; }
@@ -486,8 +436,17 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .schedule-actions button { padding: 0.2rem 0.4rem; font-size: 0.8rem; }
 .notification-toggle-button { padding: 0.2rem 0.3rem !important; font-size: 1rem !important; background: transparent !important; border: none !important; cursor: pointer; }
 .notification-toggle-button:hover { opacity: 0.7; }
+.schedule-item.current, .schedule-item.next { border-color: var(--accent-primary); background-color: color-mix(in srgb, var(--accent-primary) 8%, transparent); box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 20%, transparent); }
+.schedule-item.current { border-left-width: 5px; }
+.progress-bar-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background-color: var(--bg-tertiary-alpha); border-radius: 0 0 4px 4px; overflow: hidden; opacity: 0; transition: opacity 0.3s ease; }
+.progress-bar { width: 0%; height: 100%; background-color: var(--accent-success); border-radius: 0 0 0 4px; transition: width 1s linear; }
+.schedule-item.current .progress-bar-container { opacity: 1; }
+body.theme-dark .schedule-item.current .progress-bar { background-color: var(--accent-success); }
+body.theme-forest-green .schedule-item.current .progress-bar { background-color: var(--accent-primary); }
+body.theme-math-master .schedule-item.current .progress-bar { background-color: var(--accent-primary); }
+body.theme-historic-scroll .schedule-item.current .progress-bar { background-color: var(--accent-primary); }
+body.theme-alchemist .schedule-item.current .progress-bar { background-color: var(--accent-primary); }
 
-/* Grade Structure Modal Styles (Mantido Inalterado) */
 .grade-structure-modal .card { padding: 0.8rem; margin-bottom: 0.8rem; }
 .grade-structure-modal .card-header { padding-bottom: 0.4rem; margin-bottom: 0.4rem; align-items: flex-start; gap: 8px; }
 .grade-structure-modal .gs-name { font-size: 1.05rem; margin-bottom: 0 !important; flex-grow: 1; padding: 0.5rem; }
@@ -507,20 +466,16 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .color-range-item button { flex-shrink: 0; margin-left: auto; }
 .grade-structure-modal .add-color-range-button { font-size: 0.85rem !important; padding: 0.3rem 0.8rem !important; margin-top: 0.3rem !important; display: block; margin-left: auto; margin-right: auto; }
 
-/* Notas e Médias Header Adjustment (Mantido Inalterado) */
  #grades-card .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-left: auto; }
  #grades-card .card-header .options label { margin-bottom: 0; font-size: 0.85rem; white-space: nowrap; margin-right: 2px; }
  #grades-card .card-header .options select { padding: 0.3rem 0.4rem; font-size: 0.85rem; margin-bottom: 0; flex-shrink: 0; margin-right: 5px; }
  #grades-card .card-header .options button.icon-button { margin-left: 0; margin-right: 5px; }
  #grades-card .card-header .options .export-buttons { display: flex; gap: 5px; margin-left: 0; }
 
-/* Class Notes Area Adjustment (Mantido Inalterado) */
  #class-notes-edit textarea { min-height: 120px; margin-bottom: 0.5rem;}
  #class-notes-edit .text-right { margin-bottom: 0.5rem; margin-top: 0; }
-/* Lesson Plan Area (Mantido Inalterado) */
 #lesson-plan-textarea { min-height: 100px; margin-bottom: 0.5rem; }
 
-/* Footer, Contato, PIX (Mantidos Inalterados) */
 .footer-message { text-align: center; font-size: 0.85rem; color: var(--text-secondary); margin-top: 2rem; margin-bottom: 1rem; padding: 0 1rem; }
 #contact-section .card p { margin-bottom: 1rem; }
 #contact-section .card a { font-weight: 500; word-break: break-all; }
@@ -529,14 +484,12 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #copy-pix-button { width: 100%; max-width: 300px; margin: 0 auto; display: flex; gap: 0.5em; background-color: var(--accent-success); transition: background-color 0.3s ease; }
 #copy-pix-button.error { background-color: var(--accent-danger); }
 
-/* Notification Banner Styles (Mantido Inalterado) */
 #notification-banner { position: fixed; top: 0; left: 0; width: 100%; background-color: var(--bg-notification); color: var(--text-notification); padding: 10px 15px; z-index: 2000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; transform: translateY(-120%); transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); font-size: 0.9rem; line-height: 1.3; }
 #notification-banner.show { transform: translateY(0); }
 #notification-message { flex-grow: 1; margin-right: 10px; }
 #notification-close-button { background: none; border: none; color: inherit; opacity: 0.8; font-size: 1.6rem; font-weight: bold; cursor: pointer; padding: 0 5px; line-height: 1; }
 #notification-close-button:hover { opacity: 1; }
 
-/* Settings: Custom Notification Sound Styles (Mantido Inalterado) */
 .custom-sound-container { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
 .custom-sound-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem; flex-wrap: wrap; }
 #custom-sound-filename { font-size: 0.85rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; background: var(--bg-tertiary-alpha); padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid var(--border-color); min-width: 100px; }
@@ -544,7 +497,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #current-custom-sound-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: calc(100% - 40px); }
 #remove-custom-sound-button { padding: 0.3rem 0.5rem; font-size: 0.8rem; flex-shrink: 0; }
 
-/* --- Classroom Map Styles (Mantido Inalterado) --- */
 .classroom-container { display: grid; grid-template-rows: auto 1fr auto; grid-template-columns: auto 1fr auto; gap: 10px; padding: 15px; border: 1px solid var(--border-color); border-radius: 5px; margin-top: 1rem; overflow: auto; align-items: center; justify-items: center; min-height: 200px; }
 .classroom-map-grid { grid-area: 2 / 2 / 3 / 3; display: grid; gap: var(--seat-gap); justify-content: center; padding: 5px; width: fit-content; max-width: 100%; }
 .seat { width: var(--seat-width); height: var(--seat-height); border: 2px solid var(--map-seat-border); background-color: var(--map-seat-bg); border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 0.7rem; color: var(--map-seat-text); overflow: hidden; cursor: default; position: relative; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
@@ -588,7 +540,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
  .seat.occupied.dragging, .draggable-student.dragging { opacity: 0.4; }
  .seat.selected-for-assignment { border-color: var(--map-seat-selected-border); box-shadow: 0 0 0 3px color-mix(in srgb, var(--map-seat-selected-border) 40%, transparent); }
 
-/* --- Tools Grid (Mantido Inalterado) --- */
 .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--tool-card-min-width), 1fr)); gap: 1rem; padding: 0.5rem 0; }
 .tool-card { background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; box-shadow: 0 2px 4px var(--shadow-color); min-height: 100px; }
 .tool-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px color-mix(in srgb, var(--shadow-color) 120%, black); }
@@ -596,63 +547,34 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .tool-card .icon { font-size: 2rem; margin-bottom: 0.6rem; color: var(--accent-primary); }
 .tool-card-title { font-size: 0.9rem; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
 
-/* --- MODIFICADO/CORRIGIDO: Estilos Adicionados/Adaptados para Detalhes da Turma --- */
-
-/* Header Sticky com Botão de Ajuda */
-#class-details-section #class-details-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.6rem 0.5rem;
-    margin: 0 -1rem 1rem -1rem;
-    position: sticky; top: 0;
-    background-color: var(--bg-details-sticky-alpha);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--border-color); z-index: 999;
-    box-shadow: 0 1px 3px var(--shadow-color); transition: padding 0.2s ease-in-out;
-    gap: 0.5rem;
-}
-#class-details-section #class-details-header h2 {
-    margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--accent-primary);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    transition: font-size 0.2s ease-in-out;
-    flex-grow: 1; text-align: center;
-    padding: 0 5px;
-    display: flex; align-items: center; justify-content: center; gap: 0.4em;
-}
-#class-details-section #class-details-header .back-button {
-    position: static; transform: none; margin: 0; flex-shrink: 0;
-}
-#class-details-section #class-details-header #details-help-button {
-    flex-shrink: 0; margin-left: auto;
-}
+#class-details-section #class-details-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.5rem; margin: 0 -1rem 1rem -1rem; position: sticky; top: 0; background-color: var(--bg-details-sticky-alpha); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-bottom: 1px solid var(--border-color); z-index: 999; box-shadow: 0 1px 3px var(--shadow-color); transition: padding 0.2s ease-in-out; gap: 0.5rem; }
+#class-details-section #class-details-header h2 { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--accent-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: font-size 0.2s ease-in-out; flex-grow: 1; text-align: center; padding: 0 5px; display: flex; align-items: center; justify-content: center; gap: 0.4em; }
+#class-details-section #class-details-header .back-button { position: static; transform: none; margin: 0; flex-shrink: 0; }
+#class-details-section #class-details-header #details-help-button { flex-shrink: 0; margin-left: auto; }
 #class-details-section #class-details-header.scrolled { padding: 0.3rem 0.5rem; }
 #class-details-section #class-details-header.scrolled h2 { font-size: 0.95rem; }
 #class-details-section #class-details-header.scrolled .icon { font-size: 1em; }
 
-/* Cards com Estilo Melhorado (Específico para #class-details-section) */
-#class-details-section .card {
-    background-color: var(--bg-primary); /* Fundo branco só nos cards de detalhes */
-    border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px var(--shadow-color); transition: padding-bottom 0.3s ease, margin-bottom 0.3s ease, box-shadow 0.2s ease;
-}
+#class-details-section .card { background-color: var(--bg-primary); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px var(--shadow-color); transition: padding-bottom 0.3s ease, margin-bottom 0.3s ease, box-shadow 0.2s ease; }
 #class-details-section .card:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
 #class-details-section .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 5px; }
 #class-details-section .card-header h3 { margin: 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5em; color: var(--text-primary); }
 #class-details-section .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-left: auto; flex-shrink: 0; }
 #class-details-section .card-content { padding-top: 0.5rem; transition: max-height 0.35s ease-out, opacity 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out, margin-top 0.3s ease-out, visibility 0.3s; max-height: 1500px; opacity: 1; overflow: hidden; visibility: visible; }
-#student-list-container.card-content { max-height: none; } /* Mantém sem limite */
+#student-list-container.card-content { max-height: none; }
 #class-details-section .card.collapsed { padding-top: 0.8rem; padding-bottom: 0.8rem; margin-bottom: 1rem; }
 #class-details-section .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 #class-details-section .card.collapsed .card-content { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; overflow: hidden; visibility: hidden; }
 #class-details-section .card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background: transparent !important; border: none !important; color: var(--text-secondary); cursor: pointer; margin-left: auto; }
 #class-details-section .card-toggle-button:hover { color: var(--accent-primary); }
 
-/* Lista de Alunos (Estilo Polimento - Já específico para #student-list-container) */
 #student-list-container .list-item { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 0.5rem; transition: border-color 0.2s ease; position: relative; overflow: hidden; display: block; padding: 0; cursor: default; align-items: stretch; flex-direction: column; }
 #student-list-container .list-item:hover { border-color: var(--accent-primary); background-color: var(--bg-primary); }
 #student-list-container .list-item:active { transform: none; background-color: var(--bg-primary); }
 #student-list-container .list-item-content-wrapper { padding: 0.65rem 0.9rem; position: relative; z-index: 1; display: flex; flex-direction: column; }
 #student-list-container .list-item-main-row { display: flex; align-items: center; width: 100%; }
-#student-list-container .list-item .student-number { font-weight: 600; margin-right: 10px; min-width: 25px; text-align: right; color: var(--text-secondary); font-size: 0.8em; }
-#student-list-container .list-item .student-name { white-space: normal; word-break: break-word; flex-grow: 1; margin-right: 10px; font-weight: 500; color: var(--text-primary); }
+#student-list-container .list-item .student-number { font-weight: 600; margin-right: 6px; min-width: 25px; text-align: right; color: var(--text-secondary); font-size: 0.8em; }
+#student-list-container .list-item .student-name { white-space: normal; word-break: break-word; flex-grow: 1; margin-right: 6px; font-weight: 500; color: var(--text-primary); }
 #student-list-container .expand-actions-button { flex-shrink: 0; margin-left: 5px; padding: 0.3rem 0.6rem; font-size: 0.8rem; background-color: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 4px; }
 #student-list-container .expand-actions-button .icon { transition: transform 0.3s ease; margin: 0; }
 #student-list-container .list-item.expanded .expand-actions-button .icon { transform: rotate(180deg); }
@@ -664,7 +586,42 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #student-list-container .list-item-hidden-actions .action-button.warning:hover { color: var(--accent-warning); }
 #student-list-container .list-item-hidden-actions .action-button.secondary:hover { color: var(--accent-secondary); }
 
-/* Estilos Representantes (Já específicos para #student-list-container) */
+/* **** NOVO: Estilos para os Indicadores de Programas Governamentais **** */
+.student-programs-indicator {
+    display: inline-flex; /* Para alinhar os badges horizontalmente */
+    gap: 4px; /* Espaço entre os badges */
+    margin-right: 6px; /* Espaço antes do nome do aluno */
+    align-items: center; /* Alinha verticalmente os badges */
+    flex-shrink: 0; /* Não encolher se o nome for grande */
+}
+.program-badge {
+    display: inline-block;
+    padding: 0.15em 0.4em;
+    font-size: 0.65rem; /* Menor que o nome do aluno */
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+    user-select: none;
+}
+.program-badge-bolsa-familia {
+    background-color: var(--program-bolsa-familia-bg);
+    color: var(--program-bolsa-familia-text);
+}
+.program-badge-pe-de-meia {
+    background-color: var(--program-pe-de-meia-bg);
+    color: var(--program-pe-de-meia-text);
+}
+/* Estilo padrão para outros programas, se houver */
+.program-badge:not(.program-badge-bolsa-familia):not(.program-badge-pe-de-meia) {
+    background-color: var(--program-default-bg);
+    color: var(--program-default-text);
+}
+/* **** FIM: Estilos Indicadores de Programas **** */
+
+
 @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
 @keyframes rotate-border-glow { to { --angle: 360deg; } }
 #student-list-container .list-item.representative::before,
@@ -672,15 +629,13 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #student-list-container .list-item.representative::before { --gradient-color-1: var(--rep-gold-start); --gradient-color-2: var(--rep-gold-end); }
 #student-list-container .list-item.vice-representative::before { --gradient-color-1: var(--vice-silver-start); --gradient-color-2: var(--vice-silver-end); }
 
-/* Estilos Formulários no Modal (Mantendo originais, pois parecem ok) */
 .modal .form-group { margin-bottom: 1rem; }
 .modal label { display: block; margin-bottom: 0.4rem; font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; }
 .modal input[type="text"], .modal input[type="number"], .modal input[type="date"], .modal select, .modal textarea { width: 100%; padding: 0.75rem; margin-bottom: 0; border: 1px solid var(--input-border); border-radius: 5px; background-color: var(--input-bg); color: var(--text-primary); font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s; }
 .modal input:focus, .modal select:focus, .modal textarea:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 20%, transparent); }
 .modal .form-group > *:not(:last-child) { margin-bottom: 0.5rem; }
-.modal textarea { min-height: 80px; resize: vertical; } /* Altura menor no polimento */
+.modal textarea { min-height: 80px; resize: vertical; }
 
-/* Modal de Ajuda (Estilos específicos já prefixados com .help-modal) */
 .help-modal .modal-body h3 { color: var(--accent-primary); margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.1rem; }
 .help-modal .modal-body p { margin-bottom: 0.8rem; color: var(--text-secondary); line-height: 1.6; }
 .help-modal .modal-body ul { list-style: disc; margin-left: 20px; margin-bottom: 1rem; padding-left: 5px; }
@@ -691,17 +646,15 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .help-modal .modal-body .card-toggle-button { color: var(--text-secondary); border: none; }
 .help-modal .modal-body .suspended-indicator { font-size: 0.9em; }
 
-/* --- CORREÇÃO: Garantir que estilos da calculadora não sejam afetados --- */
-/* Aplicar estilos específicos da calculadora apenas ao modal dela */
 .calculator-modal .calculator-mode-selector { display: flex; gap: 5px; margin-bottom: 10px; }
 .calculator-modal .calculator-mode-selector button { flex: 1; font-size: 0.85rem; padding: 0.4rem 0.6rem; background-color: var(--calc-mode-button-bg); color: var(--calc-mode-button-text); border: 1px solid var(--border-color); }
 .calculator-modal .calculator-mode-selector button.active { background-color: var(--calc-mode-button-active-bg); color: var(--calc-mode-button-active-text); border-color: var(--calc-mode-button-active-bg); }
 .calculator-modal .calculator-display { width: 100%; background-color: var(--calc-display-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 5px; padding: 10px 15px; font-size: 2rem; text-align: right; margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 60px; display: flex; align-items: center; justify-content: flex-end; }
-.calculator-modal .calculator-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
-.calculator-modal .calculator-buttons button { padding: 0.8rem; font-size: 1.1rem; margin: 0; border: 1px solid transparent; /* Usar vars específicas de calc */ background-color: var(--calc-button-bg); color: var(--calc-button-text); transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease; }
+.calculator-modal .calculator-buttons { display: grid; grid-template-columns: repeat(4, 1fr)); gap: 5px; margin-bottom: 10px; }
+.calculator-modal .calculator-buttons button { padding: 0.8rem; font-size: 1.1rem; margin: 0; border: 1px solid transparent; background-color: var(--calc-button-bg); color: var(--calc-button-text); transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease; }
 .calculator-modal .calculator-buttons button:hover { opacity: var(--calc-button-hover-opacity); }
 .calculator-modal .calculator-buttons button:active { transform: scale(var(--calc-button-active-scale)); }
-.calculator-modal .calculator-buttons button.num { background-color: var(--calc-button-bg); color: var(--calc-button-text); } /* Cor de num definida pelo tema */
+.calculator-modal .calculator-buttons button.num { background-color: var(--calc-button-bg); color: var(--calc-button-text); }
 .calculator-modal .calculator-buttons button.op { background-color: var(--calc-op-button-bg); }
 .calculator-modal .calculator-buttons button.util { background-color: var(--calc-util-button-bg); }
 .calculator-modal .calculator-buttons button.danger { background-color: var(--calc-danger-button-bg); }
@@ -722,7 +675,6 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .calculator-modal .weighted-average-result { margin-top: 0.5rem; font-weight: bold; text-align: center; background-color: var(--bg-tertiary); padding: 8px; border-radius: 5px; min-height: 30px; }
 .calculator-modal .weighted-average-section button.calculate { width: 100%; }
 
-/* --- CORREÇÃO: Garantir que estilos de outros modais de ferramentas não sejam afetados --- */
 .name-sorter-modal #sorter-result-display { min-height: 60px; background-color: var(--bg-tertiary); border: 1px dashed var(--border-color); border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; margin-bottom: 1rem; font-size: 1.4rem; font-weight: bold; text-align: center; word-break: break-word; }
 .name-sorter-modal .sorter-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 1rem;}
 .name-sorter-modal .sorter-info { font-size: 0.8rem; color: var(--text-secondary); }
@@ -741,223 +693,21 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .group-generator-modal .generated-group li { font-size: 0.9rem; margin-bottom: 0.3rem; display: flex; align-items: baseline; }
 .group-generator-modal .generated-group li .student-number { font-weight: bold; margin-right: 6px; min-width: 20px; text-align: right; font-size: 0.8em; color: var(--text-secondary); }
 
-/* **** NOVOS ESTILOS PARA HORÁRIOS (Ordenação/Destaque/Progresso) **** */
-.schedule-item {
-    /* ... (estilos existentes mantidos, adicionados abaixo) ... */
-    padding-bottom: calc(0.6rem + 5px); /* Espaço extra para a barra em baixo */
-}
-
-/* Destaque para horário atual e próximo */
-.schedule-item.current,
-.schedule-item.next {
-    border-color: var(--accent-primary);
-    background-color: color-mix(in srgb, var(--accent-primary) 8%, transparent);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 20%, transparent);
-}
-
-.schedule-item.current {
-    border-left-width: 5px; /* Destaque extra para o atual */
-}
-
-/* Contêiner da Barra de Progresso */
-.progress-bar-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 5px; /* Altura da barra */
-    background-color: var(--bg-tertiary-alpha); /* Cor de fundo da barra */
-    border-radius: 0 0 4px 4px; /* Arredonda cantos inferiores */
-    overflow: hidden;
-    opacity: 0; /* Começa escondida */
-    transition: opacity 0.3s ease;
-}
-
-/* Barra de Progresso */
-.progress-bar {
-    width: 0%; /* Começa com 0% */
-    height: 100%;
-    background-color: var(--accent-success); /* Cor da barra progredindo */
-    border-radius: 0 0 0 4px; /* Arredonda canto inferior esquerdo */
-    transition: width 1s linear; /* Transição suave da largura */
-}
-
-/* Mostra a barra no item atual */
-.schedule-item.current .progress-bar-container {
-    opacity: 1;
-}
-
-/* Ajusta cor da barra para diferentes temas, se necessário */
-body.theme-dark .schedule-item.current .progress-bar { background-color: var(--accent-success); }
-body.theme-forest-green .schedule-item.current .progress-bar { background-color: var(--accent-primary); }
-body.theme-math-master .schedule-item.current .progress-bar { background-color: var(--accent-primary); }
-body.theme-historic-scroll .schedule-item.current .progress-bar { background-color: var(--accent-primary); }
-body.theme-alchemist .schedule-item.current .progress-bar { background-color: var(--accent-primary); } /* Usa o amarelo do alquimista */
-
-
-/* **** NOVO: Estilos para o Modal de Novidades (baseados no att.html e adaptados) **** */
-
-/* Overlay (fundo escuro) */
-.modal-overlay {
-    display: none; /* Começa escondido */
-    position: fixed;
-    z-index: 1055; /* Um pouco acima do modal genérico */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto; /* Scroll do overlay se modal for muito grande verticalmente */
-    background-color: rgba(0, 0, 0, 0.65); /* Fundo escurecido mais intenso */
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-overlay.show {
-    display: flex; /* Mostra o modal */
-    animation: modalFadeIn 0.3s ease-out; /* Reusa animação do modal genérico */
-}
-
-/* Adaptação do Conteúdo do Modal de Novidades para usar variáveis */
-/* Nota: #whats-new-modal é o ID do overlay, o content está dentro dele */
-#whats-new-modal .modal-content {
-    /* Reutiliza estilos base do .modal-content */
-    background-color: var(--bg-modal-alpha);
-    margin: auto;
-    padding: 20px 25px; /* Padding um pouco diferente do exemplo */
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    width: 90%;
-    max-width: 550px; /* Largura máxima do exemplo */
-    max-height: 85vh; /* Altura máxima do exemplo */
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 5px 15px var(--shadow-color);
-    animation: modalSlideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Reusa animação */
-    font-family: inherit; /* Garante herança da fonte */
-    line-height: 1.6; /* Linha do exemplo */
-}
-
-/* Adaptação do Header */
-#whats-new-modal .modal-header {
-    /* Reutiliza estilos base .modal-header */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color); /* Usando variável */
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    flex-shrink: 0;
-}
-
-#whats-new-modal .modal-header h2 {
-    /* Reutiliza estilos base h2 do .modal-header */
-    margin: 0;
-    font-size: 1.3rem; /* Tamanho do exemplo */
-    color: var(--accent-primary); /* Usando variável */
-}
-
-/* Adaptação do Botão Fechar (reutiliza .close-button existente) */
-#whats-new-modal .close-button {
-     /* Estilos já definidos globalmente para .close-button */
-     /* Se precisar de ajuste específico, pode adicionar aqui */
-}
-
-/* Adaptação do Corpo */
-#whats-new-modal .modal-body {
-    overflow-y: auto; /* Habilita scroll se o conteúdo for grande */
-    flex-grow: 1;
-    padding-right: 10px; /* Espaço para a barra de rolagem */
-}
-
-#whats-new-modal .modal-body h4 {
-    margin-top: 1.2rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-secondary); /* Usando variável */
-    border-bottom: 1px dashed var(--border-color); /* Usando variável */
-    padding-bottom: 3px;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-#whats-new-modal .modal-body ul {
-    list-style: none;
-    padding-left: 15px; /* Ajuste para alinhar com o marcador */
-    margin-bottom: 1rem;
-}
-
-#whats-new-modal .modal-body li {
-    margin-bottom: 0.7rem; /* Espaçamento um pouco maior */
-    position: relative; /* Para posicionar o ::before */
-}
-
-#whats-new-modal .modal-body li::before {
-    content: '✨'; /* Marcador do exemplo */
-    color: var(--accent-success); /* Usando variável */
-    display: inline-block;
-    position: absolute; /* Posicionamento absoluto */
-    left: -1.4em; /* Move para a esquerda */
-    top: 0.1em; /* Ajuste vertical fino */
-    font-weight: normal; /* Normalizar peso */
-    font-size: 0.9em;
-}
-/* Específico para h4 de Correções */
-#whats-new-modal .modal-body h4:last-of-type + ul li::before {
-    content: '✓'; /* Marcador diferente para correções */
-    color: var(--accent-warning); /* Cor diferente (amarelo) */
-}
-
-#whats-new-modal .modal-body li strong {
-    color: var(--text-primary); /* Usando variável */
-    font-weight: 600;
-}
-
-#whats-new-modal .modal-body p {
-    margin-bottom: 0.8rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-#whats-new-modal .modal-body p:first-of-type {
-    color: var(--text-primary);
-    font-size: 0.95rem;
-}
-#whats-new-modal .modal-body p:last-of-type {
-    margin-top: 1rem;
-    text-align: center;
-    font-style: italic;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
-
-/* Adaptação do Footer */
-#whats-new-modal .modal-footer {
-    /* Reutiliza estilos base .modal-footer */
-    border-top: 1px solid var(--border-color); /* Usando variável */
-    padding-top: 15px;
-    margin-top: 20px;
-    text-align: right;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: flex-end; /* Botão à direita */
-}
-
-/* Adaptação do Botão "Entendi" */
-#whats-new-modal .modal-footer button#ok-whats-new {
-    /* Reutiliza estilos base de button */
-    padding: 0.6rem 1.2rem;
-    background-color: var(--accent-primary); /* Usando variável */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.95rem;
-}
-#whats-new-modal .modal-footer button#ok-whats-new:hover {
-    opacity: 0.85; /* Reutiliza hover base */
-}
-
-/* Animação específica (já definida como fadeIn, mas garantindo que exista) */
-/* @keyframes fadeIn já definido anteriormente, será reutilizado */
-/* **** FIM DOS ESTILOS DO MODAL DE NOVIDADES **** */
-
-
-/* --- FIM DAS CORREÇÕES --- */
+.modal-overlay { display: none; position: fixed; z-index: 1055; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.65); align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; animation: modalFadeIn 0.3s ease-out; }
+#whats-new-modal .modal-content { background-color: var(--bg-modal-alpha); margin: auto; padding: 20px 25px; border: 1px solid var(--border-color); border-radius: 8px; width: 90%; max-width: 550px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 5px 15px var(--shadow-color); animation: modalSlideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); font-family: inherit; line-height: 1.6; }
+#whats-new-modal .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; }
+#whats-new-modal .modal-header h2 { margin: 0; font-size: 1.3rem; color: var(--accent-primary); }
+#whats-new-modal .modal-body { overflow-y: auto; flex-grow: 1; padding-right: 10px; }
+#whats-new-modal .modal-body h4 { margin-top: 1.2rem; margin-bottom: 0.5rem; color: var(--text-secondary); border-bottom: 1px dashed var(--border-color); padding-bottom: 3px; font-size: 1rem; font-weight: 600; }
+#whats-new-modal .modal-body ul { list-style: none; padding-left: 15px; margin-bottom: 1rem; }
+#whats-new-modal .modal-body li { margin-bottom: 0.7rem; position: relative; }
+#whats-new-modal .modal-body li::before { content: '✨'; color: var(--accent-success); display: inline-block; position: absolute; left: -1.4em; top: 0.1em; font-weight: normal; font-size: 0.9em; }
+#whats-new-modal .modal-body h4:last-of-type + ul li::before { content: '✓'; color: var(--accent-warning); }
+#whats-new-modal .modal-body li strong { color: var(--text-primary); font-weight: 600; }
+#whats-new-modal .modal-body p { margin-bottom: 0.8rem; color: var(--text-secondary); font-size: 0.9rem; }
+#whats-new-modal .modal-body p:first-of-type { color: var(--text-primary); font-size: 0.95rem; }
+#whats-new-modal .modal-body p:last-of-type { margin-top: 1rem; text-align: center; font-style: italic; font-size: 0.85rem; color: var(--text-secondary); }
+#whats-new-modal .modal-footer { border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 20px; text-align: right; flex-shrink: 0; display: flex; justify-content: flex-end; }
+#whats-new-modal .modal-footer button#ok-whats-new { padding: 0.6rem 1.2rem; background-color: var(--accent-primary); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; }
+#whats-new-modal .modal-footer button#ok-whats-new:hover { opacity: 0.85; }
