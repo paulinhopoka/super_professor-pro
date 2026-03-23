@@ -15,7 +15,7 @@
 
     <div id="notification-banner"> <span id="notification-message">Mensagem...</span> <button id="notification-close-button" type="button">×</button> </div>
     <audio id="notification-sound-default" preload="auto"> <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUReT18AAAAAAAAAAAAAAAAAAAAAAP////8AAAAA///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8=" type="audio/wav"> </audio>
-    <header class="app-header"> <div class="header-top-row"> <h1>Super Professor Pro</h1> <div id="header-info" class="header-info"></div> </div> <input type="search" id="search-input" placeholder="Buscar aluno, turma, escola..."> </header>
+    <header class="app-header"> <div class="header-top-row"> <h1>Super Professor Pro</h1> <div id="header-info" class="header-info"></div> <div id="auth-container" style="margin-left: auto; display: flex; align-items: center; gap: 10px;"><span id="user-email" style="font-size: 0.8rem; color: #fff;"></span><button id="auth-button" class="button-like secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Login</button></div> </div> <input type="search" id="search-input" placeholder="Buscar aluno, turma, escola..."> </header>
     <main class="app-content" id="main-content">
         <!-- Seções Horários, Escolas, Turmas -->
         <section id="schedule-section" class="section">
@@ -288,7 +288,7 @@
         </li>
     </template>
 
-    <script src="script.js"></script>
+    <script type="module" src="/script.js"></script>
 
 </body>
 </html>

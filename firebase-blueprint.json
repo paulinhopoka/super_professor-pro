@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "AppData": {
+      "title": "AppData",
+      "description": "The entire application data for a user.",
+      "type": "object",
+      "properties": {
+        "schools": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "classes": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "students": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "schedule": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "settings": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/AppData"
+      },
+      "description": "Stores the application data for a specific user."
+    }
+  }
+}

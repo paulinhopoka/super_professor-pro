@@ -1,3 +1,5 @@
+import { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, onSnapshot, createUserWithEmailAndPassword, signInWithEmailAndPassword } from './firebase.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Seletores Globais (Existentes e Novos) ---
     const mainContent = document.getElementById('main-content');
@@ -9,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalFooter = document.getElementById('modal-footer');
     const headerInfo = document.getElementById('header-info');
     const searchInput = document.getElementById('search-input');
+    const authButton = document.getElementById('auth-button');
+    const userEmailDisplay = document.getElementById('user-email');
     const scheduleListContainer = document.getElementById('schedule-list');
     const schoolListContainer = document.getElementById('school-list');
     const classListContainer = document.getElementById('class-list');
@@ -132,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Funções de Estado e Persistência ---
     const saveAppState = () => { try { localStorage.setItem('lastSection', currentSection || 'schedule-section'); localStorage.setItem('lastSchoolId', currentSchoolId || ''); localStorage.setItem('lastClassId', currentClassId || ''); } catch (e) { console.error("Erro ao salvar estado:", e); } };
     const restoreAppState = () => { const lastSection = localStorage.getItem('lastSection'); const lastSchoolId = localStorage.getItem('lastSchoolId'); const lastClassId = localStorage.getItem('lastClassId'); console.log("Restoring App State:", {lastSection, lastSchoolId, lastClassId}); currentSection = 'schedule-section'; currentSchoolId = null; currentClassId = null; if (appData.schools.length > 0) { currentSchoolId = lastSchoolId || appData.schools[0].id; if (!findSchoolById(currentSchoolId)) { currentSchoolId = appData.schools[0]?.id || null; currentClassId = null; currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; } else { currentClassId = lastClassId || null; if (currentClassId && !findClassById(currentClassId)) { currentClassId = null; } if (lastSection) { if (lastSection === 'class-details-section' && currentClassId && findClassById(currentClassId)) { currentSection = 'class-details-section'; } else if (lastSection === 'classes-section' && currentSchoolId) { currentSection = 'classes-section'; currentClassId = null; } else if (lastSection === 'schools-section') { currentSection = 'schools-section'; currentSchoolId = null; currentClassId = null; } else if (['schedule-section', 'tools-section', 'contact-section', 'settings-section'].includes(lastSection)){ const sectionExists = document.getElementById(lastSection); if(sectionExists) { currentSection = lastSection; if(['schedule-section', 'tools-section', 'contact-section', 'settings-section'].includes(lastSection)) { currentSchoolId = null; currentClassId = null; } } else { currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; currentClassId = null; } } else { currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; currentClassId = null; } } else { if (currentClassId) currentSection = 'class-details-section'; else if (currentSchoolId) currentSection = 'classes-section'; else currentSection = 'schools-section'; } } } else { currentSection = 'schedule-section'; } if(['contact-section', 'settings-section', 'tools-section'].includes(lastSection)){ currentSection = lastSection; } console.log(`Estado Final Restaurado: Section=${currentSection}, School=${currentSchoolId}, Class=${currentClassId}`); };
-    const saveData = () => { try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); console.log(`Data saved (${DATA_STORAGE_KEY}).`); } catch (e) { console.error("Erro salvar:", e); if (e.name === 'QuotaExceededError') { alert("Erro: Não há espaço suficiente para salvar os dados. Isso pode ser devido a um arquivo de som personalizado muito grande."); } else { alert("Erro ao salvar dados."); } } };
+    const saveData = () => { try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); console.log(`Data saved (${DATA_STORAGE_KEY}).`); if (typeof saveToFirestore === 'function') { saveToFirestore(); } } catch (e) { console.error("Erro salvar:", e); if (e.name === 'QuotaExceededError') { alert("Erro: Não há espaço suficiente para salvar os dados. Isso pode ser devido a um arquivo de som personalizado muito grande."); } else { alert("Erro ao salvar dados."); } } };
     const loadData = () => {
         let dataToParse = localStorage.getItem(DATA_STORAGE_KEY);
         let importedVersion = 15; // Assuming current data is effectively v15 structure before this change
@@ -394,6 +398,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (peDeMeiaCheckbox && peDeMeiaCheckbox.checked) selectedPrograms.push('Pé de Meia');
 
         if (!currentClassId) return;
+
+        if (!id) {
+            const studentsInClass = getStudentsByClass(currentClassId);
+            if (studentsInClass.length >= 100) {
+                alert('Limite máximo de 100 alunos por turma atingido.');
+                return;
+            }
+        }
 
         if (id) {
             const student = findStudentById(id);
@@ -757,6 +769,140 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Salvando versão inicial no localStorage:', CURRENT_APP_VERSION);
         }
     }
+
+    // Firebase Auth Logic
+    let isSyncing = false;
+    const saveToFirestore = async () => {
+        if (!auth.currentUser || isSyncing) return;
+        try {
+            isSyncing = true;
+            const dataToSave = JSON.parse(JSON.stringify(appData));
+            if (dataToSave.settings) {
+                delete dataToSave.settings.customNotificationSound; // Don't save large base64 to Firestore
+            }
+            await setDoc(doc(db, 'users', auth.currentUser.uid), dataToSave);
+            console.log("Data saved to Firestore.");
+        } catch (error) {
+            console.error("Error saving to Firestore:", error);
+        } finally {
+            isSyncing = false;
+        }
+    };
+
+    const syncDataWithFirestore = async (user) => {
+        if (!user) return;
+        try {
+            const docRef = doc(db, 'users', user.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const firestoreData = docSnap.data();
+                const localSound = appData.settings?.customNotificationSound;
+                appData = firestoreData;
+                if (!appData.settings) appData.settings = {};
+                appData.settings.customNotificationSound = localSound;
+                
+                // Save locally without triggering firestore save
+                try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); } catch(e) {}
+                
+                restoreAppState();
+                renderScheduleList();
+                renderSchoolList();
+                applyTheme(appData.settings.theme);
+                updateNotificationSettingsUI();
+                updateCustomSoundUI();
+                if (currentSection === 'classes-section' && currentSchoolId) { renderClassList(currentSchoolId); }
+                else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); }
+                showSection(currentSection || 'schedule-section');
+            } else {
+                await saveToFirestore();
+            }
+        } catch (error) {
+            console.error("Error syncing with Firestore:", error);
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            userEmailDisplay.textContent = user.email;
+            authButton.textContent = 'Logout';
+            syncDataWithFirestore(user);
+        } else {
+            userEmailDisplay.textContent = '';
+            authButton.textContent = 'Login';
+        }
+    });
+
+    authButton.addEventListener('click', () => {
+        if (auth.currentUser) {
+            signOut(auth).then(() => {
+                alert('Deslogado com sucesso!');
+            }).catch((error) => {
+                console.error('Logout error', error);
+            });
+        } else {
+            const modalContent = `
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Senha:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 10px; flex-direction: column;">
+                        <button type="button" id="btn-login-email" class="success">Entrar com Email</button>
+                        <button type="button" id="btn-register-email" class="secondary">Registrar com Email</button>
+                        <hr style="margin: 0.5rem 0;">
+                        <button type="button" id="btn-login-google" class="primary">Entrar com Google</button>
+                    </div>
+                </form>
+            `;
+            showModal('Login', modalContent, '');
+            
+            document.getElementById('btn-login-google').addEventListener('click', () => {
+                signInWithPopup(auth, provider).then((result) => {
+                    hideModal();
+                    alert('Logado com sucesso!');
+                }).catch((error) => {
+                    console.error('Login error', error);
+                    alert('Erro ao fazer login: ' + error.message);
+                });
+            });
+
+            document.getElementById('btn-login-email').addEventListener('click', () => {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                if (!email || !password) {
+                    alert('Preencha email e senha.');
+                    return;
+                }
+                signInWithEmailAndPassword(auth, email, password).then(() => {
+                    hideModal();
+                    alert('Logado com sucesso!');
+                }).catch((error) => {
+                    console.error('Login error', error);
+                    alert('Erro ao fazer login: ' + error.message);
+                });
+            });
+
+            document.getElementById('btn-register-email').addEventListener('click', () => {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                if (!email || !password) {
+                    alert('Preencha email e senha.');
+                    return;
+                }
+                createUserWithEmailAndPassword(auth, email, password).then(() => {
+                    hideModal();
+                    alert('Registrado e logado com sucesso!');
+                }).catch((error) => {
+                    console.error('Register error', error);
+                    alert('Erro ao registrar: ' + error.message);
+                });
+            });
+        }
+    });
 
     // Service Worker
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/pwabuilder-sw.js', { scope: '/' }) .then(registration => { console.log('ServiceWorker registration successful with scope: ', registration.scope); }) .catch(err => { console.log('ServiceWorker registration failed (scope /): ', err); navigator.serviceWorker.register('pwabuilder-sw.js') .then(registration => { console.log('ServiceWorker registration successful with relative path scope: ', registration.scope); }) .catch(err2 => { console.log('ServiceWorker registration failed (relative path): ', err2); if (err2.message.includes('404') || err.message.includes('404')) { console.warn("Service Worker file 'pwabuilder-sw.js' not found. Ensure it's in the accessible root or correct relative path."); } else if (err.message.includes('scope') || err2.message.includes('scope')) { console.warn("Service Worker registration failed due to scope mismatch or security issues. Check HTTPS and path."); } }); }); }); }

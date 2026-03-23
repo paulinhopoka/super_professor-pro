@@ -650,7 +650,7 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 .calculator-modal .calculator-mode-selector button { flex: 1; font-size: 0.85rem; padding: 0.4rem 0.6rem; background-color: var(--calc-mode-button-bg); color: var(--calc-mode-button-text); border: 1px solid var(--border-color); }
 .calculator-modal .calculator-mode-selector button.active { background-color: var(--calc-mode-button-active-bg); color: var(--calc-mode-button-active-text); border-color: var(--calc-mode-button-active-bg); }
 .calculator-modal .calculator-display { width: 100%; background-color: var(--calc-display-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 5px; padding: 10px 15px; font-size: 2rem; text-align: right; margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 60px; display: flex; align-items: center; justify-content: flex-end; }
-.calculator-modal .calculator-buttons { display: grid; grid-template-columns: repeat(4, 1fr)); gap: 5px; margin-bottom: 10px; }
+.calculator-modal .calculator-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
 .calculator-modal .calculator-buttons button { padding: 0.8rem; font-size: 1.1rem; margin: 0; border: 1px solid transparent; background-color: var(--calc-button-bg); color: var(--calc-button-text); transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease; }
 .calculator-modal .calculator-buttons button:hover { opacity: var(--calc-button-hover-opacity); }
 .calculator-modal .calculator-buttons button:active { transform: scale(var(--calc-button-active-scale)); }

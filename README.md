@@ -1,16 +1,20 @@
-# Super Professor Pro
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-Um aplicativo web para ajudar professores a gerenciar turmas, alunos, notas, frequência e mais.
+# Run and deploy your AI Studio app
 
-**Funcionalidades:**
-* Gerenciamento de Escolas e Turmas
-* Cadastro de Alunos
-* Registro de Notas e Cálculo de Médias
-* Controle de Frequência Diária e Mensal
-* Mapa de Sala Interativo
-* Ferramentas Auxiliares (Calculadora, Sorteador, etc.)
-* ... e mais!
+This contains everything you need to run your app locally.
 
-Desenvolvido por Paulinho Poka.
+View your app in AI Studio: https://ai.studio/apps/71d09197-cb18-4b0e-bd39-6c05c890df19
 
-**Licença:** CC BY-NC 4.0 (Não Comercial)
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

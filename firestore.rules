@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // This security rules file assumes the following data structures:
+    //
+    // Collection: users
+    // Document ID: {userId} (matches request.auth.uid)
+    // Fields:
+    //   - schools: list
+    //   - classes: list
+    //   - students: list
+    //   - schedule: list
+    //   - settings: map
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    //
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    //
+    // Check if user owns the resource (for user-owned documents)
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Validate that the document contains only the allowed fields
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // Validate AppData
+    function isValidAppData() {
+      return hasOnlyAllowedFields(['schools', 'classes', 'students', 'schedule', 'settings']) &&
+             (request.resource.data.schools is list || !('schools' in request.resource.data)) &&
+             (request.resource.data.classes is list || !('classes' in request.resource.data)) &&
+             (request.resource.data.students is list || !('students' in request.resource.data)) &&
+             (request.resource.data.schedule is list || !('schedule' in request.resource.data)) &&
+             (request.resource.data.settings is map || !('settings' in request.resource.data));
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidAppData();
+      allow update: if isOwner(userId) && isValidAppData();
+      allow delete: if isOwner(userId);
+    }
+  }
+}
