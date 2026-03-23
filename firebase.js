@@ -2,7 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-// Busca a configuração do arquivo JSON que já está no seu GitHub
+// Carrega a configuração do seu arquivo JSON que já está no GitHub
 const configResponse = await fetch('./firebase-applet-config.json');
 const firebaseConfig = await configResponse.json();
 
