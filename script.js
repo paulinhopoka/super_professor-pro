@@ -65,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentCustomSoundDisplay = document.getElementById('current-custom-sound-display');
     const currentCustomSoundName = document.getElementById('current-custom-sound-name');
     const removeCustomSoundButton = document.getElementById('remove-custom-sound-button');
+    const forceSyncButton = document.getElementById('force-sync-button');
+    const syncStatusText = document.getElementById('sync-status-text');
+    const lastSyncTimeDisplay = document.getElementById('last-sync-time');
     const editMapButton = document.getElementById('edit-map-button');
     const classroomContainerDisplay = document.getElementById('classroom-container-display');
     const classroomContainerEdit = document.getElementById('classroom-container-edit');
@@ -122,21 +125,38 @@ document.addEventListener('DOMContentLoaded', () => {
     let scheduleUpdateInterval = null;
 
     // ATUALIZADO: Versão do App
-    const CURRENT_APP_VERSION = '1.7.0';
+    const CURRENT_APP_VERSION = '1.8.0';
 
     const DATA_STORAGE_KEY = 'superProfessorProData_v15'; // Mantido por enquanto, mas a estrutura interna mudou
     const OLD_DATA_STORAGE_KEY_V14 = 'superProfessorProData_v14';
 
     let appData = {
         schools: [], classes: [], students: [], schedule: [],
-        settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null }
+        settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null },
+        lastUpdated: 0
     };
     let currentSchoolId = null; let currentClassId = null; let currentSection = 'schedule-section';
 
     // --- Funções de Estado e Persistência ---
     const saveAppState = () => { try { localStorage.setItem('lastSection', currentSection || 'schedule-section'); localStorage.setItem('lastSchoolId', currentSchoolId || ''); localStorage.setItem('lastClassId', currentClassId || ''); } catch (e) { console.error("Erro ao salvar estado:", e); } };
     const restoreAppState = () => { const lastSection = localStorage.getItem('lastSection'); const lastSchoolId = localStorage.getItem('lastSchoolId'); const lastClassId = localStorage.getItem('lastClassId'); console.log("Restoring App State:", {lastSection, lastSchoolId, lastClassId}); currentSection = 'schedule-section'; currentSchoolId = null; currentClassId = null; if (appData.schools.length > 0) { currentSchoolId = lastSchoolId || appData.schools[0].id; if (!findSchoolById(currentSchoolId)) { currentSchoolId = appData.schools[0]?.id || null; currentClassId = null; currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; } else { currentClassId = lastClassId || null; if (currentClassId && !findClassById(currentClassId)) { currentClassId = null; } if (lastSection) { if (lastSection === 'class-details-section' && currentClassId && findClassById(currentClassId)) { currentSection = 'class-details-section'; } else if (lastSection === 'classes-section' && currentSchoolId) { currentSection = 'classes-section'; currentClassId = null; } else if (lastSection === 'schools-section') { currentSection = 'schools-section'; currentSchoolId = null; currentClassId = null; } else if (['schedule-section', 'tools-section', 'contact-section', 'settings-section'].includes(lastSection)){ const sectionExists = document.getElementById(lastSection); if(sectionExists) { currentSection = lastSection; if(['schedule-section', 'tools-section', 'contact-section', 'settings-section'].includes(lastSection)) { currentSchoolId = null; currentClassId = null; } } else { currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; currentClassId = null; } } else { currentSection = currentSchoolId ? 'classes-section' : 'schools-section'; currentClassId = null; } } else { if (currentClassId) currentSection = 'class-details-section'; else if (currentSchoolId) currentSection = 'classes-section'; else currentSection = 'schools-section'; } } } else { currentSection = 'schedule-section'; } if(['contact-section', 'settings-section', 'tools-section'].includes(lastSection)){ currentSection = lastSection; } console.log(`Estado Final Restaurado: Section=${currentSection}, School=${currentSchoolId}, Class=${currentClassId}`); };
-    const saveData = () => { try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); console.log(`Data saved (${DATA_STORAGE_KEY}).`); if (typeof saveToFirestore === 'function') { saveToFirestore(); } } catch (e) { console.error("Erro salvar:", e); if (e.name === 'QuotaExceededError') { alert("Erro: Não há espaço suficiente para salvar os dados. Isso pode ser devido a um arquivo de som personalizado muito grande."); } else { alert("Erro ao salvar dados."); } } };
+    const saveData = () => { 
+        try { 
+            appData.lastUpdated = Date.now();
+            localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); 
+            console.log(`Data saved (${DATA_STORAGE_KEY}).`); 
+            if (typeof saveToFirestore === 'function') { 
+                saveToFirestore(); 
+            } 
+        } catch (e) { 
+            console.error("Erro salvar:", e); 
+            if (e.name === 'QuotaExceededError') { 
+                alert("Erro: Não há espaço suficiente para salvar os dados. Isso pode ser devido a um arquivo de som personalizado muito grande."); 
+            } else { 
+                alert("Erro ao salvar dados."); 
+            } 
+        } 
+    };
     const loadData = () => {
         let dataToParse = localStorage.getItem(DATA_STORAGE_KEY);
         let importedVersion = 15; // Assuming current data is effectively v15 structure before this change
@@ -650,28 +670,37 @@ document.addEventListener('DOMContentLoaded', () => {
         // **** ATUALIZADO: Conteúdo HTML das novidades ****
         whatsNewBody.innerHTML = `
             <p>Confira as últimas melhorias e funcionalidades adicionadas para facilitar ainda mais seu dia a dia:</p>
+            
+            <h4 style="color: #28a745;">🌐 Uso Offline e Nuvem</h4>
+            <ul>
+                <li><strong>📶 Modo Offline Total:</strong> Agora você pode usar o app sem internet em tempo integral! Suas alterações são salvas no seu dispositivo e sincronizadas automaticamente quando houver conexão.</li>
+                <li><strong>☁️ Backup em Nuvem:</strong> Seus dados agora estão seguros na sua conta Google. Acesse de qualquer lugar e nunca perca suas informações.</li>
+                <li><strong>🔄 Migração de Dados:</strong> Se você já usa o app sem conta, seus dados locais serão <strong>migrados automaticamente</strong> para a nuvem assim que você criar sua conta e entrar pela primeira vez!</li>
+                <li><strong>⚠️ Aviso de Segurança:</strong> Ao fazer <strong>Logout (Sair)</strong>, seus dados locais são removidos por segurança. Certifique-se de estar conectado à internet antes de sair para garantir que tudo foi sincronizado com a nuvem!</li>
+            </ul>
+
             <h4>✨ Novas Funcionalidades</h4>
             <ul>
-                <li><strong>🇧🇷 Indicador de Programas Sociais:</strong> Identifique visualmente alunos participantes de programas como Bolsa Família e Pé de Meia diretamente na lista de alunos da turma. Configure no cadastro do aluno.</li>
-                <li><strong>📊 Quórum da Escola:</strong> Veja rapidamente a porcentagem de presença geral (ou por turno) para qualquer data diretamente na lista de escolas!</li>
-                <li><strong>📝 Categorias de Observações:</strong> Registre observações dos alunos com mais detalhes usando categorias (Anotação, Observação, Ocorrência, Advertência) e adicione períodos específicos para <strong>🚫 Suspensões</strong>.</li>
-                <li><strong>👑 Representante e Vice:</strong> Defina facilmente o Representante e o Vice da turma na lista de alunos. Eles terão um destaque especial!</li>
-                <li><strong>⏰ Barra de Progresso nos Horários:</strong> Acompanhe visualmente o andamento da sua aula atual com uma barra de progresso na tela de Horários.</li>
+                <li><strong>👥 Capacidade Ampliada:</strong> Agora você pode cadastrar até <strong>100 alunos</strong> por turma!</li>
+                <li><strong>🇧🇷 Indicador de Programas Sociais:</strong> Identifique visualmente alunos participantes de programas como Bolsa Família e Pé de Meia.</li>
+                <li><strong>📊 Quórum da Escola:</strong> Veja a porcentagem de presença geral diretamente na lista de escolas.</li>
+                <li><strong>📝 Categorias de Observações:</strong> Anotações, Ocorrências, Advertências e Suspensões com períodos específicos.</li>
+                <li><strong>⏰ Barra de Progresso:</strong> Acompanhe o andamento da sua aula atual em tempo real.</li>
             </ul>
-            <h4>🚀 Melhorias Principais</h4>
+
+            <h4>🚀 Melhorias e Correções</h4>
             <ul>
-                <li><strong>🎨 Aba "Detalhes da Turma" Renovada:</strong> Navegação mais fácil com novo cabeçalho fixo e layout organizado em cards expansíveis.</li>
-                <li><strong>🖱️ Ações Rápidas na Lista de Alunos:</strong> Botão para expandir e acessar rapidamente as opções de Editar, Mover, Excluir, Observações e definir Rep/Vice para cada aluno.</li>
-                <li><strong>✔️ Presença Inteligente:</strong> O sistema agora reconhece alunos suspensos na data selecionada e ajusta as opções de marcação. O fluxo para justificar faltas também foi aprimorado.</li>
-                <li><strong>📅 Horários Mais Inteligentes:</strong> Seus horários agora são automaticamente ordenados por hora. O horário atual e o próximo são destacados para fácil visualização no dia corrente.</li>
+                <li><strong>🎨 Interface Renovada:</strong> Detalhes da turma mais organizados e navegação fluida.</li>
+                <li><strong>🖱️ Ações Rápidas:</strong> Menu simplificado na lista de alunos para edições velozes.</li>
+                <li><strong>📅 Ordenação Automática:</strong> Seus horários agora se organizam sozinhos por hora.</li>
+                <li><strong>🐛 Estabilidade:</strong> Diversos erros corrigidos para uma experiência mais suave.</li>
             </ul>
-            <h4>🐛 Correções</h4>
-            <ul>
-                <li>Correções gerais de estabilidade e performance.</li>
-                <li>Melhorias na importação/exportação de dados.</li>
-                <li>Ajustes finos na interface e usabilidade.</li>
-            </ul>
-            <p style="margin-top: 1rem; text-align: center; font-style: italic;">Esperamos que goste das novidades!</p>
+            
+            <div style="background: #fff3cd; padding: 10px; border-radius: 8px; border: 1px solid #ffeeba; margin-top: 1rem;">
+                <p style="margin: 0; font-size: 0.85rem; color: #856404;"><strong>Atenção:</strong> Limpar o cache do navegador ou formatar o celular sem ter sincronizado com a nuvem pode resultar em perda de dados.</p>
+            </div>
+            
+            <p style="margin-top: 1rem; text-align: center; font-style: italic;">Sua produtividade é nossa prioridade! ❤️</p>
         `;
         whatsNewModal.classList.add('show');
     };
@@ -738,6 +767,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Inicialização ---
+    const updateSyncStatusUI = () => {
+        if (!syncStatusText || !lastSyncTimeDisplay) return;
+        
+        if (!auth.currentUser) {
+            syncStatusText.innerHTML = 'Status: <span style="color: #666;">Offline (Sem conta)</span>';
+            lastSyncTimeDisplay.textContent = 'N/A';
+            if (forceSyncButton) forceSyncButton.disabled = true;
+            return;
+        }
+
+        if (forceSyncButton) forceSyncButton.disabled = false;
+        
+        if (navigator.onLine) {
+            syncStatusText.innerHTML = 'Status: <span style="color: #28a745;">Online (Sincronizado)</span>';
+        } else {
+            syncStatusText.innerHTML = 'Status: <span style="color: #ffc107;">Offline (Aguardando conexão)</span>';
+        }
+
+        if (appData.lastUpdated) {
+            const date = new Date(appData.lastUpdated);
+            lastSyncTimeDisplay.textContent = date.toLocaleString();
+        } else {
+            lastSyncTimeDisplay.textContent = 'Nunca';
+        }
+    };
+
+    // Inicializações Finais
+    updateSyncStatusUI();
     const dataWasLoaded = loadData();
     restoreAppState();
     renderScheduleList();
@@ -772,6 +829,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Firebase Auth Logic
     let isSyncing = false;
+    
     const saveToFirestore = async () => {
         if (!auth.currentUser || isSyncing) return;
         try {
@@ -786,6 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error saving to Firestore:", error);
         } finally {
             isSyncing = false;
+            updateSyncStatusUI();
         }
     };
 
@@ -794,32 +853,113 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const docRef = doc(db, 'users', user.uid);
             const docSnap = await getDoc(docRef);
+            
+            const localHasData = appData.schools.length > 0;
+
             if (docSnap.exists()) {
                 const firestoreData = docSnap.data();
-                const localSound = appData.settings?.customNotificationSound;
-                appData = firestoreData;
-                if (!appData.settings) appData.settings = {};
-                appData.settings.customNotificationSound = localSound;
+                const cloudHasData = firestoreData.schools && firestoreData.schools.length > 0;
                 
-                // Save locally without triggering firestore save
-                try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); } catch(e) {}
+                const localLastUpdated = appData.lastUpdated || 0;
+                const firestoreLastUpdated = firestoreData.lastUpdated || 0;
+
+                // Se o usuário tem dados locais e a nuvem também tem dados, e são diferentes
+                if (localHasData && cloudHasData && Math.abs(localLastUpdated - firestoreLastUpdated) > 1000) {
+                    const title = "Conflito de Sincronização";
+                    const content = `
+                        <p>Detectamos dados diferentes no seu dispositivo e na sua conta na nuvem.</p>
+                        <p><strong>Dados Locais:</strong> ${appData.schools.length} escolas, atualizado em ${new Date(localLastUpdated).toLocaleString()}</p>
+                        <p><strong>Dados na Nuvem:</strong> ${firestoreData.schools.length} escolas, atualizado em ${new Date(firestoreLastUpdated).toLocaleString()}</p>
+                        <p style="margin-top: 1rem;">O que você deseja fazer?</p>
+                    `;
+                    const footer = `
+                        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                            <button type="button" id="migrate-local-to-cloud" class="success w-full">Manter dados deste dispositivo (MIGRAÇÃO)</button>
+                            <button type="button" id="use-cloud-data" class="secondary w-full">Usar dados que já estão na nuvem</button>
+                        </div>
+                    `;
+                    
+                    showModal(title, content, footer, 'sync-conflict-modal');
+                    
+                    document.getElementById('migrate-local-to-cloud')?.addEventListener('click', async () => {
+                        console.log("User chose to migrate local data.");
+                        hideModal();
+                        await saveToFirestore();
+                        updateSyncStatusUI();
+                    });
+                    
+                    document.getElementById('use-cloud-data')?.addEventListener('click', () => {
+                        console.log("User chose to use cloud data.");
+                        hideModal();
+                        const localSound = appData.settings?.customNotificationSound;
+                        appData = firestoreData;
+                        if (!appData.settings) appData.settings = {};
+                        appData.settings.customNotificationSound = localSound;
+                        try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); } catch(e) {}
+                        restoreAppState();
+                        renderScheduleList();
+                        renderSchoolList();
+                        applyTheme(appData.settings.theme);
+                        updateNotificationSettingsUI();
+                        updateCustomSoundUI();
+                        showSection(currentSection || 'schedule-section');
+                        updateSyncStatusUI();
+                    });
+                    return;
+                }
                 
-                restoreAppState();
-                renderScheduleList();
-                renderSchoolList();
-                applyTheme(appData.settings.theme);
-                updateNotificationSettingsUI();
-                updateCustomSoundUI();
-                if (currentSection === 'classes-section' && currentSchoolId) { renderClassList(currentSchoolId); }
-                else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); }
-                showSection(currentSection || 'schedule-section');
+                if (firestoreLastUpdated > localLastUpdated || !localHasData) {
+                    console.log("Cloud data is newer or local is empty. Syncing...");
+                    const localSound = appData.settings?.customNotificationSound;
+                    appData = firestoreData;
+                    if (!appData.settings) appData.settings = {};
+                    appData.settings.customNotificationSound = localSound;
+                    
+                    // Save locally without triggering firestore save
+                    try { localStorage.setItem(DATA_STORAGE_KEY, JSON.stringify(appData)); } catch(e) {}
+                    
+                    restoreAppState();
+                    renderScheduleList();
+                    renderSchoolList();
+                    applyTheme(appData.settings.theme);
+                    updateNotificationSettingsUI();
+                    updateCustomSoundUI();
+                    if (currentSection === 'classes-section' && currentSchoolId) { renderClassList(currentSchoolId); }
+                    else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); }
+                    showSection(currentSection || 'schedule-section');
+                } else if (localLastUpdated > firestoreLastUpdated) {
+                    console.log("Local data is newer. Pushing to cloud...");
+                    await saveToFirestore();
+                }
+                updateSyncStatusUI();
             } else {
+                // Novo documento no Firestore
+                if (localHasData) {
+                    console.log("New account detected. Migrating local data to cloud...");
+                }
                 await saveToFirestore();
             }
         } catch (error) {
             console.error("Error syncing with Firestore:", error);
+            if (syncStatusText) syncStatusText.innerHTML = 'Status: <span style="color: #dc3545;">Erro na sincronização</span>';
         }
     };
+
+    forceSyncButton?.addEventListener('click', () => {
+        if (!auth.currentUser) {
+            alert("Você precisa estar logado para sincronizar com a nuvem.");
+            return;
+        }
+        if (!navigator.onLine) {
+            alert("Você está offline. Conecte-se à internet para sincronizar.");
+            return;
+        }
+        syncDataWithFirestore(auth.currentUser);
+        alert("Sincronização iniciada!");
+    });
+
+    window.addEventListener('online', updateSyncStatusUI);
+    window.addEventListener('offline', updateSyncStatusUI);
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -827,8 +967,28 @@ document.addEventListener('DOMContentLoaded', () => {
             authButton.textContent = 'Logout';
             syncDataWithFirestore(user);
         } else {
+            const wasLoggedIn = userEmailDisplay.textContent !== '';
             userEmailDisplay.textContent = '';
             authButton.textContent = 'Login';
+            
+            if (wasLoggedIn) {
+                // Reset data when logged out to ensure privacy
+                appData = {
+                    schools: [], classes: [], students: [], schedule: [],
+                    settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null }
+                };
+                currentSchoolId = null;
+                currentClassId = null;
+                currentSection = 'schedule-section';
+                localStorage.removeItem(DATA_STORAGE_KEY);
+                localStorage.removeItem('lastSection');
+                localStorage.removeItem('lastSchoolId');
+                localStorage.removeItem('lastClassId');
+                renderScheduleList();
+                renderSchoolList();
+                applyTheme(appData.settings.theme);
+                showSection('schedule-section');
+            }
         }
     });
 
