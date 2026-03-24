@@ -222,7 +222,7 @@ const ClassDetailsModule = (() => {
                 const noteIdx = findStudentById(stdId).notes.findIndex(n => n === activeSusp);
                 row.classList.add('suspended-student', 'clickable-suspended');
                 row.dataset.suspensionNoteIndex = noteIdx; // Adiciona índice para clique
-                statusCell.innerHTML = `<span class="suspended-indicator" title="${activeSusp.text || 'Suspenso'}">🚫 Susp.</span>`;
+                statusCell.innerHTML = `<span class="suspended-indicator" title="${activeSusp.text || 'Suspenso'}"><span class="icon">block</span> Susp.</span>`;
             } else {
                 row.classList.remove('suspended-student', 'clickable-suspended');
                 row.removeAttribute('data-suspension-note-index');
@@ -231,8 +231,8 @@ const ClassDetailsModule = (() => {
 
                 // Adiciona botões P e F
                  statusCell.innerHTML = `
-                    <button type="button" class="attendance-toggle present"><span class="icon">✔️</span> P</button>
-                    <button type="button" class="attendance-toggle absent"><span class="icon">❌</span> F</button>
+                    <button type="button" class="attendance-toggle present"><span class="icon"><span class="icon">check</span></span> P</button>
+                    <button type="button" class="attendance-toggle absent"><span class="icon"><span class="icon">close</span></span> F</button>
                  `;
                 const pBtn = statusCell.querySelector('.present');
                 const aBtn = statusCell.querySelector('.absent');
@@ -242,7 +242,7 @@ const ClassDetailsModule = (() => {
                      pBtn.classList.toggle('selected', st === 'P');
                      aBtn.classList.toggle('selected', st === 'F');
                      aBtn.classList.toggle('justified', st === 'F' && !!just);
-                     aBtn.innerHTML = `<span class="icon">❌</span> ${st === 'F' && just ? 'FJ' : 'F'}`;
+                     aBtn.innerHTML = `<span class="icon"><span class="icon">close</span></span> ${st === 'F' && just ? 'FJ' : 'F'}`;
                      aBtn.title = st === 'F' && just ? `Just.: ${sanitizeHTML(just.substring(0, 30))}... (Clique para editar)` : 'Faltou (Clique para justificar)';
                  };
 
@@ -696,14 +696,14 @@ const ClassDetailsModule = (() => {
             <p>Registre a frequência diária dos alunos:</p>
             <ul>
                 <li>Selecione a <strong>Data</strong> desejada no calendário.</li>
-                <li>Clique em <button class="attendance-toggle present" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent;"><span class="icon">✔️</span> P</button> para marcar <strong>Presença</strong>.</li>
-                <li>Clique em <button class="attendance-toggle absent" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent;"><span class="icon">❌</span> F</button> para marcar <strong>Falta</strong>.</li>
-                <li>Clicando novamente em <button class="attendance-toggle absent selected" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent;"><span class="icon">❌</span> F</button> (quando já selecionado), você pode adicionar/editar uma <strong>Justificativa</strong>. O botão mudará para <button class="attendance-toggle absent justified selected" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent; background-color: var(--accent-warning); border-color: var(--accent-warning); color: var(--text-primary);"><span class="icon">❌</span> FJ</button>.</li>
-                <li>Alunos com <strong>Suspensão</strong> registrada para a data selecionada terão a linha destacada (<span class="suspended-indicator">🚫 Susp.</span>) e os botões de presença/falta desabilitados. Clicar na linha abre as observações com a suspensão destacada.</li>
+                <li>Clique em <button class="attendance-toggle present" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent;"><span class="icon"><span class="icon">check</span></span> P</button> para marcar <strong>Presença</strong>.</li>
+                <li>Clique em <button class="attendance-toggle absent" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent;"><span class="icon"><span class="icon">close</span></span> F</button> para marcar <strong>Falta</strong>.</li>
+                <li>Clicando novamente em <button class="attendance-toggle absent selected" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent;"><span class="icon"><span class="icon">close</span></span> F</button> (quando já selecionado), você pode adicionar/editar uma <strong>Justificativa</strong>. O botão mudará para <button class="attendance-toggle absent justified selected" style="padding: 0.3rem 0.45rem; font-size: 0.8rem; font-weight: 600; border: 2px solid transparent; background-color: var(--accent-warning); border-color: var(--accent-warning); color: var(--text-primary);"><span class="icon"><span class="icon">close</span></span> FJ</button>.</li>
+                <li>Alunos com <strong>Suspensão</strong> registrada para a data selecionada terão a linha destacada (<span class="suspended-indicator"><span class="icon">block</span> Susp.</span>) e os botões de presença/falta desabilitados. Clicar na linha abre as observações com a suspensão destacada.</li>
                 <li>Lembre-se de clicar em <button class="success" style="padding: 0.6rem 1.2rem;"><span class="icon icon-salvar"></span> Salvar Presença</button> após fazer as marcações do dia.</li>
             </ul>
 
-             <h3><span class="icon">⚙️</span> Outros Cards</h3>
+             <h3><span class="icon"><span class="icon">settings</span></span> Outros Cards</h3>
              <p>Cards como Mapa da Sala, Notas, Planejamento e Anotações da Turma permitem gerenciar outros aspectos importantes. (Alguns destes já existem no seu app principal).</p>
              <p>Use o botão <button class="card-toggle-button" style="padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background: transparent !important; border: none !important; color: var(--text-secondary);" disabled><span class="icon icon-chevron-up"></span></button> no canto de cada card para mostrar ou esconder seu conteúdo.</p>
         `;
