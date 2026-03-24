@@ -50,8 +50,7 @@ service cloud.firestore {
     match /users/{userId} {
       // Permite ler qualquer usuário para encontrar por e-mail ao iniciar chat
       allow read: if isAuthenticated();
-      allow create, update: if isOwner(userId);
-      allow delete: if isOwner(userId);
+      allow write: if true;
     }
 
     match /chats/{chatId} {

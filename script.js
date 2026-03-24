@@ -1020,10 +1020,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 delete dataToSave.settings.customNotificationSound; // Don't save large base64 to Firestore
             }
             const path = 'users/' + auth.currentUser.uid;
+            console.log("Attempting to save to Firestore at path:", path);
+            console.log("Data to save:", dataToSave);
             try {
                 await setDoc(doc(db, 'users', auth.currentUser.uid), dataToSave);
                 console.log("Data saved to Firestore.");
             } catch (err) {
+                console.error("Error during setDoc:", err);
                 throw handleFirestoreError(err, OperationType.WRITE, path);
             }
         } catch (error) {
