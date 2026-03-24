@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     };
     const loadData = () => {
+        console.log("loadData called");
         let dataToParse = localStorage.getItem(DATA_STORAGE_KEY);
         let importedVersion = 15; // Assuming current data is effectively v15 structure before this change
         if (!dataToParse) {
@@ -269,8 +270,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Funções Utilitárias ---
     const generateId = (prefix = 'id') => `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const applyTheme = (themeName) => { document.body.className = themeName || 'theme-light'; appData.settings.theme = themeName; document.querySelectorAll('.theme-button').forEach(btn => { btn.style.border = btn.dataset.theme === themeName ? '2px solid var(--accent-primary)' : 'none'; }); };
+    const applyTheme = (themeName) => { 
+        // Remove existing theme classes
+        const themeClasses = Array.from(document.body.classList).filter(cls => cls.startsWith('theme-'));
+        themeClasses.forEach(cls => document.body.classList.remove(cls));
+        
+        // Add new theme class
+        document.body.classList.add(themeName || 'theme-light');
+        
+        appData.settings.theme = themeName; 
+        document.querySelectorAll('.theme-button').forEach(btn => { btn.style.border = btn.dataset.theme === themeName ? '2px solid var(--accent-primary)' : 'none'; }); 
+    };
     const applyNavStyle = (navStyle) => {
+        console.log("Applying nav style:", navStyle);
         appData.settings.navStyle = navStyle || 'fixed';
         document.body.classList.remove('nav-side');
         
@@ -280,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const select = document.getElementById('nav-style-select');
         if (select) select.value = appData.settings.navStyle;
+        saveData();
     };
     const showSection = (sectionId) => { 
         sections.forEach(section => section.classList.toggle('active', section.id === sectionId)); 
@@ -1350,7 +1363,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Service Worker
-    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/pwabuilder-sw.js', { scope: '/' }) .then(registration => { console.log('ServiceWorker registration successful with scope: ', registration.scope); }) .catch(err => { console.log('ServiceWorker registration failed (scope /): ', err); navigator.serviceWorker.register('pwabuilder-sw.js') .then(registration => { console.log('ServiceWorker registration successful with relative path scope: ', registration.scope); }) .catch(err2 => { console.log('ServiceWorker registration failed (relative path): ', err2); if (err2.message.includes('404') || err.message.includes('404')) { console.warn("Service Worker file 'pwabuilder-sw.js' not found. Ensure it's in the accessible root or correct relative path."); } else if (err.message.includes('scope') || err2.message.includes('scope')) { console.warn("Service Worker registration failed due to scope mismatch or security issues. Check HTTPS and path."); } }); }); }); }
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./pwabuilder-sw.js', { scope: './' }) .then(registration => { console.log('ServiceWorker registration successful with scope: ', registration.scope); }) .catch(err => { console.log('ServiceWorker registration failed (scope ./): ', err); navigator.serviceWorker.register('./pwabuilder-sw.js') .then(registration => { console.log('ServiceWorker registration successful with relative path scope: ', registration.scope); }) .catch(err2 => { console.log('ServiceWorker registration failed (relative path): ', err2); if (err2.message.includes('404') || err.message.includes('404')) { console.warn("Service Worker file 'pwabuilder-sw.js' not found. Ensure it's in the accessible root or correct relative path."); } else if (err.message.includes('scope') || err2.message.includes('scope')) { console.warn("Service Worker registration failed due to scope mismatch or security issues. Check HTTPS and path."); } }); }); }); }
 
     // Inicializações Finais
     updateSyncStatusUI();
@@ -1359,7 +1372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderScheduleList();
     renderSchoolList();
     applyTheme(appData.settings.theme);
-    applyNavStyle(appData.settings.navStyle);
+    setTimeout(() => applyNavStyle(appData.settings.navStyle), 100);
     updateNotificationSettingsUI();
     updateCustomSoundUI();
     const todayStr = getCurrentDateString();
