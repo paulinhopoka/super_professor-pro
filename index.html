@@ -15,7 +15,15 @@
 
     <div id="notification-banner"> <span id="notification-message">Mensagem...</span> <button id="notification-close-button" type="button">×</button> </div>
     <audio id="notification-sound-default" preload="auto"> <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUReT18AAAAAAAAAAAAAAAAAAAAAAP////8AAAAA///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8=" type="audio/wav"> </audio>
-    <header class="app-header"> <div class="header-top-row"> <h1>Super Professor Pro</h1> <div id="header-info" class="header-info"></div> <div id="auth-container" style="margin-left: auto; display: flex; align-items: center; gap: 10px;"><span id="user-email" style="font-size: 0.8rem; color: #fff;"></span><button id="auth-button" class="button-like secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Login</button></div> </div> <input type="search" id="search-input" placeholder="Buscar aluno, turma, escola..."> </header>
+    <header class="app-header">
+        <div class="header-top-row">
+            <button id="hamburger-menu-button" class="icon-button" style="display: none; margin-right: 10px; background: transparent; border: none; color: inherit; font-size: 1.5rem; cursor: pointer;">
+                <span class="icon">☰</span>
+            </button>
+            <h1>Super Professor Pro</h1>
+        </div>
+        <input type="search" id="search-input" placeholder="Buscar aluno, turma, escola...">
+    </header>
     <main class="app-content" id="main-content">
         <!-- Seções Horários, Escolas, Turmas -->
         <section id="schedule-section" class="section">
@@ -97,6 +105,30 @@
                 <p class="text-xs text-secondary mt-1">O app salva automaticamente no seu dispositivo. Use este botão para forçar o envio/recebimento de dados da nuvem se estiver online.</p>
             </div>
 
+            <div class="card mt-2" id="account-card">
+                <h3>👤 Conta</h3>
+                <div id="logged-out-state">
+                    <p class="text-sm text-secondary mb-2">Faça login para sincronizar seus dados na nuvem e acessá-los de qualquer dispositivo.</p>
+                    <button type="button" id="auth-button" class="primary w-full"><span class="icon">🔑</span> Login / Registrar</button>
+                </div>
+                <div id="logged-in-state" style="display: none;">
+                    <p class="text-sm mb-1">Logado como: <strong id="settings-user-email"></strong></p>
+                    <p class="text-sm text-secondary mb-2">Ao sair, seus dados locais serão removidos por segurança. Certifique-se de que a sincronização com a nuvem foi concluída.</p>
+                    <button type="button" id="logout-button" class="danger w-full"><span class="icon">🚪</span> Desconectar</button>
+                </div>
+            </div>
+
+            <div class="card mt-2">
+                <h3>Navegação</h3>
+                <div class="form-group">
+                    <label for="nav-style-select">Estilo de Navegação:</label>
+                    <select id="nav-style-select">
+                        <option value="fixed">Barra Inferior Fixa</option>
+                        <option value="side">Menu Lateral (Hambúrguer)</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="card mt-2">
                 <h3>Temas</h3>
  <div id="theme-selector" style="display: flex; flex-wrap: wrap; gap: 5px;"> <button type="button" class="theme-button" data-theme="theme-light">Claro</button> <button type="button" class="theme-button" data-theme="theme-dark">Escuro</button> <button type="button" class="theme-button" data-theme="theme-forest-green">Verde Floresta</button> <button type="button" class="theme-button" data-theme="theme-math-master">Mestre da Matemática</button> <button type="button" class="theme-button" data-theme="theme-historic-scroll">Papiro Histórico</button> <button type="button" class="theme-button" data-theme="theme-alchemist">O Alquimista</button> </div> </div> <div class="card mt-2"> <h3>Dados</h3> <div style="display: flex; flex-direction: column; gap: 10px;"> <button type="button" id="export-data-button" class="secondary"><span class="icon">📤</span> Exportar Dados (JSON)</button> <label for="import-data-input" class="button-like secondary" style="cursor: pointer;"><span class="icon">📥</span> Importar Dados (JSON)</label> <input type="file" id="import-data-input" accept=".json" class="hidden"> <button type="button" id="clear-data-button" class="danger"><span class="icon">⚠️</span> Limpar Todos os Dados</button> </div> </div> <div class="card mt-2"> <h3>Notificações de Horários</h3> <div class="checkbox-group"> <input type="checkbox" id="enable-global-notifications"> <label for="enable-global-notifications">Ativar Notificações Globais</label> </div> <div class="checkbox-group"> <input type="checkbox" id="enable-notification-sound"> <label for="enable-notification-sound">Ativar Som nas Notificações</label> </div> <div class="custom-sound-container"> <label for="custom-notification-sound-input">Som Personalizado (Opcional - máx 2MB):</label> <div class="custom-sound-input-group"> <label for="custom-notification-sound-input" class="button-like secondary" style="cursor: pointer;"><span class="icon icon-arquivo"></span> Escolher arquivo</label> <span id="custom-sound-filename">Nenhum arquivo escolhido</span> <input type="file" id="custom-notification-sound-input" accept="audio/*" class="hidden"> </div> <div id="current-custom-sound-display" class="hidden"> <span id="current-custom-sound-name"></span> <button type="button" id="remove-custom-sound-button" class="danger icon-button" title="Remover Som Personalizado"><span class="icon icon-excluir icon-only"></span></button> </div> </div> <p class="text-sm text-secondary mt-1"> Notificações podem ser ativadas/desativadas individualmente para cada horário na tela "Meus Horários" (clicando no 🔔/🔕). Elas aparecerão 5 minutos antes do início e do fim da aula programada. </p> </div>
@@ -109,20 +141,50 @@
          <p class="footer-message">Feito com ❤️ para professores</p>
         </section>
     </main>
+    <div id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <h2>Menu</h2>
+            <button id="close-side-menu" class="close-button">×</button>
+        </div>
+        <nav class="side-menu-nav">
+            <button type="button" class="side-nav-button" data-section="schedule-section"><span class="icon icon-horario"></span>Horários</button>
+            <button type="button" class="side-nav-button" data-section="schools-section"><span class="icon icon-escola"></span>Escolas</button>
+            <button type="button" class="side-nav-button" data-section="classes-section" id="side-nav-classes-button" disabled><span class="icon icon-turmas"></span>Turmas</button>
+            <button type="button" class="side-nav-button" data-section="class-details-section" id="side-nav-details-button" disabled><span class="icon icon-alunos"></span>Detalhes</button>
+            <button type="button" class="side-nav-button" data-section="tools-section"><span class="icon icon-ferramentas"></span>Ferramentas</button>
+            <button type="button" class="side-nav-button" data-section="contact-section"><span class="icon icon-contato"></span>Contato</button>
+            <button type="button" class="side-nav-button" data-section="settings-section"><span class="icon icon-config"></span>Config</button>
+        </nav>
+    </div>
+    <div id="side-menu-overlay" class="side-menu-overlay"></div>
+
     <nav class="app-nav"> <button type="button" class="nav-button" data-section="schedule-section"><span class="icon icon-horario"></span>Horários</button> <button type="button" class="nav-button" data-section="schools-section"><span class="icon icon-escola"></span>Escolas</button> <button type="button" class="nav-button" data-section="classes-section" id="nav-classes-button" disabled><span class="icon icon-turmas"></span>Turmas</button> <button type="button" class="nav-button" data-section="class-details-section" id="nav-details-button" disabled><span class="icon icon-alunos"></span>Detalhes</button> <button type="button" class="nav-button" data-section="tools-section"><span class="icon icon-ferramentas"></span>Ferramentas</button> <button type="button" class="nav-button" data-section="contact-section"><span class="icon icon-contato"></span>Contato</button> <button type="button" class="nav-button" data-section="settings-section"><span class="icon icon-config"></span>Config</button> </nav>
 
-    <!-- Generic Modal -->
-    <div id="generic-modal" class="modal"> <div class="modal-content"> <div class="modal-header"> <h2 id="modal-title">Título do Modal</h2> <button type="button" class="close-button" data-dismiss="modal">×</button> </div> <div id="modal-body" class="modal-body"></div> <div id="modal-footer" class="modal-footer"> <button type="button" data-dismiss="modal" class="secondary">Fechar</button> </div> </div> </div>
+    <div id="generic-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Título do Modal</h2>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+            <div id="modal-footer" class="modal-footer">
+                <button type="button" data-dismiss="modal" class="secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal de Novidades -->
     <div id="whats-new-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="whats-new-title">Novidades da Versão!</h2>
-                <button type="button" class="close-button" id="close-whats-new">&times;</button>
             </div>
             <div class="modal-body" id="whats-new-body">
-                <p>Carregando novidades...</p>
+                <ul>
+                    <li>✨ <strong>Novo Menu Lateral:</strong> Agora você pode escolher entre a barra inferior ou um menu vertical (hambúrguer)!</li>
+                    <li>📱 <strong>Navegação Flexível:</strong> Escolha o estilo que melhor se adapta ao seu uso nas configurações.</li>
+                    <li>🐛 <strong>Correções de UI:</strong> O botão flutuante foi ajustado para não sumir ao mudar o tema e ocupar menos espaço.</li>
+                    <li>👤 <strong>Gestão de Conta:</strong> Nova área de conta nas configurações para facilitar o login e sincronização.</li>
+                </ul>
             </div>
             <div class="modal-footer">
                 <button type="button" id="ok-whats-new">Entendi</button>
@@ -135,7 +197,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="calculator-modal-title">Calculadora Avançada</h2>
-                <button type="button" class="close-button" data-dismiss="modal">×</button>
             </div>
             <div class="modal-body">
                 <div class="calculator-mode-selector">

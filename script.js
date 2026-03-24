@@ -2,6 +2,7 @@ import { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, 
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Seletores Globais (Existentes e Novos) ---
+    let showingWhatsNew = false;
     const mainContent = document.getElementById('main-content');
     const sections = document.querySelectorAll('.section');
     const navButtons = document.querySelectorAll('.nav-button');
@@ -9,10 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
     const modalFooter = document.getElementById('modal-footer');
-    const headerInfo = document.getElementById('header-info');
     const searchInput = document.getElementById('search-input');
     const authButton = document.getElementById('auth-button');
-    const userEmailDisplay = document.getElementById('user-email');
+    const logoutButton = document.getElementById('logout-button');
     const scheduleListContainer = document.getElementById('schedule-list');
     const schoolListContainer = document.getElementById('school-list');
     const classListContainer = document.getElementById('class-list');
@@ -99,6 +99,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const whatsNewModal = document.getElementById('whats-new-modal');
     const whatsNewTitle = document.getElementById('whats-new-title');
     const whatsNewBody = document.getElementById('whats-new-body');
+
+    // --- Novos Seletores para Menu Lateral ---
+    const hamburgerMenuButton = document.getElementById('hamburger-menu-button');
+    const sideMenu = document.getElementById('side-menu');
+    const closeSideMenu = document.getElementById('close-side-menu');
+    const sideMenuOverlay = document.getElementById('side-menu-overlay');
+    const sideNavButtons = document.querySelectorAll('.side-nav-button');
+    const sideNavClassesButton = document.getElementById('side-nav-classes-button');
+    const sideNavDetailsButton = document.getElementById('side-nav-details-button');
+
+    // --- Side Menu Logic ---
+    const openSideMenu = () => {
+        sideMenu.classList.add('open');
+        sideMenuOverlay.classList.add('show');
+    };
+
+    const closeSideMenuFunc = () => {
+        sideMenu.classList.remove('open');
+        sideMenuOverlay.classList.remove('show');
+    };
+
+    if (hamburgerMenuButton) hamburgerMenuButton.addEventListener('click', openSideMenu);
+    if (closeSideMenu) closeSideMenu.addEventListener('click', closeSideMenuFunc);
+    if (sideMenuOverlay) sideMenuOverlay.addEventListener('click', closeSideMenuFunc);
+
+    sideNavButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const sectionId = button.getAttribute('data-section');
+            showSection(sectionId);
+            closeSideMenuFunc();
+        });
+    });
+
     const closeWhatsNewButton = document.getElementById('close-whats-new');
     const okWhatsNewButton = document.getElementById('ok-whats-new');
     const showWhatsNewManualButton = document.getElementById('show-whats-new-manual-button');
@@ -125,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let scheduleUpdateInterval = null;
 
     // ATUALIZADO: Versão do App
-    const CURRENT_APP_VERSION = '1.8.0';
+    const CURRENT_APP_VERSION = '1.8.1';
 
     const DATA_STORAGE_KEY = 'superProfessorProData_v15'; // Mantido por enquanto, mas a estrutura interna mudou
     const OLD_DATA_STORAGE_KEY_V14 = 'superProfessorProData_v14';
@@ -173,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 appData.schedule = appData.schedule || [];
                 appData.settings = appData.settings || {};
                 appData.settings.theme = appData.settings.theme || 'theme-light';
+                appData.settings.navStyle = appData.settings.navStyle || 'fixed';
                 appData.settings.globalNotificationsEnabled = appData.settings.globalNotificationsEnabled !== undefined ? appData.settings.globalNotificationsEnabled : true;
                 appData.settings.notificationSoundEnabled = appData.settings.notificationSoundEnabled !== undefined ? appData.settings.notificationSoundEnabled : true;
                 appData.settings.customNotificationSound = appData.settings.customNotificationSound || null;
@@ -236,9 +270,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Funções Utilitárias ---
     const generateId = (prefix = 'id') => `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const applyTheme = (themeName) => { document.body.className = themeName || 'theme-light'; appData.settings.theme = themeName; document.querySelectorAll('.theme-button').forEach(btn => { btn.style.border = btn.dataset.theme === themeName ? '2px solid var(--accent-primary)' : 'none'; }); };
-    const showSection = (sectionId) => { sections.forEach(section => section.classList.toggle('active', section.id === sectionId)); navButtons.forEach(button => button.classList.toggle('active', button.dataset.section === sectionId)); currentSection = sectionId; navClassesButton.disabled = !currentSchoolId; navDetailsButton.disabled = !currentClassId; updateHeaderInfo(); document.querySelectorAll('.fab-button').forEach(fab => fab.classList.add('hidden')); let fabToShow = null; if (sectionId === 'schedule-section') fabToShow = addScheduleButton; else if (sectionId === 'schools-section') fabToShow = addSchoolButton; else if (sectionId === 'classes-section') fabToShow = addClassButton; if (fabToShow) fabToShow.classList.remove('hidden'); mainContent.scrollTop = 0; saveAppState(); if (sectionId === 'settings-section') { updateNotificationSettingsUI(); updateCustomSoundUI(); } if (sectionId === 'schedule-section') { startScheduleUpdates(); } else { stopScheduleUpdates(); } };
-    const updateHeaderInfo = () => { let info = ''; if (currentSection === 'classes-section' && currentSchoolId) { const school = findSchoolById(currentSchoolId); info = `Escola: ${school?.name || '?'}`; } else if (currentSection === 'class-details-section' && currentClassId) { const classData = findClassById(currentClassId); const school = findSchoolById(classData?.schoolId); info = `Escola: ${school?.name || '?'} / Turma: ${classData?.name || '?'}`; } else if (currentSection === 'tools-section') { info = 'Ferramentas'; } else if (currentSection === 'schedule-section') { info = 'Meus Horários'; } else if (currentSection === 'contact-section') { info = 'Contato'; } else if (currentSection === 'settings-section') { info = 'Configurações'; } else if (currentSection === 'schools-section') { info = 'Minhas Escolas'; } headerInfo.textContent = info; headerInfo.title = info; };
-    const showModal = (title, contentHtml, footerButtonsHtml = '', modalClass = '') => { modalTitle.textContent = title; modalBody.innerHTML = contentHtml; const defaultFooter = `<button type="button" data-dismiss="modal" class="secondary">Fechar</button>`; modalFooter.innerHTML = footerButtonsHtml ? footerButtonsHtml + defaultFooter : defaultFooter; modal.className = 'modal'; if (modalClass) modal.classList.add(modalClass); modal.classList.add('show'); modal.querySelectorAll('[data-dismiss="modal"]').forEach(btn => { const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn); newBtn.addEventListener('click', hideModal); }); };
+    const applyNavStyle = (navStyle) => {
+        appData.settings.navStyle = navStyle || 'fixed';
+        document.body.classList.remove('nav-side');
+        
+        if (appData.settings.navStyle === 'side') {
+            document.body.classList.add('nav-side');
+        }
+        
+        const select = document.getElementById('nav-style-select');
+        if (select) select.value = appData.settings.navStyle;
+    };
+    const showSection = (sectionId) => { 
+        sections.forEach(section => section.classList.toggle('active', section.id === sectionId)); 
+        navButtons.forEach(button => button.classList.toggle('active', button.dataset.section === sectionId)); 
+        sideNavButtons.forEach(button => button.classList.toggle('active', button.dataset.section === sectionId));
+        
+        currentSection = sectionId; 
+        navClassesButton.disabled = !currentSchoolId; 
+        navDetailsButton.disabled = !currentClassId; 
+        sideNavClassesButton.disabled = !currentSchoolId;
+        sideNavDetailsButton.disabled = !currentClassId;
+        
+        document.querySelectorAll('.fab-button').forEach(fab => { if (fab.id !== 'floating-nav-toggle') fab.classList.add('hidden'); }); 
+        let fabToShow = null; 
+        if (sectionId === 'schedule-section') fabToShow = addScheduleButton; 
+        else if (sectionId === 'schools-section') fabToShow = addSchoolButton; 
+        else if (sectionId === 'classes-section') fabToShow = addClassButton; 
+        
+        if (fabToShow) fabToShow.classList.remove('hidden'); 
+        mainContent.scrollTop = 0; 
+        saveAppState(); 
+        if (sectionId === 'settings-section') { updateNotificationSettingsUI(); updateCustomSoundUI(); } 
+        if (sectionId === 'schedule-section') { startScheduleUpdates(); } else { stopScheduleUpdates(); } 
+    };
+    const showModal = (title, contentHtml, footerButtonsHtml = '', modalClass = '') => { 
+        modalTitle.textContent = title; 
+        modalBody.innerHTML = contentHtml; 
+        const defaultFooter = `<button type="button" data-dismiss="modal" class="secondary">Fechar</button>`; 
+        // Otimização: Se já houver um botão de fechar/cancelar ou for um modal de decisão, não adiciona o "Fechar" padrão
+        if (footerButtonsHtml.includes('data-dismiss="modal"') || 
+            modalClass === 'login-prompt-modal' || 
+            modalClass === 'sync-conflict-modal') {
+            modalFooter.innerHTML = footerButtonsHtml;
+        } else {
+            modalFooter.innerHTML = footerButtonsHtml ? footerButtonsHtml + defaultFooter : defaultFooter; 
+        }
+        modal.className = 'modal'; 
+        if (modalClass) modal.classList.add(modalClass); 
+        modal.classList.add('show'); 
+        
+
+        modal.querySelectorAll('[data-dismiss="modal"]').forEach(btn => { 
+            const newBtn = btn.cloneNode(true); 
+            btn.parentNode.replaceChild(newBtn, btn); 
+            newBtn.addEventListener('click', hideModal); 
+        }); 
+    };
     const hideModal = () => { if (stopwatchInterval) { clearInterval(stopwatchInterval); stopwatchInterval = null; isStopwatchRunning = false; } modal.classList.remove('show'); calculatorModal?.classList.remove('show'); setTimeout(() => { modalTitle.textContent = ''; modalBody.innerHTML = ''; modalFooter.innerHTML = ''; modal.className = 'modal'; }, 300); };
     const findSchoolById = (id) => appData.schools.find(s => s.id === id);
     const findClassById = (id) => appData.classes.find(c => c.id === id);
@@ -251,6 +339,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
     const getDayOfWeek = (year, month, day) => new Date(year, month, day).getDay();
     const sanitizeHTML = (str) => { if (str === null || str === undefined) return ''; const temp = document.createElement('div'); temp.textContent = String(str); return temp.innerHTML; };
+    const customConfirm = (message) => {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay show';
+            overlay.style.zIndex = '9999';
+            overlay.innerHTML = `
+                <div class="modal-content" style="max-width: 400px; text-align: center;">
+                    <h3 style="margin-top: 0;">Confirmação</h3>
+                    <p style="white-space: pre-wrap; margin: 20px 0;">${sanitizeHTML(message)}</p>
+                    <div style="display: flex; justify-content: center; gap: 10px;">
+                        <button class="custom-confirm-yes danger">Sim</button>
+                        <button class="custom-confirm-no secondary">Não</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            
+            overlay.querySelector('.custom-confirm-yes').onclick = () => {
+                document.body.removeChild(overlay);
+                resolve(true);
+            };
+            overlay.querySelector('.custom-confirm-no').onclick = () => {
+                document.body.removeChild(overlay);
+                resolve(false);
+            };
+        });
+    };
+
+    const customAlert = (message) => {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay show';
+            overlay.style.zIndex = '9999';
+            overlay.innerHTML = `
+                <div class="modal-content" style="max-width: 400px; text-align: center;">
+                    <h3 style="margin-top: 0;">Aviso</h3>
+                    <p style="white-space: pre-wrap; margin: 20px 0;">${sanitizeHTML(message)}</p>
+                    <div style="display: flex; justify-content: center;">
+                        <button class="custom-alert-ok primary">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            
+            overlay.querySelector('.custom-alert-ok').onclick = () => {
+                document.body.removeChild(overlay);
+                resolve(true);
+            };
+        });
+    };
     function getContrastYIQ(hexcolor){ if (!hexcolor || hexcolor.length < 4) return '#000000'; hexcolor = hexcolor.replace("#", ""); let r,g,b; if (hexcolor.length === 3) { r = parseInt(hexcolor.substr(0,1)+hexcolor.substr(0,1), 16); g = parseInt(hexcolor.substr(1,1)+hexcolor.substr(1,1), 16); b = parseInt(hexcolor.substr(2,1)+hexcolor.substr(2,1), 16); } else if (hexcolor.length === 6) { r = parseInt(hexcolor.substr(0,2), 16); g = parseInt(hexcolor.substr(2,2), 16); b = parseInt(hexcolor.substr(4,2), 16); } else { return '#000000'; } const yiq = ((r*299)+(g*587)+(b*114))/1000; return (yiq >= 128) ? '#000000' : '#FFFFFF'; }
     const getGradeBackgroundColor = (value, ranges) => { if (value === null || value === undefined || !Array.isArray(ranges) || ranges.length === 0) { return null; } const numericValue = parseFloat(value); if (isNaN(numericValue)) { return null; } for (const range of ranges) { const min = parseFloat(range.min); const max = parseFloat(range.max); if (!isNaN(min) && !isNaN(max) && numericValue >= min && numericValue <= max) { return range.color; } } return null; };
     const applyGradeColor = (element, value, ranges) => { const bgColor = getGradeBackgroundColor(value, ranges); if (bgColor) { element.style.backgroundColor = bgColor; element.style.color = getContrastYIQ(bgColor); } else { element.style.backgroundColor = ''; element.style.color = ''; } };
@@ -351,11 +489,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const openSchoolModal = (schoolIdToEdit = null) => { const isEditing = schoolIdToEdit !== null; const schoolData = isEditing ? findSchoolById(schoolIdToEdit) : {}; const title = isEditing ? 'Editar Escola' : 'Nova Escola'; const modalContent = `<form id="school-form"><input type="hidden" id="school-id" value="${isEditing ? schoolIdToEdit : ''}"><div class="form-group"><label for="school-name">Nome:</label><input type="text" id="school-name" required value="${sanitizeHTML(schoolData.name || '')}"></div></form>`; const footerButtons = `<button type="button" id="save-school-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; showModal(title, modalContent, footerButtons); document.getElementById('save-school-button').addEventListener('click', saveSchool); };
     const saveSchool = () => { const form = document.getElementById('school-form'); if (!form || !form.checkValidity()) { alert('Preencha o nome da escola.'); form?.reportValidity(); return; } const id = document.getElementById('school-id').value; const newSchoolData = { id: id || generateId('sch'), name: document.getElementById('school-name').value.trim() }; if (id) { const index = appData.schools.findIndex(s => s.id === id); if (index > -1) appData.schools[index] = newSchoolData; } else { appData.schools.push(newSchoolData); } saveData(); renderSchoolList(); if(currentSection === 'schedule-section') renderScheduleList(); hideModal(); };
     const deleteSchool = (id) => { const classesToDelete = appData.classes.filter(c => c.schoolId === id).map(c => c.id); appData.schools = appData.schools.filter(s => s.id !== id); appData.classes = appData.classes.filter(c => c.schoolId !== id); appData.students = appData.students.filter(s => !classesToDelete.includes(s.classId)); appData.schedule = appData.schedule.filter(sch => sch.schoolId !== id); if (currentSchoolId === id) { currentSchoolId = null; currentClassId = null; showSection('schools-section'); } saveData(); renderSchoolList(); if (currentSection === 'schedule-section') renderScheduleList(); if (currentSection === 'classes-section' && !currentSchoolId) { showSection('schools-section'); } else if (currentSection === 'classes-section') { renderClassList(currentSchoolId); } saveAppState(); };
-    const selectSchool = (id) => { currentSchoolId = id; currentClassId = null; renderClassList(id); navClassesButton.disabled = false; navDetailsButton.disabled = true; updateHeaderInfo(); saveAppState(); };
+    const selectSchool = (id) => { currentSchoolId = id; currentClassId = null; renderClassList(id); navClassesButton.disabled = false; navDetailsButton.disabled = true; saveAppState(); };
     const openClassModal = (classIdToEdit = null) => { if (!currentSchoolId) return; const isEditing = classIdToEdit !== null; const classData = isEditing ? findClassById(classIdToEdit) : {}; const title = isEditing ? 'Editar Turma' : 'Nova Turma'; const schoolName = findSchoolById(currentSchoolId)?.name || '?'; const modalContent = `<form id="class-form"><input type="hidden" id="class-id" value="${isEditing ? classIdToEdit : ''}"><p class="mb-1"><strong>Escola:</strong> ${sanitizeHTML(schoolName)}</p><div class="form-group"><label for="class-name">Nome Turma:</label><input type="text" id="class-name" required value="${sanitizeHTML(classData.name || '')}"></div><div class="form-group"><label for="class-subject">Matéria:</label><input type="text" id="class-subject" value="${sanitizeHTML(classData.subject || '')}"></div><div class="form-group d-flex"><div style="flex: 1; margin-right: 5px;"><label for="class-schedule">Horário:</label><input type="time" id="class-schedule" value="${classData.schedule || ''}"></div><div style="flex: 1; margin-left: 5px;"><label for="class-shift">Turno:</label><select id="class-shift"><option value="">--</option><option value="Manhã" ${classData.shift === 'Manhã' ? 'selected' : ''}>Manhã</option><option value="Tarde" ${classData.shift === 'Tarde' ? 'selected' : ''}>Tarde</option><option value="Noite" ${classData.shift === 'Noite' ? 'selected' : ''}>Noite</option><option value="Integral" ${classData.shift === 'Integral' ? 'selected' : ''}>Integral</option></select></div></div></form>`; const footerButtons = `<button type="button" id="save-class-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; showModal(title, modalContent, footerButtons); document.getElementById('save-class-button').addEventListener('click', saveClass); };
     const saveClass = () => { const form = document.getElementById('class-form'); if (!form || !form.checkValidity() || !currentSchoolId) { alert('Preencha nome da turma e verifique escola.'); form?.reportValidity(); return; } const id = document.getElementById('class-id').value; const isEditing = !!id; const existingData = isEditing ? findClassById(id) : {}; const newClassData = { id: id || generateId('cls'), schoolId: currentSchoolId, name: document.getElementById('class-name').value.trim(), subject: document.getElementById('class-subject').value.trim(), schedule: document.getElementById('class-schedule').value, shift: document.getElementById('class-shift').value, notes: existingData?.notes || '', gradeStructure: existingData?.gradeStructure || [], lessonPlans: existingData?.lessonPlans || {}, classroomLayout: existingData?.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }, representativeId: existingData?.representativeId || null, viceRepresentativeId: existingData?.viceRepresentativeId || null }; if (isEditing) { const index = appData.classes.findIndex(c => c.id === id); if (index > -1) appData.classes[index] = newClassData; } else { appData.classes.push(newClassData); } saveData(); renderClassList(currentSchoolId); if (id && id === currentClassId && currentSection === 'class-details-section') { selectClass(id, true); } hideModal(); };
-    const deleteClass = (id) => { appData.classes = appData.classes.filter(c => c.id !== id); appData.students = appData.students.filter(s => s.classId !== id); if (currentClassId === id) { currentClassId = null; showSection('classes-section'); } saveData(); renderClassList(currentSchoolId); if (!currentClassId) navDetailsButton.disabled = true; updateHeaderInfo(); saveAppState(); };
-    const selectClass = (id, forceReload = false) => { if (currentClassId !== id || forceReload) { console.log(`Selecionando Turma: ${id}, Forçar Recarga: ${forceReload}`); if (tempClassroomLayout) { cancelClassroomMapEdit(); } currentClassId = id; const selectedClass = findClassById(id); if (selectedClass) { classDetailsTitle.textContent = `${sanitizeHTML(selectedClass.name)} (${sanitizeHTML(selectedClass.subject || 'Sem matéria')})`; renderStudentList(id); renderGradeSets(id); const currentDate = attendanceDateInput.value || getCurrentDateString(); attendanceDateInput.value = currentDate; lessonPlanDateInput.value = currentDate; renderAttendanceTable(id, currentDate); renderLessonPlan(id, currentDate); renderClassroomMap(id); classNotesContent.textContent = sanitizeHTML(selectedClass.notes || 'Nenhuma anotação.'); classNotesTextarea.value = selectedClass.notes || ''; classNotesEdit.classList.add('hidden'); classNotesDisplay.classList.remove('hidden'); if (currentSection === 'classes-section') renderClassList(selectedClass.schoolId); navDetailsButton.disabled = false; classDetailsSection.querySelectorAll('.card').forEach(card => { card.classList.remove('collapsed'); const toggleBtn = card.querySelector('.card-toggle-button .icon'); if (toggleBtn) { toggleBtn.classList.remove('icon-chevron-down'); toggleBtn.classList.add('icon-chevron-up'); if(toggleBtn.parentElement) toggleBtn.parentElement.title = 'Esconder'; } }); } else { currentClassId = null; classDetailsTitle.textContent = "Erro: Turma não encontrada"; studentListContainer.innerHTML = '<p>Erro</p>'; gradesTableContainer.innerHTML = '<p>Erro</p>'; attendanceTableContainer.innerHTML = '<p>Erro</p>'; lessonPlanTextarea.value = ''; saveLessonPlanButton.classList.add('hidden'); classNotesContent.textContent = 'Erro'; classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro ao carregar mapa.</p>'; navDetailsButton.disabled = true; } updateHeaderInfo(); saveAppState(); } else { console.log(`Turma ${id} já selecionada.`); } };
+    const deleteClass = (id) => { appData.classes = appData.classes.filter(c => c.id !== id); appData.students = appData.students.filter(s => s.classId !== id); if (currentClassId === id) { currentClassId = null; showSection('classes-section'); } saveData(); renderClassList(currentSchoolId); if (!currentClassId) navDetailsButton.disabled = true; saveAppState(); };
+    const selectClass = (id, forceReload = false) => { if (currentClassId !== id || forceReload) { console.log(`Selecionando Turma: ${id}, Forçar Recarga: ${forceReload}`); if (tempClassroomLayout) { cancelClassroomMapEdit(); } currentClassId = id; const selectedClass = findClassById(id); if (selectedClass) { classDetailsTitle.textContent = `${sanitizeHTML(selectedClass.name)} (${sanitizeHTML(selectedClass.subject || 'Sem matéria')})`; renderStudentList(id); renderGradeSets(id); const currentDate = attendanceDateInput.value || getCurrentDateString(); attendanceDateInput.value = currentDate; lessonPlanDateInput.value = currentDate; renderAttendanceTable(id, currentDate); renderLessonPlan(id, currentDate); renderClassroomMap(id); classNotesContent.textContent = sanitizeHTML(selectedClass.notes || 'Nenhuma anotação.'); classNotesTextarea.value = selectedClass.notes || ''; classNotesEdit.classList.add('hidden'); classNotesDisplay.classList.remove('hidden'); if (currentSection === 'classes-section') renderClassList(selectedClass.schoolId); navDetailsButton.disabled = false; classDetailsSection.querySelectorAll('.card').forEach(card => { card.classList.remove('collapsed'); const toggleBtn = card.querySelector('.card-toggle-button .icon'); if (toggleBtn) { toggleBtn.classList.remove('icon-chevron-down'); toggleBtn.classList.add('icon-chevron-up'); if(toggleBtn.parentElement) toggleBtn.parentElement.title = 'Esconder'; } }); } else { currentClassId = null; classDetailsTitle.textContent = "Erro: Turma não encontrada"; studentListContainer.innerHTML = '<p>Erro</p>'; gradesTableContainer.innerHTML = '<p>Erro</p>'; attendanceTableContainer.innerHTML = '<p>Erro</p>'; lessonPlanTextarea.value = ''; saveLessonPlanButton.classList.add('hidden'); classNotesContent.textContent = 'Erro'; classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro ao carregar mapa.</p>'; navDetailsButton.disabled = true; } saveAppState(); } else { console.log(`Turma ${id} já selecionada.`); } };
     const openStudentModal = (studentIdToEdit = null) => {
         if (!currentClassId) return;
         const isEditing = studentIdToEdit !== null;
@@ -661,14 +799,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const stopScheduleUpdates = () => { if (scheduleUpdateInterval) { clearInterval(scheduleUpdateInterval); scheduleUpdateInterval = null; console.log("Stopped schedule UI updates."); } };
 
     // Funções do Modal de Novidades
-    const showWhatsNew = () => {
+    function showWhatsNew() {
         if (!whatsNewModal || !whatsNewTitle || !whatsNewBody) {
             console.error("Elementos do modal de novidades não encontrados!");
             return;
         }
-        whatsNewTitle.textContent = `Novidades da Versão ${CURRENT_APP_VERSION}!`;
-        // **** ATUALIZADO: Conteúdo HTML das novidades ****
-        whatsNewBody.innerHTML = `
+        
+        showingWhatsNew = true;
+        const isLoggedIn = !!auth.currentUser;
+        const lastSeenVersion = localStorage.getItem('lastSeenAppVersion');
+        
+        // Determinar o título com base no estado
+        if (lastSeenVersion === null) {
+            whatsNewTitle.textContent = "Bem-vindo ao Super Professor Pro! 🚀";
+        } else if (lastSeenVersion !== CURRENT_APP_VERSION) {
+            whatsNewTitle.textContent = `Novidades da Versão ${CURRENT_APP_VERSION}!`;
+        } else {
+            whatsNewTitle.textContent = "Mantenha seus dados seguros! ☁️";
+        }
+        
+        let newsContent = `
             <p>Confira as últimas melhorias e funcionalidades adicionadas para facilitar ainda mais seu dia a dia:</p>
             
             <h4 style="color: #28a745;">🌐 Uso Offline e Nuvem</h4>
@@ -681,6 +831,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <h4>✨ Novas Funcionalidades</h4>
             <ul>
+                <li><strong>☰ Novo Menu Lateral:</strong> Agora você pode escolher entre a barra inferior clássica ou um menu lateral (hambúrguer) para ganhar mais espaço na tela!</li>
+                <li><strong>🎨 Temas e Cores:</strong> O menu lateral agora se adapta perfeitamente ao seu tema escolhido, com cores sólidas e elegantes.</li>
+                <li><strong>🚀 Interface Limpa:</strong> Removemos o botão flutuante para uma experiência mais intuitiva e agradável.</li>
                 <li><strong>👥 Capacidade Ampliada:</strong> Agora você pode cadastrar até <strong>100 alunos</strong> por turma!</li>
                 <li><strong>🇧🇷 Indicador de Programas Sociais:</strong> Identifique visualmente alunos participantes de programas como Bolsa Família e Pé de Meia.</li>
                 <li><strong>📊 Quórum da Escola:</strong> Veja a porcentagem de presença geral diretamente na lista de escolas.</li>
@@ -695,20 +848,78 @@ document.addEventListener('DOMContentLoaded', () => {
                 <li><strong>📅 Ordenação Automática:</strong> Seus horários agora se organizam sozinhos por hora.</li>
                 <li><strong>🐛 Estabilidade:</strong> Diversos erros corrigidos para uma experiência mais suave.</li>
             </ul>
-            
-            <div style="background: #fff3cd; padding: 10px; border-radius: 8px; border: 1px solid #ffeeba; margin-top: 1rem;">
-                <p style="margin: 0; font-size: 0.85rem; color: #856404;"><strong>Atenção:</strong> Limpar o cache do navegador ou formatar o celular sem ter sincronizado com a nuvem pode resultar em perda de dados.</p>
-            </div>
-            
-            <p style="margin-top: 1rem; text-align: center; font-style: italic;">Sua produtividade é nossa prioridade! ❤️</p>
         `;
+
+        // Se não estiver logado, adicionamos o destaque sobre o login
+        if (!isLoggedIn) {
+            sessionStorage.setItem('loginPromptShown', 'true');
+            const hasData = appData.schools.length > 0 || appData.schedule.length > 0;
+            newsContent += `
+                <div style="background: var(--bg-tertiary); padding: 15px; border-radius: 12px; margin-top: 1.5rem; border: 1px solid var(--accent-primary); box-shadow: 0 4px 12px var(--shadow-color);">
+                    <h4 style="margin-top: 0; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
+                        <span class="icon icon-config"></span> Sincronize seus dados! ☁️
+                    </h4>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">${hasData ? 'Vimos que você já tem dados cadastrados! Para nunca perdê-los, recomendamos criar uma conta.' : 'Para que seus dados fiquem sempre salvos e acessíveis de qualquer dispositivo, recomendamos criar uma conta agora.'}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">✨ <strong>Sincronização automática:</strong> Seus dados serão salvos na nuvem instantaneamente.</p>
+                </div>
+            `;
+            
+            // Alteramos o rodapé para os botões de login
+            const modalFooter = whatsNewModal.querySelector('.modal-footer');
+            if (modalFooter) {
+                modalFooter.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                        <button type="button" id="whats-new-login-button" class="primary w-full" style="padding: 14px; font-weight: bold; font-size: 1rem;">Fazer Login / Criar Conta</button>
+                        <button type="button" id="whats-new-skip-button" class="secondary w-full" style="padding: 10px; font-size: 0.85rem; border: none; background: transparent; color: var(--text-secondary);">Continuar sem conta (apenas local)</button>
+                    </div>
+                `;
+                
+                document.getElementById('whats-new-login-button')?.addEventListener('click', () => {
+                    hideWhatsNew();
+                    showSection('settings-section');
+                    setTimeout(() => { authButton.click(); }, 100);
+                });
+                
+                document.getElementById('whats-new-skip-button')?.addEventListener('click', hideWhatsNew);
+            }
+        } else {
+            // Se já estiver logado, mantemos o botão padrão
+            const modalFooter = whatsNewModal.querySelector('.modal-footer');
+            if (modalFooter) {
+                modalFooter.innerHTML = `<button type="button" id="ok-whats-new">Entendi</button>`;
+                document.getElementById('ok-whats-new')?.addEventListener('click', hideWhatsNew);
+            }
+        }
+
+        whatsNewBody.innerHTML = newsContent;
         whatsNewModal.classList.add('show');
     };
 
-    const hideWhatsNew = () => { if (whatsNewModal) { whatsNewModal.classList.remove('show'); } };
+    function hideWhatsNew() { 
+        if (whatsNewModal) { 
+            whatsNewModal.classList.remove('show'); 
+            showingWhatsNew = false;
+            console.log("Whats New closed, showingWhatsNew set to false.");
+        } 
+    };
 
     // --- Event Listeners Globais e Específicos ---
-    navButtons.forEach(button => { button.addEventListener('click', () => { const targetSection = button.dataset.section; if (button.disabled) return; showSection(targetSection); }); });
+    navButtons.forEach(button => { 
+        button.addEventListener('click', () => { 
+            const targetSection = button.dataset.section; 
+            if (button.disabled) return; 
+            showSection(targetSection); 
+        }); 
+    });
+
+    const navStyleSelect = document.getElementById('nav-style-select');
+    if (navStyleSelect) {
+        navStyleSelect.addEventListener('change', (e) => {
+            applyNavStyle(e.target.value);
+            saveData();
+        });
+    }
+
     addScheduleButton.addEventListener('click', () => openScheduleModal());
     addSchoolButton.addEventListener('click', () => openSchoolModal());
     addClassButton.addEventListener('click', () => { if(currentSchoolId) openClassModal(); else alert("Selecione uma escola primeiro!"); });
@@ -793,53 +1004,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Inicializações Finais
-    updateSyncStatusUI();
-    const dataWasLoaded = loadData();
-    restoreAppState();
-    renderScheduleList();
-    renderSchoolList();
-    applyTheme(appData.settings.theme);
-    updateNotificationSettingsUI();
-    updateCustomSoundUI();
-    const todayStr = getCurrentDateString();
-    if (attendanceDateInput) attendanceDateInput.value = todayStr;
-    if (lessonPlanDateInput) lessonPlanDateInput.value = todayStr;
-    if (currentSection === 'classes-section' && currentSchoolId) { renderClassList(currentSchoolId); }
-    else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); }
-    showSection(currentSection || 'schedule-section');
-    if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
-
-    // Lógica de Verificação da Versão
-    const lastSeenVersion = localStorage.getItem('lastSeenAppVersion');
-    console.log('Versão Atual do App:', CURRENT_APP_VERSION);
-    console.log('Última Versão Vista pelo Usuário:', lastSeenVersion);
-    if (lastSeenVersion !== CURRENT_APP_VERSION) {
-        console.log('Nova versão detectada! Mostrando modal de novidades...');
-        showWhatsNew();
-        localStorage.setItem('lastSeenAppVersion', CURRENT_APP_VERSION);
-        console.log('Versão vista atualizada no localStorage para:', CURRENT_APP_VERSION);
-    } else {
-        console.log('Usuário já viu esta versão ou é a primeira vez.');
-        if (!lastSeenVersion) {
-            localStorage.setItem('lastSeenAppVersion', CURRENT_APP_VERSION);
-            console.log('Salvando versão inicial no localStorage:', CURRENT_APP_VERSION);
-        }
-    }
-
     // Firebase Auth Logic
     let isSyncing = false;
     
     const saveToFirestore = async () => {
         if (!auth.currentUser || isSyncing) return;
+        if (!navigator.onLine) {
+            console.log("Offline: Skipping Firestore save.");
+            return;
+        }
         try {
             isSyncing = true;
             const dataToSave = JSON.parse(JSON.stringify(appData));
             if (dataToSave.settings) {
                 delete dataToSave.settings.customNotificationSound; // Don't save large base64 to Firestore
             }
-            await setDoc(doc(db, 'users', auth.currentUser.uid), dataToSave);
-            console.log("Data saved to Firestore.");
+            const path = 'users/' + auth.currentUser.uid;
+            try {
+                await setDoc(doc(db, 'users', auth.currentUser.uid), dataToSave);
+                console.log("Data saved to Firestore.");
+            } catch (err) {
+                throw handleFirestoreError(err, OperationType.WRITE, path);
+            }
         } catch (error) {
             console.error("Error saving to Firestore:", error);
         } finally {
@@ -848,11 +1034,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const syncDataWithFirestore = async (user) => {
+    const OperationType = {
+        CREATE: 'create',
+        UPDATE: 'update',
+        DELETE: 'delete',
+        LIST: 'list',
+        GET: 'get',
+        WRITE: 'write',
+    };
+
+    function handleFirestoreError(error, operationType, path) {
+        const errInfo = {
+            error: error instanceof Error ? error.message : String(error),
+            authInfo: {
+                userId: auth.currentUser?.uid,
+                email: auth.currentUser?.email,
+                emailVerified: auth.currentUser?.emailVerified,
+                isAnonymous: auth.currentUser?.isAnonymous,
+                tenantId: auth.currentUser?.tenantId,
+                providerInfo: auth.currentUser?.providerData.map(provider => ({
+                    providerId: provider.providerId,
+                    displayName: provider.displayName,
+                    email: provider.email,
+                    photoUrl: provider.photoURL
+                })) || []
+            },
+            operationType,
+            path
+        };
+        console.error('Firestore Error: ', JSON.stringify(errInfo));
+        // Se for erro de permissão, lançamos o erro formatado conforme as diretrizes
+        if (errInfo.error.includes('Missing or insufficient permissions')) {
+            throw new Error(JSON.stringify(errInfo));
+        }
+        // Para outros erros, apenas logamos e retornamos o erro original
+        return error;
+    }
+
+    async function syncDataWithFirestore(user) {
         if (!user) return;
+        if (!navigator.onLine) {
+            console.log("Offline: Skipping Firestore sync.");
+            if (syncStatusText) syncStatusText.innerHTML = 'Status: <span style="color: #6c757d;">Offline (Aguardando conexão)</span>';
+            return;
+        }
         try {
             const docRef = doc(db, 'users', user.uid);
-            const docSnap = await getDoc(docRef);
+            let docSnap;
+            try {
+                docSnap = await getDoc(docRef);
+            } catch (err) {
+                // Se falhar por estar offline, tentamos do cache
+                if (err.message.includes('offline')) {
+                    console.warn("Firestore offline, skipping sync.");
+                    return;
+                }
+                throw handleFirestoreError(err, OperationType.GET, 'users/' + user.uid);
+            }
             
             const localHasData = appData.schools.length > 0;
 
@@ -961,21 +1199,30 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('online', updateSyncStatusUI);
     window.addEventListener('offline', updateSyncStatusUI);
 
+    const loggedOutState = document.getElementById('logged-out-state');
+    const loggedInState = document.getElementById('logged-in-state');
+    const settingsUserEmail = document.getElementById('settings-user-email');
+
+    // showLoginPrompt removido e integrado ao showWhatsNew
+
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            userEmailDisplay.textContent = user.email;
-            authButton.textContent = 'Logout';
+            if (settingsUserEmail) settingsUserEmail.textContent = user.email;
+            if (loggedOutState) loggedOutState.style.display = 'none';
+            if (loggedInState) loggedInState.style.display = 'block';
             syncDataWithFirestore(user);
         } else {
-            const wasLoggedIn = userEmailDisplay.textContent !== '';
-            userEmailDisplay.textContent = '';
-            authButton.textContent = 'Login';
+            const wasLoggedIn = settingsUserEmail && settingsUserEmail.textContent !== '';
+            if (settingsUserEmail) settingsUserEmail.textContent = '';
+            if (loggedOutState) loggedOutState.style.display = 'block';
+            if (loggedInState) loggedInState.style.display = 'none';
             
             if (wasLoggedIn) {
                 // Reset data when logged out to ensure privacy
                 appData = {
                     schools: [], classes: [], students: [], schedule: [],
-                    settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null }
+                    settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null, navStyle: 'fixed' }
                 };
                 currentSchoolId = null;
                 currentClassId = null;
@@ -987,38 +1234,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderScheduleList();
                 renderSchoolList();
                 applyTheme(appData.settings.theme);
+                applyNavStyle(appData.settings.navStyle);
                 showSection('schedule-section');
+            } else {
+                // Se não estava logado e acabou de entrar, verificamos se mostramos o prompt
+                // Mas apenas se NÃO estivermos mostrando o modal de novidades (que chamará o prompt ao fechar)
+                if (!showingWhatsNew && !sessionStorage.getItem('loginPromptShown')) {
+                    console.log("Not showing Whats New, triggering login prompt delay...");
+                    setTimeout(showWhatsNew, 2000);
+                } else {
+                    console.log("Whats New is active or already shown, skipping initial prompt.");
+                }
             }
         }
     });
 
+    if (logoutButton) {
+        logoutButton.addEventListener('click', async () => {
+            const confirmLogout = await customConfirm("Deseja realmente desconectar/trocar de conta?\n\nAviso: Certifique-se de que seus dados foram sincronizados. Alterações não salvas podem ser perdidas.");
+            if (confirmLogout) {
+                signOut(auth).then(() => {
+                    customAlert('Deslogado com sucesso!');
+                }).catch((error) => {
+                    console.error('Logout error', error);
+                });
+            }
+        });
+    }
+
     authButton.addEventListener('click', () => {
-        if (auth.currentUser) {
-            signOut(auth).then(() => {
-                alert('Deslogado com sucesso!');
-            }).catch((error) => {
-                console.error('Logout error', error);
-            });
-        } else {
+        if (!auth.currentUser) {
             const modalContent = `
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-email">Email:</label>
-                        <input type="email" id="login-email" required>
+                <form id="login-form" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Faça login para sincronizar seus dados na nuvem e acessá-los de qualquer dispositivo.</p>
                     </div>
-                    <div class="form-group">
-                        <label for="login-password">Senha:</label>
-                        <input type="password" id="login-password" required>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px; background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <button type="button" id="btn-login-google" class="primary" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; font-size: 1rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+                            Entrar com Google
+                        </button>
+                        <p style="text-align: center; font-size: 0.8rem; color: #28a745; margin: 0; font-weight: bold;">✨ Melhor método e mais seguro</p>
                     </div>
-                    <div style="margin-top: 1rem; display: flex; gap: 10px; flex-direction: column;">
-                        <button type="button" id="btn-login-email" class="success">Entrar com Email</button>
-                        <button type="button" id="btn-register-email" class="secondary">Registrar com Email</button>
-                        <hr style="margin: 0.5rem 0;">
-                        <button type="button" id="btn-login-google" class="primary">Entrar com Google</button>
+
+                    <div style="display: flex; align-items: center; margin: 10px 0;">
+                        <hr style="flex-grow: 1; border: none; border-top: 1px solid var(--border-color);">
+                        <span style="padding: 0 10px; color: var(--text-secondary); font-size: 0.8rem;">OU USE EMAIL</span>
+                        <hr style="flex-grow: 1; border: none; border-top: 1px solid var(--border-color);">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 15px; background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="login-email" style="font-weight: 500;">Email:</label>
+                            <input type="email" id="login-email" placeholder="seu@email.com" required style="padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); width: 100%; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="login-password" style="font-weight: 500;">Senha:</label>
+                            <input type="password" id="login-password" placeholder="Sua senha" required style="padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); width: 100%; box-sizing: border-box;">
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 5px;">
+                            <button type="button" id="btn-login-email" class="primary" style="flex: 1; padding: 10px;">Entrar</button>
+                            <button type="button" id="btn-register-email" class="secondary" style="flex: 1; padding: 10px;">Registrar</button>
+                        </div>
                     </div>
                 </form>
             `;
-            showModal('Login', modalContent, '');
+            showModal('Entrar no Super Professor Pro', modalContent, '', 'login-modal-class');
             
             document.getElementById('btn-login-google').addEventListener('click', () => {
                 signInWithPopup(auth, provider).then((result) => {
@@ -1066,5 +1348,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Service Worker
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/pwabuilder-sw.js', { scope: '/' }) .then(registration => { console.log('ServiceWorker registration successful with scope: ', registration.scope); }) .catch(err => { console.log('ServiceWorker registration failed (scope /): ', err); navigator.serviceWorker.register('pwabuilder-sw.js') .then(registration => { console.log('ServiceWorker registration successful with relative path scope: ', registration.scope); }) .catch(err2 => { console.log('ServiceWorker registration failed (relative path): ', err2); if (err2.message.includes('404') || err.message.includes('404')) { console.warn("Service Worker file 'pwabuilder-sw.js' not found. Ensure it's in the accessible root or correct relative path."); } else if (err.message.includes('scope') || err2.message.includes('scope')) { console.warn("Service Worker registration failed due to scope mismatch or security issues. Check HTTPS and path."); } }); }); }); }
+
+    // Inicializações Finais
+    updateSyncStatusUI();
+    const dataWasLoaded = loadData();
+    restoreAppState();
+    renderScheduleList();
+    renderSchoolList();
+    applyTheme(appData.settings.theme);
+    applyNavStyle(appData.settings.navStyle);
+    updateNotificationSettingsUI();
+    updateCustomSoundUI();
+    const todayStr = getCurrentDateString();
+    if (attendanceDateInput) attendanceDateInput.value = todayStr;
+    if (lessonPlanDateInput) lessonPlanDateInput.value = todayStr;
+    if (currentSection === 'classes-section' && currentSchoolId) { renderClassList(currentSchoolId); }
+    else if (currentSection === 'class-details-section' && currentClassId) { selectClass(currentClassId, true); }
+    showSection(currentSection || 'schedule-section');
+    if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
+
+    // Lógica de Verificação da Versão e Login
+    const lastSeenVersion = localStorage.getItem('lastSeenAppVersion');
+    const isNewUser = lastSeenVersion === null;
+    const hasUpdate = lastSeenVersion !== CURRENT_APP_VERSION;
+    const isLoggedOut = !auth.currentUser;
+
+    console.log('Versão Atual do App:', CURRENT_APP_VERSION);
+    console.log('Última Versão Vista pelo Usuário:', lastSeenVersion);
+    
+    // Se for um novo usuário, houver atualização ou estiver deslogado (e não mostrou o prompt nesta sessão)
+    if (isNewUser || hasUpdate || (isLoggedOut && !sessionStorage.getItem('loginPromptShown'))) {
+        showingWhatsNew = true;
+        console.log('Mostrando tela de boas-vindas/novidades...');
+        // Pequeno delay para garantir que o app carregou e não conflitar com outros modais iniciais
+        setTimeout(() => {
+            showWhatsNew();
+            // Só atualizamos a versão vista se realmente houve uma mudança ou é novo
+            if (isNewUser || hasUpdate) {
+                localStorage.setItem('lastSeenAppVersion', CURRENT_APP_VERSION);
+                console.log('Versão vista atualizada no localStorage para:', CURRENT_APP_VERSION);
+            }
+        }, 1000);
+    }
 
 }); // Fim do DOMContentLoaded

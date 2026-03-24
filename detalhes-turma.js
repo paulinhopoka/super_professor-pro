@@ -248,8 +248,8 @@ const ClassDetailsModule = (() => {
 
                 updateUI(currSt, currJust);
 
-                pBtn.addEventListener('click', () => updateAttendanceStatus(stdId, date, 'P'));
-                aBtn.addEventListener('click', () => {
+                pBtn?.addEventListener('click', () => updateAttendanceStatus(stdId, date, 'P'));
+                aBtn?.addEventListener('click', () => {
                     if (attRec.status === 'F') {
                         openJustificationModal(stdId, date);
                     } else {
@@ -846,17 +846,19 @@ const ClassDetailsModule = (() => {
         const clonedDateInput = attendanceDateInput.cloneNode(true);
         attendanceDateInput.parentNode.replaceChild(clonedDateInput, attendanceDateInput);
         attendanceDateInput = clonedDateInput; // Atualiza referência
-        attendanceDateInput.addEventListener('change', (e) => {
+        attendanceDateInput?.addEventListener('change', (e) => {
             if (currentClassId) renderAttendanceTable(currentClassId, e.target.value);
         });
 
 
         // Listener para Salvar Presença (agora dentro do módulo)
         // Remove listener antigo antes de adicionar novo
-        const clonedSaveButton = saveAttendanceButton.cloneNode(true);
-        saveAttendanceButton.parentNode.replaceChild(clonedSaveButton, saveAttendanceButton);
-        saveAttendanceButton = clonedSaveButton; // Atualiza referência
-        saveAttendanceButton.addEventListener('click', () => {
+        const clonedSaveButton = saveAttendanceButton?.cloneNode(true);
+        if (clonedSaveButton) {
+            saveAttendanceButton.parentNode.replaceChild(clonedSaveButton, saveAttendanceButton);
+            saveAttendanceButton = clonedSaveButton; // Atualiza referência
+        }
+        saveAttendanceButton?.addEventListener('click', () => {
             const date = attendanceDateInput.value;
             if (!currentClassId || !date) {
                 alert("Selecione uma turma e uma data.");

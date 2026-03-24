@@ -5,53 +5,64 @@ service cloud.firestore {
     // Assumed Data Model
     // ===============================================================
     //
-    // This security rules file assumes the following data structures:
-    //
     // Collection: users
     // Document ID: {userId} (matches request.auth.uid)
     // Fields:
-    //   - schools: list
-    //   - classes: list
-    //   - students: list
-    //   - schedule: list
-    //   - settings: map
+    //   - uid: string
+    //   - email: string
+    //   - displayName: string
+    //   - lastSeen: timestamp
+    //   - online: bool
+    //   - schools, classes, students, schedule, settings: app data
+    //
+    // Collection: chats
+    // Document ID: {chatId}
+    // Fields:
+    //   - participants: list (uids)
+    //   - participantNames: map (uid -> name)
+    //   - isGroup: bool
+    //   - name: string (optional for groups)
+    //   - lastMessage: string
+    //   - lastMessageAt: timestamp
+    //   - createdAt: timestamp
+    //
+    // Subcollection: chats/{chatId}/messages
+    // Fields:
+    //   - senderId: string
+    //   - senderName: string
+    //   - text: string
+    //   - timestamp: timestamp
     //
     // ===============================================================
 
-    // ===============================================================
-    // Helper Functions
-    // ===============================================================
-    //
-    // Check if the user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
-    //
-    // Check if user owns the resource (for user-owned documents)
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Validate that the document contains only the allowed fields
-    function hasOnlyAllowedFields(fields) {
-      return request.resource.data.keys().hasOnly(fields);
-    }
-
-    // Validate AppData
-    function isValidAppData() {
-      return hasOnlyAllowedFields(['schools', 'classes', 'students', 'schedule', 'settings']) &&
-             (request.resource.data.schools is list || !('schools' in request.resource.data)) &&
-             (request.resource.data.classes is list || !('classes' in request.resource.data)) &&
-             (request.resource.data.students is list || !('students' in request.resource.data)) &&
-             (request.resource.data.schedule is list || !('schedule' in request.resource.data)) &&
-             (request.resource.data.settings is map || !('settings' in request.resource.data));
+    function isParticipant(chatId) {
+      return isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
     }
 
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && isValidAppData();
-      allow update: if isOwner(userId) && isValidAppData();
+      // Permite ler qualquer usuário para encontrar por e-mail ao iniciar chat
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId);
       allow delete: if isOwner(userId);
+    }
+
+    match /chats/{chatId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participants;
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      
+      match /messages/{messageId} {
+        allow read: if isParticipant(chatId);
+        allow create: if isParticipant(chatId) && request.resource.data.senderId == request.auth.uid;
+      }
     }
   }
 }
