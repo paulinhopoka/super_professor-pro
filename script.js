@@ -992,7 +992,126 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleOccupiedSeatClick = (event) => { const clickedSeat = event.currentTarget; if (!tempClassroomLayout || !clickedSeat.classList.contains('occupied')) return; const studentIdToUnassign = clickedSeat.dataset.studentId; const row = parseInt(clickedSeat.dataset.row); const col = parseInt(clickedSeat.dataset.col); if (!studentIdToUnassign) return; const student = findStudentById(studentIdToUnassign); if (confirm(`Desassociar aluno ${sanitizeHTML(student?.name || studentIdToUnassign)} desta mesa (R${row}, C${col})?`)) { console.log(`Click Unassign: Student ${studentIdToUnassign} from Row ${row}, Col ${col}`); tempClassroomLayout.seats = tempClassroomLayout.seats.filter(seat => !(seat.row === row && seat.col === col)); clearSeatSelection(); renderClassroomMap(currentClassId, true); } };
     const handleUnassignedStudentClickForAssignment = (event) => { if (!selectedSeatForAssignment) { console.log("Unassigned student clicked, but no seat selected."); return; } const clickedStudentElement = event.currentTarget; const studentIdToAssign = clickedStudentElement.dataset.studentId; const targetRow = parseInt(selectedSeatForAssignment.dataset.row); const targetCol = parseInt(selectedSeatForAssignment.dataset.col); if (!studentIdToAssign || isNaN(targetRow) || isNaN(targetCol) || !tempClassroomLayout) { console.error("Error during click assignment: Missing data"); clearSeatSelection(); return; } console.log(`Click Assign: Student ${studentIdToAssign} to Row ${targetRow}, Col ${targetCol}`); let seatEntry = tempClassroomLayout.seats.find(s => s.row === targetRow && s.col === targetCol); if (!seatEntry) { seatEntry = { row: targetRow, col: targetCol, studentId: null }; tempClassroomLayout.seats.push(seatEntry); } else if (seatEntry.studentId) { console.warn(`Target seat ${targetRow}-${targetCol} was already occupied by ${seatEntry.studentId} during click assignment. Overwriting.`); } seatEntry.studentId = studentIdToAssign; console.log(" -> Updated Temp Layout (Click Assign):", JSON.parse(JSON.stringify(tempClassroomLayout.seats))); clearSeatSelection(); renderClassroomMap(currentClassId, true); };
     const toggleCardCollapse = (button) => { const card = button.closest('.card'); const icon = button.querySelector('.icon'); if (card && icon) { const isCollapsed = card.classList.toggle('collapsed'); icon.classList.toggle('icon-chevron-down', isCollapsed); icon.classList.toggle('icon-chevron-up', !isCollapsed); button.title = isCollapsed ? 'Mostrar' : 'Esconder'; } };
-    const openNameSorterModal = () => { const title = "Sorteador de Nomes"; let content = ''; let footer = ''; const currentClass = currentClassId ? findClassById(currentClassId) : null; const students = currentClass ? getStudentsByClass(currentClassId) : []; if (!currentClass) { content = '<p>Por favor, selecione uma turma na aba "Detalhes" para usar o sorteador.</p>'; } else if (students.length === 0) { content = `<p>Não há alunos cadastrados na turma "${sanitizeHTML(currentClass.name)}".</p>`; } else { sorterStudentList = [...students]; sorterAvailableStudents = [...students]; sorterDrawnStudents = []; content = `<p class="mb-1 text-sm text-secondary">Turma: ${sanitizeHTML(currentClass.name)}</p> <div id="sorter-result-display">-- Clique em Sortear --</div> <div class="sorter-controls mt-2"> <div class="checkbox-group mb-0"> <input type="checkbox" id="sorter-no-repeat"> <label for="sorter-no-repeat">Sortear sem Repetição</label> </div> <span id="sorter-remaining-count" class="sorter-info hidden">${students.length} restantes</span> </div>`; footer = `<button type="button" id="reset-sorter-button" class="secondary"><span class="icon icon-sync"></span> Reiniciar</button> <button type="button" id="sort-next-button" class="success"><span class="icon icon-sorteio"></span> Sortear Próximo</button>`; } showModal(title, content, footer, 'name-sorter-modal'); if (currentClass && students.length > 0) { const sortButton = document.getElementById('sort-next-button'); const resetButton = document.getElementById('reset-sorter-button'); const noRepeatCheckbox = document.getElementById('sorter-no-repeat'); const remainingCountDisplay = document.getElementById('sorter-remaining-count'); const resultDisplay = document.getElementById('sorter-result-display'); const updateRemainingCount = () => { if (noRepeatCheckbox.checked) { remainingCountDisplay.textContent = `${sorterAvailableStudents.length} restantes`; remainingCountDisplay.classList.remove('hidden'); sortButton.disabled = sorterAvailableStudents.length === 0; } else { remainingCountDisplay.classList.add('hidden'); sortButton.disabled = false; } }; sortButton.addEventListener('click', () => sortNextName(resultDisplay, noRepeatCheckbox.checked, updateRemainingCount)); resetButton.addEventListener('click', () => resetSorter(resultDisplay, updateRemainingCount)); noRepeatCheckbox.addEventListener('change', () => resetSorter(resultDisplay, updateRemainingCount)); } };
+    const openNameSorterModal = () => {
+        const title = "Sorteador de Nomes";
+        
+        const schools = [...new Set(appData.classes.map(c => findSchoolById(c.schoolId)?.name).filter(Boolean))];
+        const shifts = [...new Set(appData.classes.map(c => c.shift).filter(Boolean))];
+        
+        let scopeHtml = `
+            <div style="margin-bottom: 15px;">
+                <label for="sorter-scope" style="display: block; margin-bottom: 5px;">Escopo do Sorteio:</label>
+                <select id="sorter-scope" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);">
+                    <option value="current_class">Turma Atual ${currentClassId ? `(${findClassById(currentClassId)?.name})` : '(Nenhuma selecionada)'}</option>
+                    <option value="all_classes">Todas as Turmas</option>
+                    ${schools.length > 0 ? `<optgroup label="Por Escola">${schools.map(s => `<option value="school_${s}">${s}</option>`).join('')}</optgroup>` : ''}
+                    ${shifts.length > 0 ? `<optgroup label="Por Turno">${shifts.map(s => `<option value="shift_${s}">${s}</option>`).join('')}</optgroup>` : ''}
+                </select>
+            </div>
+        `;
+
+        let content = `
+            ${scopeHtml}
+            <div id="sorter-main-content"></div>
+        `;
+        
+        let footer = `
+            <button type="button" id="reset-sorter-button" class="secondary"><span class="icon icon-sync"></span> Reiniciar</button>
+            <button type="button" id="sort-next-button" class="success"><span class="icon icon-sorteio"></span> Sortear Próximo</button>
+        `;
+        
+        showModal(title, content, footer, 'name-sorter-modal');
+        
+        const scopeSelect = document.getElementById('sorter-scope');
+        const mainContent = document.getElementById('sorter-main-content');
+        
+        const renderSorterContent = () => {
+            const scope = scopeSelect.value;
+            let targetStudents = [];
+            let scopeLabel = '';
+            
+            if (scope === 'current_class') {
+                if (currentClassId) {
+                    targetStudents = getStudentsByClass(currentClassId);
+                    scopeLabel = `Turma: ${findClassById(currentClassId).name}`;
+                }
+            } else if (scope === 'all_classes') {
+                targetStudents = appData.students;
+                scopeLabel = 'Todas as Turmas';
+            } else if (scope.startsWith('school_')) {
+                const school = scope.replace('school_', '');
+                const schoolClasses = appData.classes.filter(c => findSchoolById(c.schoolId)?.name === school).map(c => c.id);
+                targetStudents = appData.students.filter(s => schoolClasses.includes(s.classId));
+                scopeLabel = `Escola: ${school}`;
+            } else if (scope.startsWith('shift_')) {
+                const shift = scope.replace('shift_', '');
+                const shiftClasses = appData.classes.filter(c => c.shift === shift).map(c => c.id);
+                targetStudents = appData.students.filter(s => shiftClasses.includes(s.classId));
+                scopeLabel = `Turno: ${shift}`;
+            }
+            
+            const sortButton = document.getElementById('sort-next-button');
+            const resetButton = document.getElementById('reset-sorter-button');
+            
+            if (targetStudents.length === 0) {
+                mainContent.innerHTML = `<p>Não há alunos cadastrados neste escopo.</p>`;
+                if(sortButton) sortButton.disabled = true;
+                if(resetButton) resetButton.disabled = true;
+                return;
+            }
+            
+            sorterStudentList = [...targetStudents];
+            sorterAvailableStudents = [...targetStudents];
+            sorterDrawnStudents = [];
+            
+            mainContent.innerHTML = `
+                <p class="mb-1 text-sm text-secondary">${scopeLabel}</p>
+                <div id="sorter-result-display">-- Clique em Sortear --</div>
+                <div class="sorter-controls mt-2">
+                    <div class="checkbox-group mb-0">
+                        <input type="checkbox" id="sorter-no-repeat">
+                        <label for="sorter-no-repeat">Sortear sem Repetição</label>
+                    </div>
+                    <span id="sorter-remaining-count" class="sorter-info hidden">${targetStudents.length} restantes</span>
+                </div>
+            `;
+            
+            if(sortButton) sortButton.disabled = false;
+            if(resetButton) resetButton.disabled = false;
+            
+            const noRepeatCheckbox = document.getElementById('sorter-no-repeat');
+            const remainingCountDisplay = document.getElementById('sorter-remaining-count');
+            const resultDisplay = document.getElementById('sorter-result-display');
+            
+            const updateRemainingCount = () => {
+                if (noRepeatCheckbox.checked) {
+                    remainingCountDisplay.textContent = `${sorterAvailableStudents.length} restantes`;
+                    remainingCountDisplay.classList.remove('hidden');
+                    if(sortButton) sortButton.disabled = sorterAvailableStudents.length === 0;
+                } else {
+                    remainingCountDisplay.classList.add('hidden');
+                    if(sortButton) sortButton.disabled = false;
+                }
+            };
+            
+            if(sortButton) {
+                const newSortBtn = sortButton.cloneNode(true);
+                sortButton.parentNode.replaceChild(newSortBtn, sortButton);
+                newSortBtn.addEventListener('click', () => sortNextName(resultDisplay, noRepeatCheckbox.checked, updateRemainingCount));
+            }
+            
+            if(resetButton) {
+                const newResetBtn = resetButton.cloneNode(true);
+                resetButton.parentNode.replaceChild(newResetBtn, resetButton);
+                newResetBtn.addEventListener('click', () => resetSorter(resultDisplay, updateRemainingCount));
+            }
+            
+            noRepeatCheckbox.addEventListener('change', () => resetSorter(resultDisplay, updateRemainingCount));
+        };
+        
+        scopeSelect.addEventListener('change', renderSorterContent);
+        renderSorterContent();
+    };
     const sortNextName = (displayElement, noRepeat, updateCountCallback) => { let listToDrawFrom = noRepeat ? sorterAvailableStudents : sorterStudentList; if (listToDrawFrom.length === 0) { displayElement.textContent = "Fim!"; updateCountCallback(); return; } const randomIndex = Math.floor(Math.random() * listToDrawFrom.length); const drawnStudent = listToDrawFrom[randomIndex]; displayElement.innerHTML = `<span style="font-weight:normal; font-size: 0.8em; display:block;">${drawnStudent.number || '-.'}</span> ${sanitizeHTML(drawnStudent.name)}`; if (noRepeat) { sorterDrawnStudents.push(drawnStudent); sorterAvailableStudents.splice(randomIndex, 1); } updateCountCallback(); };
     const resetSorter = (displayElement, updateCountCallback) => { sorterAvailableStudents = [...sorterStudentList]; sorterDrawnStudents = []; displayElement.textContent = "-- Reiniciado --"; updateCountCallback(); };
     const formatTime = (totalSeconds) => { const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); const seconds = totalSeconds % 60; return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; };
@@ -1001,7 +1120,115 @@ document.addEventListener('DOMContentLoaded', () => {
     const pauseStopwatch = () => { if (!isStopwatchRunning) return; isStopwatchRunning = false; clearInterval(stopwatchInterval); stopwatchInterval = null; document.getElementById('start-timer-button')?.classList.remove('hidden'); document.getElementById('pause-timer-button')?.classList.add('hidden'); };
     const resetStopwatch = () => { pauseStopwatch(); stopwatchSeconds = 0; updateStopwatchDisplay(); };
     const openTimerModal = () => { const title = "Cronômetro / Timer"; if (stopwatchInterval) clearInterval(stopwatchInterval); stopwatchInterval = null; stopwatchSeconds = 0; isStopwatchRunning = false; const content = `<div id="timer-display">00:00:00</div> <div class="timer-controls"> <button type="button" id="start-timer-button" class="success"><span class="icon icon-play-arrow"></span> Iniciar</button> <button type="button" id="pause-timer-button" class="warning hidden"><span class="icon icon-pause"></span> Pausar</button> <button type="button" id="reset-timer-button" class="secondary"><span class="icon icon-sync"></span> Zerar</button> </div> <hr style="margin: 1.5rem 0 1rem 0; border-color: var(--border-color);"> <p class="text-center text-secondary text-sm">Funcionalidade de Timer (contagem regressiva) em desenvolvimento.</p>`; showModal(title, content, '', 'timer-modal'); document.getElementById('start-timer-button')?.addEventListener('click', startStopwatch); document.getElementById('pause-timer-button')?.addEventListener('click', pauseStopwatch); document.getElementById('reset-timer-button')?.addEventListener('click', resetStopwatch); modal.addEventListener('click', (e) => { if (e.target === modal || e.target.closest('.close-button')) { pauseStopwatch(); } }); };
-    const openGroupGeneratorModal = () => { const title = "Gerador de Grupos"; let content = ''; let footer = ''; const currentClass = currentClassId ? findClassById(currentClassId) : null; const students = currentClass ? getStudentsByClass(currentClassId) : []; if (!currentClass) { content = '<p>Por favor, selecione uma turma na aba "Detalhes" para usar o gerador.</p>'; } else if (students.length === 0) { content = `<p>Não há alunos cadastrados na turma "${sanitizeHTML(currentClass.name)}".</p>`; } else { content = ` <p class="mb-1 text-sm text-secondary">Turma: ${sanitizeHTML(currentClass.name)} (${students.length} alunos)</p> <div class="group-options"> <div class="radio-group"> <input type="radio" id="group-by-number" name="group-method" value="number" checked> <label for="group-by-number">Dividir em:</label> <input type="number" id="group-number-input" value="2" min="2"> <label for="group-number-input">grupos</label> </div> <div class="radio-group"> <input type="radio" id="group-by-size" name="group-method" value="size"> <label for="group-by-size">Grupos de:</label> <input type="number" id="group-size-input" value="2" min="1"> <label for="group-size-input">alunos</label> </div> </div> <div id="group-results-container"> <!-- Results will be displayed here --> <p class="text-secondary text-center mt-2">Clique em "Gerar Grupos".</p> </div> `; footer = `<button type="button" id="generate-groups-button" class="success"><span class="icon icon-grupos"></span> Gerar Grupos</button>`; } showModal(title, content, footer, 'group-generator-modal'); if (currentClass && students.length > 0) { const generateButton = document.getElementById('generate-groups-button'); const numberInput = document.getElementById('group-number-input'); const sizeInput = document.getElementById('group-size-input'); const numberRadio = document.getElementById('group-by-number'); const sizeRadio = document.getElementById('group-by-size'); const resultsContainer = document.getElementById('group-results-container'); numberRadio.addEventListener('change', () => { numberInput.disabled = false; sizeInput.disabled = true; }); sizeRadio.addEventListener('change', () => { numberInput.disabled = true; sizeInput.disabled = false; }); numberInput.disabled = !numberRadio.checked; sizeInput.disabled = !sizeRadio.checked; generateButton.addEventListener('click', () => generateGroups(students, resultsContainer)); } };
+    const openGroupGeneratorModal = () => {
+        const title = "Gerador de Grupos";
+        
+        const schools = [...new Set(appData.classes.map(c => findSchoolById(c.schoolId)?.name).filter(Boolean))];
+        const shifts = [...new Set(appData.classes.map(c => c.shift).filter(Boolean))];
+        
+        let scopeHtml = `
+            <div style="margin-bottom: 15px;">
+                <label for="group-scope" style="display: block; margin-bottom: 5px;">Escopo do Gerador:</label>
+                <select id="group-scope" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);">
+                    <option value="current_class">Turma Atual ${currentClassId ? `(${findClassById(currentClassId)?.name})` : '(Nenhuma selecionada)'}</option>
+                    <option value="all_classes">Todas as Turmas</option>
+                    ${schools.length > 0 ? `<optgroup label="Por Escola">${schools.map(s => `<option value="school_${s}">${s}</option>`).join('')}</optgroup>` : ''}
+                    ${shifts.length > 0 ? `<optgroup label="Por Turno">${shifts.map(s => `<option value="shift_${s}">${s}</option>`).join('')}</optgroup>` : ''}
+                </select>
+            </div>
+        `;
+
+        let content = `
+            ${scopeHtml}
+            <div id="group-main-content"></div>
+        `;
+        
+        let footer = `<button type="button" id="generate-groups-button" class="success"><span class="icon icon-grupos"></span> Gerar Grupos</button>`;
+        
+        showModal(title, content, footer, 'group-generator-modal');
+        
+        const scopeSelect = document.getElementById('group-scope');
+        const mainContent = document.getElementById('group-main-content');
+        let currentTargetStudents = [];
+        
+        const renderGroupContent = () => {
+            const scope = scopeSelect.value;
+            let targetStudents = [];
+            let scopeLabel = '';
+            
+            if (scope === 'current_class') {
+                if (currentClassId) {
+                    targetStudents = getStudentsByClass(currentClassId);
+                    scopeLabel = `Turma: ${findClassById(currentClassId).name}`;
+                }
+            } else if (scope === 'all_classes') {
+                targetStudents = appData.students;
+                scopeLabel = 'Todas as Turmas';
+            } else if (scope.startsWith('school_')) {
+                const school = scope.replace('school_', '');
+                const schoolClasses = appData.classes.filter(c => findSchoolById(c.schoolId)?.name === school).map(c => c.id);
+                targetStudents = appData.students.filter(s => schoolClasses.includes(s.classId));
+                scopeLabel = `Escola: ${school}`;
+            } else if (scope.startsWith('shift_')) {
+                const shift = scope.replace('shift_', '');
+                const shiftClasses = appData.classes.filter(c => c.shift === shift).map(c => c.id);
+                targetStudents = appData.students.filter(s => shiftClasses.includes(s.classId));
+                scopeLabel = `Turno: ${shift}`;
+            }
+            
+            currentTargetStudents = targetStudents;
+            const generateButton = document.getElementById('generate-groups-button');
+            
+            if (targetStudents.length === 0) {
+                mainContent.innerHTML = `<p>Não há alunos cadastrados neste escopo.</p>`;
+                if(generateButton) generateButton.disabled = true;
+                return;
+            }
+            
+            mainContent.innerHTML = `
+                <p class="mb-1 text-sm text-secondary">${scopeLabel} (${targetStudents.length} alunos)</p>
+                <div class="group-options">
+                    <div class="radio-group">
+                        <input type="radio" id="group-by-number" name="group-method" value="number" checked>
+                        <label for="group-by-number">Dividir em:</label>
+                        <input type="number" id="group-number-input" value="2" min="2">
+                        <label for="group-number-input">grupos</label>
+                    </div>
+                    <div class="radio-group">
+                        <input type="radio" id="group-by-size" name="group-method" value="size">
+                        <label for="group-by-size">Grupos de:</label>
+                        <input type="number" id="group-size-input" value="2" min="1">
+                        <label for="group-size-input">alunos</label>
+                    </div>
+                </div>
+                <div id="group-results-container">
+                    <p class="text-secondary text-center mt-2">Clique em "Gerar Grupos".</p>
+                </div>
+            `;
+            
+            if(generateButton) generateButton.disabled = false;
+            
+            const numberInput = document.getElementById('group-number-input');
+            const sizeInput = document.getElementById('group-size-input');
+            const numberRadio = document.getElementById('group-by-number');
+            const sizeRadio = document.getElementById('group-by-size');
+            const resultsContainer = document.getElementById('group-results-container');
+            
+            numberRadio.addEventListener('change', () => { numberInput.disabled = false; sizeInput.disabled = true; });
+            sizeRadio.addEventListener('change', () => { numberInput.disabled = true; sizeInput.disabled = false; });
+            numberInput.disabled = !numberRadio.checked;
+            sizeInput.disabled = !sizeRadio.checked;
+            
+            if(generateButton) {
+                const newGenBtn = generateButton.cloneNode(true);
+                generateButton.parentNode.replaceChild(newGenBtn, generateButton);
+                newGenBtn.addEventListener('click', () => generateGroups(currentTargetStudents, resultsContainer));
+            }
+        };
+        
+        scopeSelect.addEventListener('change', renderGroupContent);
+        renderGroupContent();
+    };
     const shuffleArray = (array) => { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; };
     const generateGroups = (studentList, resultsContainer) => { const method = document.querySelector('input[name="group-method"]:checked').value; const numberInput = document.getElementById('group-number-input'); const sizeInput = document.getElementById('group-size-input'); const shuffledStudents = shuffleArray([...studentList]); let groups = []; resultsContainer.innerHTML = ''; try { if (method === 'number') { const numGroups = parseInt(numberInput.value); if (isNaN(numGroups) || numGroups < 2 || numGroups > shuffledStudents.length) { alert("Número de grupos inválido. Deve ser entre 2 e o número de alunos."); return; } for (let i = 0; i < numGroups; i++) groups.push([]); let currentGroupIndex = 0; shuffledStudents.forEach(student => { groups[currentGroupIndex].push(student); currentGroupIndex = (currentGroupIndex + 1) % numGroups; }); } else { const groupSize = parseInt(sizeInput.value); if (isNaN(groupSize) || groupSize < 1) { alert("Tamanho do grupo inválido. Deve ser pelo menos 1."); return; } for (let i = 0; i < shuffledStudents.length; i += groupSize) { groups.push(shuffledStudents.slice(i, i + groupSize)); } } if (groups.length > 0) { groups.forEach((group, index) => { const groupDiv = document.createElement('div'); groupDiv.classList.add('generated-group'); const groupTitle = document.createElement('h5'); groupTitle.textContent = `Grupo ${index + 1}`; groupDiv.appendChild(groupTitle); const ul = document.createElement('ul'); group.forEach(student => { const li = document.createElement('li'); li.innerHTML = `<span class="student-number">${student.number || '-.'}</span> ${sanitizeHTML(student.name)}`; ul.appendChild(li); }); groupDiv.appendChild(ul); resultsContainer.appendChild(groupDiv); }); } else { resultsContainer.innerHTML = '<p class="text-secondary text-center mt-2">Não foi possível gerar grupos com essas opções.</p>'; } } catch (error) { console.error("Erro ao gerar grupos:", error); resultsContainer.innerHTML = '<p class="text-danger text-center mt-2">Ocorreu um erro ao gerar os grupos.</p>'; } };
     const updateCalculatorDisplay = () => { if(calculatorDisplay) { calculatorDisplay.textContent = calculator.displayValue.replace('.', ','); } };
@@ -1020,7 +1247,1491 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateWeightedAverage = () => { if (!weightedAverageResult) return; if (calculator.weightedPairs.length === 0) { weightedAverageResult.textContent = '--'; return; } let totalWeightedSum = 0; let totalWeight = 0; calculator.weightedPairs.forEach(pair => { totalWeightedSum += pair.grade * pair.weight; totalWeight += pair.weight; }); if (totalWeight === 0) { weightedAverageResult.textContent = 'Erro (Peso 0)'; return; } const average = totalWeightedSum / totalWeight; weightedAverageResult.textContent = `Média: ${average.toFixed(2).replace('.', ',')}`; };
     const switchCalculatorMode = (mode) => { calculator.mode = mode; resetCalculator(); if (mode === 'standard') { standardCalcSection?.classList.remove('hidden'); weightedCalcSection?.classList.add('hidden'); calcModeStandardBtn?.classList.add('active'); calcModeWeightedBtn?.classList.remove('active'); } else { standardCalcSection?.classList.add('hidden'); weightedCalcSection?.classList.remove('hidden'); calcModeStandardBtn?.classList.remove('active'); calcModeWeightedBtn?.classList.add('active'); } };
     const openAdvancedCalculatorModal = () => { resetCalculator(); switchCalculatorMode('standard'); calculatorModal?.classList.add('show'); const currentCalcButtonsContainer = document.querySelector('#calculator-standard-section .calculator-buttons'); currentCalcButtonsContainer?.removeEventListener('click', handleCalculatorButtonClick); currentCalcButtonsContainer?.addEventListener('click', handleCalculatorButtonClick); if(calcModeStandardBtn) calcModeStandardBtn.onclick = () => switchCalculatorMode('standard'); if(calcModeWeightedBtn) calcModeWeightedBtn.onclick = () => switchCalculatorMode('weighted'); if(addPairButton) addPairButton.onclick = addWeightedPair; if(calculateWeightedAvgButton) calculateWeightedAvgButton.onclick = calculateWeightedAverage; calculatorModal?.querySelectorAll('[data-dismiss="modal"]').forEach(btn => { const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn); newBtn.addEventListener('click', hideModal); }); calculatorModal?.addEventListener('click', (e) => { if (e.target === calculatorModal) { hideModal(); } }, { once: false }); };
-    const openToolModal = (toolType) => { if (toolType === 'advanced-calculator') { openAdvancedCalculatorModal(); return; } let title = "Ferramenta"; let content = "<p>Funcionalidade em desenvolvimento.</p>"; let modalClass = ''; let footer = ''; switch (toolType) { case 'name-sorter': openNameSorterModal(); return; case 'timer-stopwatch': openTimerModal(); return; case 'group-generator': openGroupGeneratorModal(); return; default: title = "Funcionalidade Indisponível"; content = "<p>Esta ferramenta ainda não foi implementada.</p>"; } showModal(title, content, footer, modalClass); };
+    const openNotepadModal = () => {
+        const title = "Bloco de Notas";
+        let notes = JSON.parse(localStorage.getItem('spp_notepad_notes') || '[]');
+        
+        const renderNotes = () => {
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">Minhas Anotações</h3>
+                    <button type="button" id="add-note-btn" class="success"><span class="icon icon-adicionar"></span> Nova Anotação</button>
+                </div>
+                <div id="notes-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto;">
+            `;
+            
+            if (notes.length === 0) {
+                html += `<p class="text-secondary text-center">Nenhuma anotação. Clique em "Nova Anotação" para começar.</p>`;
+            } else {
+                notes.forEach((note, index) => {
+                    html += `
+                        <div class="card" style="padding: 10px; position: relative;">
+                            <input type="text" class="note-title-input" data-index="${index}" value="${sanitizeHTML(note.title)}" placeholder="Título da anotação" style="font-weight: bold; border: none; background: transparent; width: calc(100% - 30px); margin-bottom: 5px; font-size: 1.1em;">
+                            <textarea class="note-content-input" data-index="${index}" style="width: 100%; height: 80px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; resize: vertical; font-family: inherit;" placeholder="Conteúdo...">${sanitizeHTML(note.content)}</textarea>
+                            <button type="button" class="icon-button delete-note-btn" data-index="${index}" style="position: absolute; top: 5px; right: 5px; color: var(--accent-danger);"><span class="icon icon-excluir"></span></button>
+                        </div>
+                    `;
+                });
+            }
+            html += `</div>`;
+            return html;
+        };
+
+        const content = `<div id="notepad-container">${renderNotes()}</div>`;
+        showModal(title, content, '', 'notepad-modal');
+        
+        const attachEvents = () => {
+            document.getElementById('add-note-btn')?.addEventListener('click', () => {
+                notes.unshift({ title: '', content: '' });
+                saveAndRender();
+            });
+            
+            document.querySelectorAll('.delete-note-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (confirm('Excluir esta anotação?')) {
+                        const index = e.currentTarget.dataset.index;
+                        notes.splice(index, 1);
+                        saveAndRender();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.note-title-input, .note-content-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const index = e.target.dataset.index;
+                    const isTitle = e.target.classList.contains('note-title-input');
+                    if (isTitle) {
+                        notes[index].title = e.target.value;
+                    } else {
+                        notes[index].content = e.target.value;
+                    }
+                    localStorage.setItem('spp_notepad_notes', JSON.stringify(notes));
+                });
+            });
+        };
+        
+        const saveAndRender = () => {
+            localStorage.setItem('spp_notepad_notes', JSON.stringify(notes));
+            document.getElementById('notepad-container').innerHTML = renderNotes();
+            attachEvents();
+        };
+        
+        attachEvents();
+    };
+
+    const openCalendarNotesModal = () => {
+        const title = "Calendário de Anotações";
+        let currentDate = new Date();
+        
+        const renderCalendar = (date) => {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <button type="button" id="cal-prev-month" class="secondary" style="padding: 5px 10px;">&lt;</button>
+                    <h3 style="margin: 0;">${monthNames[month]} ${year}</h3>
+                    <button type="button" id="cal-next-month" class="secondary" style="padding: 5px 10px;">&gt;</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; font-weight: bold; margin-bottom: 5px;">
+                    <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;">
+            `;
+            
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div></div>`;
+            }
+            
+            const savedNotes = JSON.parse(localStorage.getItem('spp_calendar_notes_v2') || '{}');
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const dayNotes = savedNotes[dateKey] || [];
+                const hasNote = dayNotes.length > 0 ? `<div style="width: 6px; height: 6px; background-color: var(--accent-primary); border-radius: 50%; margin: 2px auto 0;"></div>` : '';
+                const isToday = new Date().toDateString() === new Date(year, month, i).toDateString() ? 'background-color: var(--bg-tertiary); border-color: var(--accent-primary);' : '';
+                
+                html += `
+                    <div class="cal-day" data-date="${dateKey}" style="border: 1px solid var(--border-color); border-radius: 4px; padding: 10px 5px; text-align: center; cursor: pointer; ${isToday}">
+                        ${i}
+                        ${hasNote}
+                    </div>
+                `;
+            }
+            
+            html += `</div>
+                <div id="cal-note-area" style="margin-top: 20px; display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 id="cal-note-date-title" style="margin: 0;"></h4>
+                        <button type="button" id="cal-add-note-btn" class="success" style="padding: 4px 8px; font-size: 0.9em;"><span class="icon icon-adicionar"></span> Adicionar</button>
+                    </div>
+                    <div id="cal-notes-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        };
+
+        const content = `<div id="calendar-container">${renderCalendar(currentDate)}</div>`;
+        showModal(title, content, '', 'calendar-modal');
+        
+        let selectedDateKey = null;
+
+        const renderDayNotes = (dateKey) => {
+            const savedNotes = JSON.parse(localStorage.getItem('spp_calendar_notes_v2') || '{}');
+            const dayNotes = savedNotes[dateKey] || [];
+            const listContainer = document.getElementById('cal-notes-list');
+            
+            if (dayNotes.length === 0) {
+                listContainer.innerHTML = '<p class="text-secondary text-center text-sm">Nenhuma anotação. Clique em Adicionar.</p>';
+            } else {
+                let html = '';
+                dayNotes.forEach((note, index) => {
+                    html += `
+                        <div style="position: relative; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px;">
+                            <textarea class="cal-note-input" data-index="${index}" style="width: 100%; height: 60px; padding: 5px; border: none; resize: vertical; font-family: inherit; background: transparent;" placeholder="Sua anotação...">${sanitizeHTML(note)}</textarea>
+                            <button type="button" class="icon-button delete-cal-note-btn" data-index="${index}" style="position: absolute; top: 2px; right: 2px; color: var(--accent-danger); padding: 2px;"><span class="icon icon-excluir" style="font-size: 1em;"></span></button>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+                
+                document.querySelectorAll('.cal-note-input').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        const idx = e.target.dataset.index;
+                        const notes = JSON.parse(localStorage.getItem('spp_calendar_notes_v2') || '{}');
+                        if (!notes[dateKey]) notes[dateKey] = [];
+                        notes[dateKey][idx] = e.target.value;
+                        localStorage.setItem('spp_calendar_notes_v2', JSON.stringify(notes));
+                    });
+                });
+                
+                document.querySelectorAll('.delete-cal-note-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (confirm('Excluir esta anotação?')) {
+                            const idx = e.currentTarget.dataset.index;
+                            const notes = JSON.parse(localStorage.getItem('spp_calendar_notes_v2') || '{}');
+                            notes[dateKey].splice(idx, 1);
+                            if (notes[dateKey].length === 0) delete notes[dateKey];
+                            localStorage.setItem('spp_calendar_notes_v2', JSON.stringify(notes));
+                            
+                            // Re-render calendar to update dots
+                            const scrollPos = document.getElementById('cal-notes-list').scrollTop;
+                            document.getElementById('calendar-container').innerHTML = renderCalendar(currentDate);
+                            attachCalendarEvents();
+                            selectDay(dateKey);
+                            document.getElementById('cal-notes-list').scrollTop = scrollPos;
+                        }
+                    });
+                });
+            }
+        };
+
+        const selectDay = (dateKey) => {
+            selectedDateKey = dateKey;
+            document.querySelectorAll('.cal-day').forEach(el => el.style.boxShadow = 'none');
+            const dayEl = document.querySelector(`.cal-day[data-date="${dateKey}"]`);
+            if (dayEl) dayEl.style.boxShadow = '0 0 0 2px var(--accent-primary)';
+            
+            const noteArea = document.getElementById('cal-note-area');
+            const noteTitle = document.getElementById('cal-note-date-title');
+            
+            const [y, m, d] = dateKey.split('-');
+            noteTitle.textContent = `${d}/${m}/${y}`;
+            noteArea.style.display = 'block';
+            
+            renderDayNotes(dateKey);
+        };
+
+        const attachCalendarEvents = () => {
+            document.getElementById('cal-prev-month')?.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                document.getElementById('calendar-container').innerHTML = renderCalendar(currentDate);
+                attachCalendarEvents();
+                if (selectedDateKey) selectDay(selectedDateKey);
+            });
+            
+            document.getElementById('cal-next-month')?.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                document.getElementById('calendar-container').innerHTML = renderCalendar(currentDate);
+                attachCalendarEvents();
+                if (selectedDateKey) selectDay(selectedDateKey);
+            });
+            
+            document.querySelectorAll('.cal-day').forEach(dayEl => {
+                dayEl.addEventListener('click', (e) => {
+                    selectDay(e.currentTarget.dataset.date);
+                });
+            });
+            
+            document.getElementById('cal-add-note-btn')?.addEventListener('click', () => {
+                if (!selectedDateKey) return;
+                const notes = JSON.parse(localStorage.getItem('spp_calendar_notes_v2') || '{}');
+                if (!notes[selectedDateKey]) notes[selectedDateKey] = [];
+                notes[selectedDateKey].push('');
+                localStorage.setItem('spp_calendar_notes_v2', JSON.stringify(notes));
+                
+                document.getElementById('calendar-container').innerHTML = renderCalendar(currentDate);
+                attachCalendarEvents();
+                selectDay(selectedDateKey);
+            });
+        };
+        
+        attachCalendarEvents();
+    };
+
+    const openAudioRecorderModal = () => {
+        const title = "Gravador de Áudio";
+        const content = `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0;">
+                <div id="audio-status" style="font-size: 1.2rem; font-weight: bold; color: var(--text-secondary);">Pronto para gravar</div>
+                <div id="audio-timer" style="font-size: 2rem; font-family: monospace;">00:00</div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" id="start-record-btn" class="success" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <span class="icon icon-mic" style="font-size: 24px;"></span>
+                    </button>
+                    <button type="button" id="stop-record-btn" class="danger hidden" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <span class="icon icon-stop" style="font-size: 24px;"></span>
+                    </button>
+                </div>
+                
+                <div id="audio-playback-container" class="hidden" style="width: 100%; margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <audio id="audio-playback" controls style="width: 100%;"></audio>
+                    <a id="download-audio-btn" class="button secondary" download="gravacao.webm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                        <span class="icon icon-download"></span> Baixar Gravação
+                    </a>
+                </div>
+            </div>
+        `;
+        showModal(title, content, '', 'audio-recorder-modal');
+        
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordInterval;
+        let recordSeconds = 0;
+        
+        const startBtn = document.getElementById('start-record-btn');
+        const stopBtn = document.getElementById('stop-record-btn');
+        const statusEl = document.getElementById('audio-status');
+        const timerEl = document.getElementById('audio-timer');
+        const playbackContainer = document.getElementById('audio-playback-container');
+        const audioPlayback = document.getElementById('audio-playback');
+        const downloadBtn = document.getElementById('download-audio-btn');
+        
+        const formatTime = (totalSeconds) => {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        };
+        
+        startBtn.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    audioPlayback.src = audioUrl;
+                    downloadBtn.href = audioUrl;
+                    
+                    playbackContainer.classList.remove('hidden');
+                    statusEl.textContent = "Gravação concluída";
+                    statusEl.style.color = "var(--text-secondary)";
+                    
+                    // Stop all tracks to release microphone
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+                
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                playbackContainer.classList.add('hidden');
+                
+                statusEl.textContent = "Gravando...";
+                statusEl.style.color = "red";
+                
+                recordSeconds = 0;
+                timerEl.textContent = "00:00";
+                recordInterval = setInterval(() => {
+                    recordSeconds++;
+                    timerEl.textContent = formatTime(recordSeconds);
+                }, 1000);
+                
+            } catch (err) {
+                console.error("Erro ao acessar microfone:", err);
+                showNotification("Não foi possível acessar o microfone. Verifique as permissões.", "error");
+            }
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                clearInterval(recordInterval);
+                
+                stopBtn.classList.add('hidden');
+                startBtn.classList.remove('hidden');
+            }
+        });
+        
+        // Cleanup on modal close
+        const modal = document.getElementById('generic-modal');
+        const cleanup = (e) => {
+            if (e.target === modal || e.target.closest('.close-button')) {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                if (recordInterval) {
+                    clearInterval(recordInterval);
+                }
+                modal.removeEventListener('click', cleanup);
+            }
+        };
+        modal.addEventListener('click', cleanup);
+    };
+
+    const openWhiteboardModal = () => {
+        const title = "Quadro Branco Virtual";
+        const content = `
+            <div style="display: flex; flex-direction: column; height: 100%; gap: 10px; overflow-x: hidden; box-sizing: border-box;">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; padding: 6px; background: var(--bg-tertiary); border-radius: 8px; width: 100%; box-sizing: border-box;">
+                    <input type="color" id="wb-color" value="#000000" style="width: 28px; height: 28px; border: none; cursor: pointer; padding: 0; border-radius: 4px; margin-bottom: 0; flex-shrink: 0;" title="Cor da Caneta">
+                    <input type="range" id="wb-size" min="1" max="20" value="3" style="width: 60px; margin-bottom: 0; flex-shrink: 1;" title="Tamanho do Traço">
+                    <button type="button" id="wb-clear" class="secondary icon-button" style="padding: 6px; margin: 0; flex-shrink: 0;" title="Limpar Tudo"><span class="icon icon-excluir icon-only"></span></button>
+                    <button type="button" id="wb-eraser" class="secondary icon-button" style="padding: 6px; margin: 0; flex-shrink: 0;" title="Borracha"><span class="icon icon-block icon-only"></span></button>
+                    <button type="button" id="wb-download" class="secondary icon-button" style="padding: 6px; margin: 0; flex-shrink: 0;" title="Salvar Imagem"><span class="icon icon-download icon-only"></span></button>
+                </div>
+                <div style="flex-grow: 1; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: white; min-height: 250px; width: 100%; box-sizing: border-box;">
+                    <canvas id="wb-canvas" style="width: 100%; height: 100%; touch-action: none; display: block;"></canvas>
+                </div>
+            </div>
+        `;
+        showModal(title, content, '', 'whiteboard-modal');
+        
+        const canvas = document.getElementById('wb-canvas');
+        const ctx = canvas.getContext('2d');
+        const colorPicker = document.getElementById('wb-color');
+        const sizePicker = document.getElementById('wb-size');
+        const clearBtn = document.getElementById('wb-clear');
+        const eraserBtn = document.getElementById('wb-eraser');
+        const downloadBtn = document.getElementById('wb-download');
+        
+        let isDrawing = false;
+        let isEraser = false;
+        
+        const resizeCanvas = () => {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        };
+        
+        setTimeout(resizeCanvas, 100);
+        window.addEventListener('resize', resizeCanvas);
+        
+        const startDrawing = (e) => {
+            isDrawing = true;
+            draw(e);
+        };
+        
+        const stopDrawing = () => {
+            isDrawing = false;
+            ctx.beginPath();
+        };
+        
+        const draw = (e) => {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+            
+            ctx.lineWidth = sizePicker.value;
+            ctx.lineCap = 'round';
+            
+            if (isEraser) {
+                ctx.strokeStyle = 'white';
+            } else {
+                ctx.strokeStyle = colorPicker.value;
+            }
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        };
+        
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+        
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        eraserBtn.addEventListener('click', () => {
+            isEraser = !isEraser;
+            eraserBtn.classList.toggle('active', isEraser);
+            if (isEraser) {
+                eraserBtn.style.backgroundColor = 'var(--accent-primary)';
+                eraserBtn.style.color = 'white';
+            } else {
+                eraserBtn.style.backgroundColor = '';
+                eraserBtn.style.color = '';
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            // Create a temporary canvas to draw the white background
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Fill with white background
+            tempCtx.fillStyle = '#ffffff';
+            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Draw the original canvas over it
+            tempCtx.drawImage(canvas, 0, 0);
+            
+            const dataURL = tempCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'quadro-branco-' + new Date().toISOString().slice(0,10) + '.png';
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        const modal = document.getElementById('generic-modal');
+        const cleanup = (e) => {
+            if (e.target === modal || e.target.closest('.close-button')) {
+                window.removeEventListener('resize', resizeCanvas);
+                modal.removeEventListener('click', cleanup);
+            }
+        };
+        modal.addEventListener('click', cleanup);
+    };
+
+    const openTodoListModal = () => {
+        const title = "Gerenciador de Tarefas";
+        let tasks = JSON.parse(localStorage.getItem('spp_todo_list') || '[]');
+        
+        const renderTasks = () => {
+            let html = `
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="todo-input" placeholder="Nova tarefa..." style="flex-grow: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    <button type="button" id="add-todo-btn" class="success"><span class="icon icon-adicionar"></span></button>
+                </div>
+                <div id="todo-list-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
+            `;
+            
+            if (tasks.length === 0) {
+                html += `<p class="text-secondary text-center">Nenhuma tarefa. Adicione uma acima.</p>`;
+            } else {
+                tasks.forEach((task, index) => {
+                    const checked = task.completed ? 'checked' : '';
+                    const textStyle = task.completed ? 'text-decoration: line-through; opacity: 0.6;' : '';
+                    html += `
+                        <div class="card" style="display: flex; align-items: center; gap: 10px; padding: 10px;">
+                            <input type="checkbox" class="todo-checkbox" data-index="${index}" ${checked} style="width: 20px; height: 20px; cursor: pointer;">
+                            <span style="flex-grow: 1; ${textStyle}">${sanitizeHTML(task.text)}</span>
+                            <button type="button" class="icon-button delete-todo-btn" data-index="${index}" style="color: var(--accent-danger);"><span class="icon icon-excluir"></span></button>
+                        </div>
+                    `;
+                });
+            }
+            html += `</div>`;
+            return html;
+        };
+
+        const content = `<div id="todo-wrapper">${renderTasks()}</div>`;
+        showModal(title, content, '', 'todo-modal');
+        
+        const attachEvents = () => {
+            const input = document.getElementById('todo-input');
+            const addBtn = document.getElementById('add-todo-btn');
+            
+            const addTask = () => {
+                const text = input.value.trim();
+                if (text) {
+                    tasks.push({ text, completed: false });
+                    saveAndRender();
+                }
+            };
+            
+            addBtn?.addEventListener('click', addTask);
+            input?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTask();
+            });
+            
+            document.querySelectorAll('.todo-checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const index = e.target.dataset.index;
+                    tasks[index].completed = e.target.checked;
+                    saveAndRender();
+                });
+            });
+            
+            document.querySelectorAll('.delete-todo-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.index;
+                    tasks.splice(index, 1);
+                    saveAndRender();
+                });
+            });
+        };
+        
+        const saveAndRender = () => {
+            localStorage.setItem('spp_todo_list', JSON.stringify(tasks));
+            document.getElementById('todo-wrapper').innerHTML = renderTasks();
+            attachEvents();
+        };
+        
+        attachEvents();
+    };
+
+    const openTopicSorterModal = () => {
+        const title = "Sorteador de Temas";
+        let topics = JSON.parse(localStorage.getItem('spp_topic_sorter') || '[]');
+        
+        const renderContent = () => {
+            let html = `
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Adicionar Tema/Pergunta:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="topic-input" placeholder="Digite aqui..." style="flex-grow: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                            <button type="button" id="add-topic-btn" class="success"><span class="icon icon-adicionar"></span></button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: bold;">Lista (${topics.length}):</span>
+                        <button type="button" id="clear-topics-btn" class="danger" style="padding: 4px 8px; font-size: 0.9em;">Limpar Tudo</button>
+                    </div>
+                    
+                    <div id="topics-list" style="display: flex; flex-wrap: wrap; gap: 5px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-tertiary);">
+            `;
+            
+            if (topics.length === 0) {
+                html += `<span class="text-secondary">Nenhum tema adicionado.</span>`;
+            } else {
+                topics.forEach((topic, index) => {
+                    html += `
+                        <span class="badge" style="background: var(--bg-secondary); padding: 5px 10px; border-radius: 15px; display: inline-flex; align-items: center; gap: 5px;">
+                            ${sanitizeHTML(topic)}
+                            <span class="icon icon-excluir delete-topic-btn" data-index="${index}" style="cursor: pointer; font-size: 1em; color: var(--accent-danger);"></span>
+                        </span>
+                    `;
+                });
+            }
+            
+            html += `
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="button" id="draw-topic-btn" class="primary" style="font-size: 1.2em; padding: 10px 20px;" ${topics.length === 0 ? 'disabled' : ''}>
+                            <span class="icon icon-sorteio"></span> Sortear
+                        </button>
+                    </div>
+                    
+                    <div id="drawn-topic-result" style="margin-top: 20px; text-align: center; font-size: 1.5em; font-weight: bold; color: var(--accent-primary); min-height: 40px;">
+                    </div>
+                </div>
+            `;
+            return html;
+        };
+
+        const content = `<div id="topic-sorter-wrapper">${renderContent()}</div>`;
+        showModal(title, content, '', 'topic-sorter-modal');
+        
+        const attachEvents = () => {
+            const input = document.getElementById('topic-input');
+            const addBtn = document.getElementById('add-topic-btn');
+            const clearBtn = document.getElementById('clear-topics-btn');
+            const drawBtn = document.getElementById('draw-topic-btn');
+            const resultDiv = document.getElementById('drawn-topic-result');
+            
+            const addTopic = () => {
+                const text = input.value.trim();
+                if (text) {
+                    topics.push(text);
+                    saveAndRender();
+                }
+            };
+            
+            addBtn?.addEventListener('click', addTopic);
+            input?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTopic();
+            });
+            
+            document.querySelectorAll('.delete-topic-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.index;
+                    topics.splice(index, 1);
+                    saveAndRender();
+                });
+            });
+            
+            clearBtn?.addEventListener('click', () => {
+                if (confirm('Limpar toda a lista?')) {
+                    topics = [];
+                    saveAndRender();
+                }
+            });
+            
+            drawBtn?.addEventListener('click', () => {
+                if (topics.length === 0) return;
+                
+                let counter = 0;
+                const interval = setInterval(() => {
+                    resultDiv.textContent = topics[Math.floor(Math.random() * topics.length)];
+                    counter++;
+                    if (counter > 10) {
+                        clearInterval(interval);
+                        const finalIndex = Math.floor(Math.random() * topics.length);
+                        resultDiv.textContent = topics[finalIndex];
+                        resultDiv.style.transform = 'scale(1.1)';
+                        setTimeout(() => resultDiv.style.transform = 'scale(1)', 200);
+                    }
+                }, 50);
+            });
+        };
+        
+        const saveAndRender = () => {
+            localStorage.setItem('spp_topic_sorter', JSON.stringify(topics));
+            document.getElementById('topic-sorter-wrapper').innerHTML = renderContent();
+            attachEvents();
+        };
+        
+        attachEvents();
+    };
+
+    const openGradeConverterModal = () => {
+        const title = "Conversor de Notas";
+        
+        let customCriteria = JSON.parse(localStorage.getItem('spp_grade_criteria')) || [
+            { label: 'A', min: 90 },
+            { label: 'B', min: 80 },
+            { label: 'C', min: 70 },
+            { label: 'D', min: 60 },
+            { label: 'F', min: 0 }
+        ];
+
+        const renderCriteriaSettings = () => {
+            return customCriteria.map((c, index) => `
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px;">
+                    <input type="text" class="crit-label" value="${c.label}" style="width: 60px; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    <span>>=</span>
+                    <input type="number" class="crit-min" value="${c.min}" style="width: 80px; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    <span>%</span>
+                    ${index < customCriteria.length - 1 ? `<button type="button" class="secondary remove-crit" data-index="${index}" style="padding: 2px 6px; font-size: 0.8em;"><span class="icon icon-excluir"></span></button>` : ''}
+                </div>
+            `).join('');
+        };
+
+        const content = `
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="card" style="padding: 15px;">
+                    <h4 style="margin-top: 0;">Converter Pontos para Porcentagem</h4>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="number" id="gc-points" placeholder="Pontos obtidos" style="width: 120px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <span>de</span>
+                        <input type="number" id="gc-max" placeholder="Total" style="width: 120px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <button type="button" id="gc-calc-pct" class="primary">Calcular</button>
+                    </div>
+                    <div id="gc-pct-result" style="margin-top: 10px; font-size: 1.2em; font-weight: bold;"></div>
+                </div>
+                
+                <div class="card" style="padding: 15px;">
+                    <h4 style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
+                        Converter Porcentagem para Conceito
+                        <button type="button" id="gc-toggle-settings" class="secondary" style="font-size: 0.8em; padding: 4px 8px;"><span class="icon icon-config"></span> Configurar Critérios</button>
+                    </h4>
+                    
+                    <div id="gc-settings-panel" style="display: none; margin-bottom: 15px; padding: 10px; background: var(--bg-tertiary); border-radius: 8px;">
+                        <h5>Critérios de Conversão</h5>
+                        <div id="gc-criteria-list">
+                            ${renderCriteriaSettings()}
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button type="button" id="gc-add-crit" class="secondary" style="font-size: 0.8em;"><span class="icon icon-add"></span> Adicionar</button>
+                            <button type="button" id="gc-save-crit" class="primary" style="font-size: 0.8em;">Salvar Critérios</button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="number" id="gc-pct-input" placeholder="Porcentagem (%)" style="width: 150px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <button type="button" id="gc-calc-concept" class="primary">Converter</button>
+                    </div>
+                    <div id="gc-concept-result" style="margin-top: 10px; font-size: 1.2em; font-weight: bold;"></div>
+                </div>
+            </div>
+        `;
+        showModal(title, content, '', 'grade-converter-modal');
+        
+        const updateCriteriaListUI = () => {
+            document.getElementById('gc-criteria-list').innerHTML = renderCriteriaSettings();
+            attachCriteriaListeners();
+        };
+
+        const attachCriteriaListeners = () => {
+            document.querySelectorAll('.remove-crit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    customCriteria.splice(index, 1);
+                    updateCriteriaListUI();
+                });
+            });
+        };
+
+        document.getElementById('gc-toggle-settings').addEventListener('click', () => {
+            const panel = document.getElementById('gc-settings-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            attachCriteriaListeners();
+        });
+
+        document.getElementById('gc-add-crit').addEventListener('click', () => {
+            // Insert before the last one (which is usually the minimum/F)
+            customCriteria.splice(customCriteria.length - 1, 0, { label: 'Novo', min: 50 });
+            updateCriteriaListUI();
+        });
+
+        document.getElementById('gc-save-crit').addEventListener('click', () => {
+            const labels = document.querySelectorAll('.crit-label');
+            const mins = document.querySelectorAll('.crit-min');
+            
+            let newCriteria = [];
+            for(let i=0; i<labels.length; i++) {
+                newCriteria.push({
+                    label: labels[i].value,
+                    min: parseFloat(mins[i].value) || 0
+                });
+            }
+            
+            // Sort descending by min
+            newCriteria.sort((a, b) => b.min - a.min);
+            customCriteria = newCriteria;
+            localStorage.setItem('spp_grade_criteria', JSON.stringify(customCriteria));
+            
+            updateCriteriaListUI();
+            document.getElementById('gc-settings-panel').style.display = 'none';
+            showToast("Critérios salvos com sucesso!");
+        });
+        
+        document.getElementById('gc-calc-pct').addEventListener('click', () => {
+            const points = parseFloat(document.getElementById('gc-points').value);
+            const max = parseFloat(document.getElementById('gc-max').value);
+            const resDiv = document.getElementById('gc-pct-result');
+            
+            if (isNaN(points) || isNaN(max) || max === 0) {
+                resDiv.textContent = "Valores inválidos.";
+                resDiv.style.color = "var(--accent-danger)";
+                return;
+            }
+            
+            const pct = (points / max) * 100;
+            resDiv.textContent = `Resultado: ${pct.toFixed(1)}%`;
+            resDiv.style.color = "var(--text-primary)";
+        });
+        
+        document.getElementById('gc-calc-concept').addEventListener('click', () => {
+            const pct = parseFloat(document.getElementById('gc-pct-input').value);
+            const resDiv = document.getElementById('gc-concept-result');
+            
+            if (isNaN(pct)) {
+                resDiv.textContent = "Valor inválido.";
+                resDiv.style.color = "var(--accent-danger)";
+                return;
+            }
+            
+            let concept = customCriteria[customCriteria.length - 1].label; // Default to lowest
+            let isLowest = true;
+            
+            for (let i = 0; i < customCriteria.length; i++) {
+                if (pct >= customCriteria[i].min) {
+                    concept = customCriteria[i].label;
+                    isLowest = (i === customCriteria.length - 1);
+                    break;
+                }
+            }
+            
+            resDiv.textContent = `Conceito: ${concept}`;
+            resDiv.style.color = isLowest ? "var(--accent-danger)" : "var(--accent-success)";
+        });
+    };
+
+    const openPomodoroTimerModal = () => {
+        const title = "Pomodoro Timer";
+        const content = `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0;">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button type="button" id="pomo-mode-work" class="button primary" style="border-radius: 20px;">Foco (25m)</button>
+                    <button type="button" id="pomo-mode-break" class="button secondary" style="border-radius: 20px;">Pausa (5m)</button>
+                </div>
+                
+                <div id="pomo-display" style="font-size: 4rem; font-family: monospace; font-weight: bold; color: var(--accent-primary);">25:00</div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" id="pomo-start" class="success" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <span class="icon icon-play-arrow" style="font-size: 24px;"></span>
+                    </button>
+                    <button type="button" id="pomo-pause" class="warning hidden" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <span class="icon icon-pause" style="font-size: 24px;"></span>
+                    </button>
+                    <button type="button" id="pomo-reset" class="secondary" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <span class="icon icon-sync" style="font-size: 24px;"></span>
+                    </button>
+                </div>
+            </div>
+        `;
+        showModal(title, content, '', 'pomodoro-modal');
+        
+        let timeLeft = 25 * 60;
+        let isRunning = false;
+        let interval;
+        let currentMode = 'work';
+        
+        const display = document.getElementById('pomo-display');
+        const startBtn = document.getElementById('pomo-start');
+        const pauseBtn = document.getElementById('pomo-pause');
+        const resetBtn = document.getElementById('pomo-reset');
+        const workBtn = document.getElementById('pomo-mode-work');
+        const breakBtn = document.getElementById('pomo-mode-break');
+        
+        const updateDisplay = () => {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            display.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        };
+        
+        const setMode = (mode) => {
+            currentMode = mode;
+            isRunning = false;
+            clearInterval(interval);
+            startBtn.classList.remove('hidden');
+            pauseBtn.classList.add('hidden');
+            
+            if (mode === 'work') {
+                timeLeft = 25 * 60;
+                workBtn.classList.replace('secondary', 'primary');
+                breakBtn.classList.replace('primary', 'secondary');
+                display.style.color = 'var(--accent-primary)';
+            } else {
+                timeLeft = 5 * 60;
+                breakBtn.classList.replace('secondary', 'primary');
+                workBtn.classList.replace('primary', 'secondary');
+                display.style.color = 'var(--accent-success)';
+            }
+            updateDisplay();
+        };
+        
+        workBtn.addEventListener('click', () => setMode('work'));
+        breakBtn.addEventListener('click', () => setMode('break'));
+        
+        startBtn.addEventListener('click', () => {
+            if (!isRunning) {
+                isRunning = true;
+                startBtn.classList.add('hidden');
+                pauseBtn.classList.remove('hidden');
+                
+                interval = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(interval);
+                        isRunning = false;
+                        startBtn.classList.remove('hidden');
+                        pauseBtn.classList.add('hidden');
+                        showNotification(currentMode === 'work' ? "Tempo de foco encerrado! Faça uma pausa." : "Pausa encerrada! De volta ao foco.", "success");
+                        try {
+                            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                            audio.play();
+                        } catch(e) {}
+                    }
+                }, 1000);
+            }
+        });
+        
+        pauseBtn.addEventListener('click', () => {
+            isRunning = false;
+            clearInterval(interval);
+            pauseBtn.classList.add('hidden');
+            startBtn.classList.remove('hidden');
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            setMode(currentMode);
+        });
+        
+        const modal = document.getElementById('generic-modal');
+        const cleanup = (e) => {
+            if (e.target === modal || e.target.closest('.close-button')) {
+                clearInterval(interval);
+                modal.removeEventListener('click', cleanup);
+            }
+        };
+        modal.addEventListener('click', cleanup);
+    };
+
+    const openRubricGeneratorModal = () => {
+        const title = "Gerador de Rubricas";
+        const content = `
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <p class="text-secondary">Crie uma tabela de critérios de avaliação rapidamente.</p>
+                <div>
+                    <label style="font-weight: bold;">Tema/Atividade:</label>
+                    <input type="text" id="rubric-theme" placeholder="Ex: Redação sobre Meio Ambiente" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Critérios (um por linha):</label>
+                    <textarea id="rubric-criteria" style="width: 100%; height: 100px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; resize: vertical;" placeholder="Ex:\nGramática\nCoerência\nArgumentação"></textarea>
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Níveis de Desempenho (separados por vírgula):</label>
+                    <input type="text" id="rubric-levels" value="Excelente, Bom, Regular, Insuficiente" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                </div>
+                <button type="button" id="generate-rubric-btn" class="primary">Gerar Tabela</button>
+                
+                <div id="rubric-result" style="margin-top: 20px; overflow-x: auto;"></div>
+            </div>
+        `;
+        showModal(title, content, '', 'rubric-modal');
+        
+        document.getElementById('generate-rubric-btn').addEventListener('click', () => {
+            const theme = document.getElementById('rubric-theme').value;
+            const criteria = document.getElementById('rubric-criteria').value.split('\n').filter(c => c.trim());
+            const levels = document.getElementById('rubric-levels').value.split(',').map(l => l.trim()).filter(l => l);
+            
+            if (criteria.length === 0 || levels.length === 0) {
+                showNotification("Preencha os critérios e níveis.", "error");
+                return;
+            }
+            
+            let html = `<h4 style="text-align: center;">Rubrica: ${sanitizeHTML(theme)}</h4>`;
+            html += `<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">`;
+            html += `<thead><tr><th style="border: 1px solid var(--border-color); padding: 8px; background: var(--bg-tertiary);">Critérios</th>`;
+            levels.forEach(level => {
+                html += `<th style="border: 1px solid var(--border-color); padding: 8px; background: var(--bg-tertiary);">${sanitizeHTML(level)}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+            
+            criteria.forEach(crit => {
+                html += `<tr><td style="border: 1px solid var(--border-color); padding: 8px; font-weight: bold;">${sanitizeHTML(crit)}</td>`;
+                levels.forEach(() => {
+                    html += `<td style="border: 1px solid var(--border-color); padding: 8px;"></td>`;
+                });
+                html += `</tr>`;
+            });
+            
+            html += `</tbody></table>`;
+            
+            document.getElementById('rubric-result').innerHTML = html;
+        });
+    };
+
+    const openLessonPlannerModal = () => {
+        const title = "Planejador de Aulas";
+        const content = `
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-weight: bold;">Tema da Aula:</label>
+                    <input type="text" id="lp-theme" placeholder="Ex: Revolução Francesa" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="font-weight: bold;">Turma:</label>
+                        <input type="text" id="lp-class" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="font-weight: bold;">Duração (min):</label>
+                        <input type="number" id="lp-duration" value="50" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Objetivos:</label>
+                    <textarea id="lp-objectives" style="width: 100%; height: 60px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; resize: vertical;"></textarea>
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Estrutura (Tempo - Atividade):</label>
+                    <textarea id="lp-structure" style="width: 100%; height: 100px; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; resize: vertical;" placeholder="Ex:\n10 min - Introdução\n25 min - Explicação do conteúdo\n15 min - Exercícios de fixação"></textarea>
+                </div>
+                <div>
+                    <label style="font-weight: bold;">Materiais Necessários:</label>
+                    <input type="text" id="lp-materials" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                </div>
+                <button type="button" id="lp-save-btn" class="primary"><span class="icon icon-salvar"></span> Salvar Plano</button>
+            </div>
+        `;
+        showModal(title, content, '', 'lesson-planner-modal');
+        
+        document.getElementById('lp-save-btn').addEventListener('click', () => {
+            showNotification("Plano de aula salvo com sucesso! (Simulação)", "success");
+            hideModal();
+        });
+    };
+
+    const openMindMapModal = () => {
+        const title = "Mapa Mental";
+        const content = `
+            <div style="display: flex; flex-direction: column; height: 100%; gap: 10px;">
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0;">Digite os tópicos usando espaços no início da linha para criar a hierarquia.</p>
+                <textarea id="mindmap-input" style="height: 120px; font-family: monospace; white-space: pre;" placeholder="Ideia Central\n  Tópico 1\n    Subtópico A\n  Tópico 2"></textarea>
+                <button type="button" id="mindmap-generate-btn" class="primary">Gerar Mapa</button>
+                <div id="mindmap-output" style="flex-grow: 1; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; overflow: auto; background: white; min-height: 250px;">
+                </div>
+            </div>
+        `;
+        showModal(title, content, '', 'mindmap-modal');
+
+        const parseTree = (lines) => {
+            const root = { children: [] };
+            const stack = [{ level: -1, node: root }];
+            
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                const level = line.search(/\S/);
+                const text = line.trim();
+                const node = { text, children: [] };
+                
+                while (stack.length > 1 && stack[stack.length - 1].level >= level) {
+                    stack.pop();
+                }
+                stack[stack.length - 1].node.children.push(node);
+                stack.push({ level, node });
+            });
+            return root.children;
+        };
+
+        const renderTree = (nodes, isRoot = false) => {
+            if (!nodes || nodes.length === 0) return '';
+            let html = `<ul class="mindmap-list ${isRoot ? 'mindmap-root' : ''}">`;
+            nodes.forEach(node => {
+                html += `<li><div class="mindmap-node">${sanitizeHTML(node.text)}</div>`;
+                html += renderTree(node.children);
+                html += `</li>`;
+            });
+            html += `</ul>`;
+            return html;
+        };
+
+        document.getElementById('mindmap-generate-btn').addEventListener('click', () => {
+            const text = document.getElementById('mindmap-input').value;
+            const lines = text.split('\\n');
+            const tree = parseTree(lines);
+            document.getElementById('mindmap-output').innerHTML = renderTree(tree, true);
+        });
+    };
+
+    const openFlashcardsModal = () => {
+        let cards = [];
+        let currentIndex = 0;
+        
+        const content = `
+            <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button type="button" id="tab-create-fc" class="primary" style="flex: 1;">Criar</button>
+                <button type="button" id="tab-study-fc" class="secondary" style="flex: 1;">Estudar</button>
+            </div>
+            
+            <div id="fc-create-view">
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                    <input type="text" id="fc-front" placeholder="Frente (Pergunta)" style="flex: 1; margin-bottom: 0;">
+                    <input type="text" id="fc-back" placeholder="Verso (Resposta)" style="flex: 1; margin-bottom: 0;">
+                    <button type="button" id="fc-add-btn" class="primary icon-button"><span class="icon icon-adicionar icon-only"></span></button>
+                </div>
+                <div id="fc-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                    <p class="text-secondary" style="text-align: center; margin-top: 20px;">Nenhum cartão criado ainda.</p>
+                </div>
+            </div>
+            
+            <div id="fc-study-view" class="hidden" style="text-align: center;">
+                <div id="fc-study-container">
+                    <div class="fc-card-container" id="fc-card">
+                        <div class="fc-card-inner">
+                            <div class="fc-card-front" id="fc-display-front"></div>
+                            <div class="fc-card-back" id="fc-display-back"></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;">
+                        <button type="button" id="fc-prev-btn" class="secondary icon-button"><span class="icon icon-voltar icon-only"></span></button>
+                        <span id="fc-counter" style="font-weight: bold; min-width: 50px;">0 / 0</span>
+                        <button type="button" id="fc-next-btn" class="secondary icon-button"><span class="icon icon-play-arrow icon-only"></span></button>
+                    </div>
+                </div>
+                <div id="fc-empty-state" class="hidden">
+                    <p>Adicione cartões na aba "Criar" para começar a estudar.</p>
+                </div>
+            </div>
+        `;
+        showModal("Flashcards", content, '', 'flashcards-modal');
+        
+        const tabCreate = document.getElementById('tab-create-fc');
+        const tabStudy = document.getElementById('tab-study-fc');
+        const viewCreate = document.getElementById('fc-create-view');
+        const viewStudy = document.getElementById('fc-study-view');
+        const frontInput = document.getElementById('fc-front');
+        const backInput = document.getElementById('fc-back');
+        const addBtn = document.getElementById('fc-add-btn');
+        const listContainer = document.getElementById('fc-list');
+        
+        const cardElement = document.getElementById('fc-card');
+        const displayFront = document.getElementById('fc-display-front');
+        const displayBack = document.getElementById('fc-display-back');
+        const prevBtn = document.getElementById('fc-prev-btn');
+        const nextBtn = document.getElementById('fc-next-btn');
+        const counter = document.getElementById('fc-counter');
+        const studyContainer = document.getElementById('fc-study-container');
+        const emptyState = document.getElementById('fc-empty-state');
+        
+        tabCreate.addEventListener('click', () => {
+            tabCreate.classList.replace('secondary', 'primary');
+            tabStudy.classList.replace('primary', 'secondary');
+            viewCreate.classList.remove('hidden');
+            viewStudy.classList.add('hidden');
+        });
+        
+        tabStudy.addEventListener('click', () => {
+            tabStudy.classList.replace('secondary', 'primary');
+            tabCreate.classList.replace('primary', 'secondary');
+            viewStudy.classList.remove('hidden');
+            viewCreate.classList.add('hidden');
+            updateStudyView();
+        });
+        
+        addBtn.addEventListener('click', () => {
+            const front = frontInput.value.trim();
+            const back = backInput.value.trim();
+            if (front && back) {
+                cards.push({ front, back });
+                frontInput.value = '';
+                backInput.value = '';
+                frontInput.focus();
+                renderList();
+            }
+        });
+        
+        const renderList = () => {
+            if (cards.length === 0) {
+                listContainer.innerHTML = '<p class="text-secondary" style="text-align: center; margin-top: 20px;">Nenhum cartão criado ainda.</p>';
+                return;
+            }
+            listContainer.innerHTML = cards.map((c, i) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px;">
+                    <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <strong>F:</strong> ${sanitizeHTML(c.front)} <br>
+                        <span class="text-secondary"><strong>V:</strong> ${sanitizeHTML(c.back)}</span>
+                    </div>
+                    <button type="button" class="secondary icon-button delete-fc" data-index="${i}"><span class="icon icon-excluir icon-only"></span></button>
+                </div>
+            `).join('');
+            
+            listContainer.querySelectorAll('.delete-fc').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(e.currentTarget.dataset.index);
+                    cards.splice(idx, 1);
+                    if (currentIndex >= cards.length) currentIndex = Math.max(0, cards.length - 1);
+                    renderList();
+                });
+            });
+        };
+        
+        cardElement.addEventListener('click', () => {
+            cardElement.classList.toggle('flipped');
+        });
+        
+        const updateStudyView = () => {
+            if (cards.length === 0) {
+                studyContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            studyContainer.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            
+            cardElement.classList.remove('flipped');
+            setTimeout(() => {
+                displayFront.textContent = cards[currentIndex].front;
+                displayBack.textContent = cards[currentIndex].back;
+                counter.textContent = `${currentIndex + 1} / ${cards.length}`;
+            }, 150);
+        };
+        
+        prevBtn.addEventListener('click', () => {
+            if (cards.length > 0) {
+                currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+                updateStudyView();
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            if (cards.length > 0) {
+                currentIndex = (currentIndex + 1) % cards.length;
+                updateStudyView();
+            }
+        });
+    };
+
+    const openEventOrganizerModal = () => {
+        const classesOptions = appData.classes.map(c => `<option value="${c.id}">${sanitizeHTML(c.name)}</option>`).join('');
+        const content = `
+            <div class="form-group">
+                <label>Selecione a Turma:</label>
+                <select id="event-class-select">
+                    <option value="">-- Selecione --</option>
+                    ${classesOptions}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nome do Evento/Excursão:</label>
+                <input type="text" id="event-name" placeholder="Ex: Museu de Arte">
+            </div>
+            <div id="event-summary" style="margin-bottom: 15px; font-weight: bold; color: var(--accent-primary);"></div>
+            <div id="event-students-list" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+        `;
+        showModal("Organizador de Excursões", content, '<button type="button" id="print-event-btn" class="primary hidden"><span class="icon icon-pdf"></span> Imprimir Lista</button>', 'event-organizer-modal');
+
+        const classSelect = document.getElementById('event-class-select');
+        const studentsList = document.getElementById('event-students-list');
+        const summary = document.getElementById('event-summary');
+        const printBtn = document.getElementById('print-event-btn');
+        
+        let currentStudents = [];
+        let eventState = {};
+
+        const updateSummary = () => {
+            if (currentStudents.length === 0) {
+                summary.textContent = '';
+                return;
+            }
+            const total = currentStudents.length;
+            const authCount = Object.values(eventState).filter(s => s.auth).length;
+            const paidCount = Object.values(eventState).filter(s => s.paid).length;
+            summary.innerHTML = `Total: ${total} alunos | Autorizados: ${authCount} | Pagos: ${paidCount}`;
+        };
+
+        classSelect.addEventListener('change', () => {
+            const classId = classSelect.value;
+            if (!classId) {
+                studentsList.innerHTML = '';
+                currentStudents = [];
+                eventState = {};
+                updateSummary();
+                printBtn.classList.add('hidden');
+                return;
+            }
+            
+            currentStudents = getStudentsByClass(classId);
+            eventState = {};
+            currentStudents.forEach(s => { eventState[s.id] = { auth: false, paid: false }; });
+            
+            printBtn.classList.remove('hidden');
+            
+            studentsList.innerHTML = currentStudents.map(s => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px;">
+                    <div style="flex: 1; font-weight: 500;">${s.number ? s.number + '. ' : ''}${sanitizeHTML(s.name)}</div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin: 0;">
+                            <input type="checkbox" class="event-auth-cb" data-id="${s.id}"> Aut.
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin: 0;">
+                            <input type="checkbox" class="event-paid-cb" data-id="${s.id}"> Pago
+                        </label>
+                    </div>
+                </div>
+            `).join('');
+            
+            studentsList.querySelectorAll('.event-auth-cb').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    eventState[e.target.dataset.id].auth = e.target.checked;
+                    updateSummary();
+                });
+            });
+            studentsList.querySelectorAll('.event-paid-cb').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    eventState[e.target.dataset.id].paid = e.target.checked;
+                    updateSummary();
+                });
+            });
+            
+            updateSummary();
+        });
+        
+        printBtn.addEventListener('click', () => {
+            const eventName = document.getElementById('event-name').value || 'Excursão';
+            const cls = findClassById(classSelect.value);
+            let printWindow = window.open('', '_blank');
+            let html = `
+                <html><head><title>Lista - ${eventName}</title>
+                <style>
+                    body { font-family: sans-serif; padding: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .center { text-align: center; }
+                </style>
+                </head><body>
+                <h2>${sanitizeHTML(eventName)} - Turma: ${sanitizeHTML(cls.name)}</h2>
+                <p>${summary.textContent}</p>
+                <table>
+                    <thead><tr><th>Nº</th><th>Aluno</th><th>Autorização</th><th>Pagamento</th></tr></thead>
+                    <tbody>
+            `;
+            currentStudents.forEach(s => {
+                const state = eventState[s.id];
+                html += `<tr>
+                    <td width="30">${s.number || ''}</td>
+                    <td>${sanitizeHTML(s.name)}</td>
+                    <td class="center" width="100">${state.auth ? 'X' : ' '}</td>
+                    <td class="center" width="100">${state.paid ? 'X' : ' '}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></body></html>`;
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); }, 500);
+        });
+    };
+
+    let noiseAudioContext;
+    let noiseStream;
+    let noiseAnimationFrame;
+
+    const openNoiseMeterModal = () => {
+        const content = `
+            <div style="text-align: center; padding: 10px;">
+                <div class="traffic-light-container">
+                    <div id="light-red" class="light-bulb red"></div>
+                    <div id="light-yellow" class="light-bulb yellow"></div>
+                    <div id="light-green" class="light-bulb green active"></div>
+                </div>
+                <div style="margin-top: 25px; display: flex; justify-content: center; gap: 10px;">
+                    <button type="button" id="start-noise-meter" class="primary"><span class="icon icon-mic"></span> Iniciar</button>
+                    <button type="button" id="stop-noise-meter" class="secondary" disabled><span class="icon icon-stop"></span> Parar</button>
+                </div>
+                <div style="margin-top: 20px; text-align: left; max-width: 250px; margin-left: auto; margin-right: auto;">
+                    <label style="font-size: 0.85rem;">Sensibilidade: <span id="noise-sens-val">50</span>%</label>
+                    <input type="range" id="noise-sensitivity" min="1" max="100" value="50" style="margin-bottom: 0;">
+                </div>
+            </div>
+        `;
+        showModal("Semáforo do Silêncio", content, '', 'noise-meter-modal');
+
+        const startBtn = document.getElementById('start-noise-meter');
+        const stopBtn = document.getElementById('stop-noise-meter');
+        const sensInput = document.getElementById('noise-sensitivity');
+        const sensVal = document.getElementById('noise-sens-val');
+        const lightRed = document.getElementById('light-red');
+        const lightYellow = document.getElementById('light-yellow');
+        const lightGreen = document.getElementById('light-green');
+        
+        sensInput.addEventListener('input', (e) => {
+            sensVal.textContent = e.target.value;
+        });
+
+        const setLight = (color) => {
+            lightRed.classList.remove('active');
+            lightYellow.classList.remove('active');
+            lightGreen.classList.remove('active');
+            if (color === 'red') lightRed.classList.add('active');
+            else if (color === 'yellow') lightYellow.classList.add('active');
+            else lightGreen.classList.add('active');
+        };
+
+        const stopMeter = () => {
+            if (noiseAnimationFrame) cancelAnimationFrame(noiseAnimationFrame);
+            if (noiseStream) {
+                noiseStream.getTracks().forEach(track => track.stop());
+            }
+            if (noiseAudioContext) {
+                noiseAudioContext.close();
+            }
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            setLight('green');
+        };
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                noiseStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                noiseAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = noiseAudioContext.createMediaStreamSource(noiseStream);
+                const analyser = noiseAudioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                const checkNoiseLevel = () => {
+                    analyser.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for(let i = 0; i < bufferLength; i++) {
+                        sum += dataArray[i];
+                    }
+                    const average = sum / bufferLength;
+                    
+                    const sensitivity = parseInt(sensInput.value);
+                    const factor = (101 - sensitivity) / 50;
+                    const yellowThreshold = 20 * factor;
+                    const redThreshold = 50 * factor;
+
+                    if (average > redThreshold) {
+                        setLight('red');
+                    } else if (average > yellowThreshold) {
+                        setLight('yellow');
+                    } else {
+                        setLight('green');
+                    }
+
+                    noiseAnimationFrame = requestAnimationFrame(checkNoiseLevel);
+                };
+                
+                checkNoiseLevel();
+                
+            } catch (err) {
+                console.error("Erro ao acessar microfone:", err);
+                alert("Não foi possível acessar o microfone. Verifique as permissões.");
+            }
+        });
+
+        stopBtn.addEventListener('click', stopMeter);
+        
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class' && !modal.classList.contains('show')) {
+                    stopMeter();
+                    observer.disconnect();
+                }
+            });
+        });
+        observer.observe(modal, { attributes: true });
+    };
+
+    const openToolModal = (toolType) => { if (toolType === 'advanced-calculator') { openAdvancedCalculatorModal(); return; } let title = "Ferramenta"; let content = "<p>Funcionalidade em desenvolvimento.</p>"; let modalClass = ''; let footer = ''; switch (toolType) { case 'name-sorter': openNameSorterModal(); return; case 'timer-stopwatch': openTimerModal(); return; case 'group-generator': openGroupGeneratorModal(); return; case 'notepad': openNotepadModal(); return; case 'calendar-notes': openCalendarNotesModal(); return; case 'audio-recorder': openAudioRecorderModal(); return; case 'whiteboard': openWhiteboardModal(); return; case 'todo-list': openTodoListModal(); return; case 'topic-sorter': openTopicSorterModal(); return; case 'grade-converter': openGradeConverterModal(); return; case 'pomodoro-timer': openPomodoroTimerModal(); return; case 'rubric-generator': openRubricGeneratorModal(); return; case 'lesson-planner': openLessonPlannerModal(); return; case 'mind-map': openMindMapModal(); return; case 'flashcards': openFlashcardsModal(); return; case 'event-organizer': openEventOrganizerModal(); return; case 'noise-meter': openNoiseMeterModal(); return; default: title = "Funcionalidade Indisponível"; content = "<p>Esta ferramenta ainda não foi implementada.</p>"; } showModal(title, content, footer, modalClass); };
     const updateScheduleItemsUI = () => { if (currentSection !== 'schedule-section' || !scheduleListContainer) return; const now = new Date(); const currentDayIndex = now.getDay(); const currentDayName = weekdays[currentDayIndex]; const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes(); const scheduleItemsElements = scheduleListContainer.querySelectorAll(`.schedule-item`); let nextItemFoundForToday = false; scheduleItemsElements.forEach(el => { const itemId = el.dataset.id; const item = findScheduleById(itemId); if (!item) return; const startMinutes = parseInt(el.dataset.startMinutes); const endMinutes = parseInt(el.dataset.endMinutes); const progressBar = el.querySelector('.progress-bar'); el.classList.remove('current', 'next'); if (progressBar) progressBar.style.width = '0%'; if (item.day === currentDayName && !isNaN(startMinutes) && !isNaN(endMinutes)) { const isCurrent = currentTimeInMinutes >= startMinutes && currentTimeInMinutes < endMinutes; const isUpcoming = currentTimeInMinutes < startMinutes; if (isCurrent) { el.classList.add('current'); const duration = endMinutes - startMinutes; const elapsed = currentTimeInMinutes - startMinutes; const progress = duration > 0 ? Math.min(100, Math.max(0, (elapsed / duration) * 100)) : 0; if (progressBar) progressBar.style.width = `${progress}%`; nextItemFoundForToday = true; } else if (isUpcoming && !nextItemFoundForToday) { el.classList.add('next'); nextItemFoundForToday = true; } } }); };
     const startScheduleUpdates = () => { stopScheduleUpdates(); console.log("Starting schedule UI updates..."); updateScheduleItemsUI(); scheduleUpdateInterval = setInterval(updateScheduleItemsUI, 1000); };
     const stopScheduleUpdates = () => { if (scheduleUpdateInterval) { clearInterval(scheduleUpdateInterval); scheduleUpdateInterval = null; console.log("Stopped schedule UI updates."); } };
@@ -1048,33 +2759,28 @@ document.addEventListener('DOMContentLoaded', () => {
         let newsContent = `
             <p>Confira as últimas melhorias e funcionalidades adicionadas para facilitar ainda mais seu dia a dia:</p>
             
-            <h4 style="color: #9b72cb;"><span class="icon icon-auto-awesome"></span> Novas Ferramentas de IA</h4>
+            <h4 style="color: #9b72cb;"><span class="icon icon-auto-awesome"></span> Novas Ferramentas Pedagógicas</h4>
             <ul>
-                <li><strong><span class="icon icon-auto-awesome"></span> Assistente de Provas:</strong> Gere provas completas com base no assunto e nível escolar, direto na aba Ferramentas.</li>
-                <li><strong><span class="icon icon-auto-awesome"></span> Gerador de Questões:</strong> Crie questões específicas (múltipla escolha, dissertativas, etc.) rapidamente.</li>
-                <li><strong><span class="icon icon-auto-awesome"></span> Análise de Turma:</strong> Obtenha insights pedagógicos sobre sua turma com base no número de alunos e anotações.</li>
-                <li><strong><span class="icon icon-plano"></span> Plano de Aula Inteligente:</strong> O gerador de esboço de aula foi aprimorado e agora conta com uma interface dedicada.</li>
-                <li><strong><span class="icon icon-pdf"></span> Exportação para PDF:</strong> Exporte facilmente os conteúdos gerados pela IA (provas, questões, planos) diretamente para PDF.</li>
+                <li><strong><span class="icon icon-auto-awesome"></span> Mapa Mental e Flashcards:</strong> Crie mapas mentais visuais e cartões de estudo para revisão rápida.</li>
+                <li><strong><span class="icon icon-mic"></span> Semáforo do Silêncio:</strong> Controle o ruído da sala com um semáforo visual que usa o microfone.</li>
+                <li><strong><span class="icon icon-groups"></span> Organizador de Excursões:</strong> Gerencie autorizações e pagamentos de passeios de forma simples.</li>
+                <li><strong><span class="icon icon-auto-awesome"></span> Assistente de IA:</strong> Gere provas, questões e planos de aula completos com exportação para PDF.</li>
             </ul>
 
             <h4 style="color: #28a745;"><span class="icon icon-language"></span> Uso Offline e Nuvem</h4>
             <ul>
-                <li><strong><span class="icon icon-signal-cellular-alt"></span> Modo Offline Total:</strong> Agora você pode usar o app sem internet em tempo integral! Suas alterações são salvas no seu dispositivo e sincronizadas automaticamente quando houver conexão.</li>
+                <li><strong><span class="icon icon-signal-cellular-alt"></span> Modo Offline Total:</strong> Use o app sem internet em tempo integral! Suas alterações são salvas e sincronizadas automaticamente.</li>
                 <li><strong><span class="icon icon-cloud"></span> Backup em Nuvem:</strong> Seus dados agora estão seguros na sua conta Google. Acesse de qualquer lugar e nunca perca suas informações.</li>
-                <li><strong><span class="icon icon-sync"></span> Migração de Dados:</strong> Se você já usa o app sem conta, seus dados locais serão <strong>migrados automaticamente</strong> para a nuvem assim que você criar sua conta e entrar pela primeira vez!</li>
-                <li><strong><span class="icon icon-warning"></span> Aviso de Segurança:</strong> Ao fazer <strong>Logout (Sair)</strong>, seus dados locais são removidos por segurança. Certifique-se de estar conectado à internet antes de sair para garantir que tudo foi sincronizado com a nuvem!</li>
+                <li><strong><span class="icon icon-sync"></span> Migração de Dados:</strong> Seus dados locais serão migrados automaticamente para a nuvem ao criar sua conta!</li>
             </ul>
 
-            <h4><span class="icon icon-auto-awesome"></span> Outras Funcionalidades</h4>
+            <h4><span class="icon icon-palette"></span> Interface e Gestão</h4>
             <ul>
-                <li><strong><span class="icon icon-menu"></span> Novo Menu Lateral:</strong> Agora você pode escolher entre a barra inferior clássica ou um menu lateral (hambúrguer) para ganhar mais espaço na tela!</li>
-                <li><strong><span class="icon icon-palette"></span> Temas e Cores:</strong> O menu lateral agora se adapta perfeitamente ao seu tema escolhido, com cores sólidas e elegantes.</li>
-                <li><strong><span class="icon icon-rocket-launch"></span> Interface Limpa:</strong> Removemos o botão flutuante para uma experiência mais intuitiva e agradável.</li>
-                <li><strong><span class="icon icon-groups"></span> Capacidade Ampliada:</strong> Agora você pode cadastrar até <strong>100 alunos</strong> por turma!</li>
+                <li><strong><span class="icon icon-menu"></span> Novo Menu Lateral:</strong> Escolha entre a barra inferior clássica ou um menu lateral para ganhar mais espaço na tela!</li>
+                <li><strong><span class="icon icon-palette"></span> Temas e Cores:</strong> O menu lateral agora se adapta ao seu tema escolhido, com cores sólidas e elegantes.</li>
+                <li><strong><span class="icon icon-groups"></span> Capacidade Ampliada:</strong> Agora você pode cadastrar até 100 alunos por turma!</li>
                 <li><strong><span class="icon icon-flag"></span> Indicador de Programas Sociais:</strong> Identifique visualmente alunos participantes de programas como Bolsa Família e Pé de Meia.</li>
-                <li><strong><span class="icon icon-notas"></span> Quórum da Escola:</strong> Veja a porcentagem de presença geral diretamente na lista de escolas.</li>
                 <li><strong><span class="icon icon-anotacao"></span> Categorias de Observações:</strong> Anotações, Ocorrências, Advertências e Suspensões com períodos específicos.</li>
-                <li><strong><span class="icon icon-alarm"></span> Barra de Progresso:</strong> Acompanhe o andamento da sua aula atual em tempo real.</li>
             </ul>
         `;
 

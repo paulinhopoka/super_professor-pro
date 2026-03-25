@@ -1,5 +1,7 @@
 {
   "name": "Super Professor Pro - IA + BD + PDF ok ok ok",
   "description": "app spp 100% funcional",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }
