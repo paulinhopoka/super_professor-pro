@@ -2114,15 +2114,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            const element = aiToolResultContainer.cloneNode(true);
+            const element = document.createElement('div');
             element.style.position = 'absolute';
-            element.style.left = '0';
+            element.style.left = '-9999px';
             element.style.top = '0';
             element.style.width = '800px'; 
             element.style.backgroundColor = 'white';
+            element.style.color = 'black';
             element.style.padding = '40px';
-            element.style.zIndex = '9999';
-            element.classList.remove('hidden');
+            element.style.zIndex = '-1';
+            
+            const title = document.createElement('h2');
+            title.textContent = aiToolTitle.textContent || 'Documento';
+            title.style.textAlign = 'center';
+            title.style.marginBottom = '20px';
+            title.style.borderBottom = '1px solid #ccc';
+            title.style.paddingBottom = '10px';
+            title.style.color = 'black';
+            title.style.fontFamily = 'sans-serif';
+            element.appendChild(title);
+
+            const contentClone = aiToolResultContent.cloneNode(true);
+            contentClone.style.maxHeight = 'none';
+            contentClone.style.overflow = 'visible';
+            contentClone.style.height = 'auto';
+            contentClone.style.backgroundColor = 'transparent';
+            contentClone.style.color = 'black';
+            
+            // Fix text colors inside the clone to ensure they are visible on white background
+            const allElements = contentClone.querySelectorAll('*');
+            allElements.forEach(el => {
+                el.style.color = 'black';
+                if (el.tagName === 'PRE' || el.tagName === 'CODE') {
+                    el.style.backgroundColor = '#f5f5f5';
+                    el.style.whiteSpace = 'pre-wrap';
+                    el.style.wordBreak = 'break-word';
+                }
+            });
+            
+            element.appendChild(contentClone);
             
             document.body.appendChild(element);
 
@@ -2135,10 +2165,10 @@ document.addEventListener('DOMContentLoaded', () => {
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             const opt = {
-                margin:       10,
-                filename:     `${aiToolTitle.textContent.replace(/\s+/g, '_')}.pdf`,
+                margin:       [15, 15, 15, 15],
+                filename:     `${(aiToolTitle.textContent || 'Documento').replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: true },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };

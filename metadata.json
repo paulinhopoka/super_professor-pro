@@ -1,5 +1,5 @@
 {
-  "name": "super professor pro - falta ajustar coisas, olhe descrição",
-  "description": "quero fazer algumas modificações quanto a aparência do app, modificar os ícones (remover todos emojis do app).\ndeixar todas abas com um cabeçalho igual ao design da aba \"detalhes de turma\", onde existe uma seta a esquerda dentro de uma caixa para voltar, nome da aba no centro com uma fonte de tamanho adequado, com espaçamento para não ficar muito colado na barra de pesquisa e quando rolar a tela, essas informações continuem sendo exibidas, assim como na aba detalhes de turma.\nvou enviar algumas imagens de exemplo.\nimplementar o perfil com nome de usuário e avatar, após salvar o perfil, o nome e avatar devem aparecer no menu hamburguer e os textos devem substituir \"professor\" pelo nome de usuário, para deixar tudo mais personalizado, como por exemplo \"olá, professor...\", virá \"olá, nome de usuário...\"\nNão quero opções de multi idiomas, o app deve ser apenas em português BR.\naparentemente a lista de alunos de uma turma esta sendo exibido corretamente, porém a lista de presença esta cortando os ultimos alunos da listagem, corrija e certifique-se de que isso não acontece em outros campos.",
+  "name": "Super Professor Pro - PDF Generator",
+  "description": "Gerador de PDFs otimizado para provas e exercícios, com suporte a gabaritos.",
   "requestFramePermissions": []
 }
