@@ -2116,13 +2116,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const element = document.createElement('div');
             element.style.position = 'absolute';
-            element.style.left = '-9999px';
+            element.style.left = '0';
             element.style.top = '0';
             element.style.width = '800px'; 
             element.style.backgroundColor = 'white';
             element.style.color = 'black';
             element.style.padding = '40px';
-            element.style.zIndex = '-1';
+            element.style.zIndex = '-9999'; // Hide behind the main app instead of off-screen
+            element.style.opacity = '1';
             
             const title = document.createElement('h2');
             title.textContent = aiToolTitle.textContent || 'Documento';
@@ -2168,7 +2169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 margin:       [15, 15, 15, 15],
                 filename:     `${(aiToolTitle.textContent || 'Documento').replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
+                html2canvas:  { scale: 2, useCORS: true, logging: true, scrollY: 0 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
