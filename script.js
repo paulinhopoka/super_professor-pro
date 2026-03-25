@@ -2114,71 +2114,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            const element = document.createElement('div');
-            element.style.position = 'absolute';
-            element.style.left = '0';
-            element.style.top = '0';
-            element.style.width = '800px'; 
-            element.style.backgroundColor = 'white';
-            element.style.color = 'black';
-            element.style.padding = '40px';
-            element.style.zIndex = '-9999'; // Hide behind the main app instead of off-screen
-            element.style.opacity = '1';
-            
-            const title = document.createElement('h2');
-            title.textContent = aiToolTitle.textContent || 'Documento';
-            title.style.textAlign = 'center';
-            title.style.marginBottom = '20px';
-            title.style.borderBottom = '1px solid #ccc';
-            title.style.paddingBottom = '10px';
-            title.style.color = 'black';
-            title.style.fontFamily = 'sans-serif';
-            element.appendChild(title);
-
-            const contentClone = aiToolResultContent.cloneNode(true);
-            contentClone.style.maxHeight = 'none';
-            contentClone.style.overflow = 'visible';
-            contentClone.style.height = 'auto';
-            contentClone.style.backgroundColor = 'transparent';
-            contentClone.style.color = 'black';
-            
-            // Fix text colors inside the clone to ensure they are visible on white background
-            const allElements = contentClone.querySelectorAll('*');
-            allElements.forEach(el => {
-                el.style.color = 'black';
-                if (el.tagName === 'PRE' || el.tagName === 'CODE') {
-                    el.style.backgroundColor = '#f5f5f5';
-                    el.style.whiteSpace = 'pre-wrap';
-                    el.style.wordBreak = 'break-word';
-                }
-            });
-            
-            element.appendChild(contentClone);
-            
-            document.body.appendChild(element);
-
-            // Ensure MathJax typesets the temporary element before PDF generation
+            // Wait for MathJax to finish rendering in the original element if needed
             if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-                await MathJax.typesetPromise([element]);
+                await MathJax.typesetPromise([aiToolResultContent]);
             }
             
-            // Wait for rendering to complete
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const htmlString = `
+                <div style="width: 800px; background-color: white; color: black; padding: 40px; font-family: Arial, sans-serif; line-height: 1.6;">
+                    <style>
+                        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 24px; margin-bottom: 16px; font-weight: bold; }
+                        p { margin-bottom: 16px; color: #000; }
+                        ul, ol { margin-bottom: 16px; padding-left: 30px; color: #000; }
+                        li { margin-bottom: 8px; }
+                        pre { background-color: #f5f5f5; padding: 16px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; border: 1px solid #e5e5e5; }
+                        code { background-color: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+                        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; color: #000; }
+                        th { background-color: #f9f9f9; font-weight: bold; }
+                        blockquote { border-left: 4px solid #ccc; margin: 0; padding-left: 16px; color: #555; }
+                        svg { max-width: 100%; height: auto; }
+                    </style>
+                    <h2 style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 15px; color: #222;">
+                        ${aiToolTitle.textContent || 'Documento'}
+                    </h2>
+                    <div style="color: black;">
+                        ${aiToolResultContent.innerHTML}
+                    </div>
+                </div>
+            `;
 
             const opt = {
                 margin:       [15, 15, 15, 15],
                 filename:     `${(aiToolTitle.textContent || 'Documento').replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: true, scrollY: 0 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                document.body.removeChild(element);
+            html2pdf().set(opt).from(htmlString).save().then(() => {
                 showNotification('PDF exportado com sucesso!', 'success');
             }).catch(err => {
-                document.body.removeChild(element);
                 console.error('Erro ao exportar PDF:', err);
                 showNotification('Erro ao exportar PDF.', 'error');
             });
