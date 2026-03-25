@@ -2120,7 +2120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const htmlString = `
-                <div style="width: 800px; background-color: white; color: black; padding: 40px; font-family: Arial, sans-serif; line-height: 1.6;">
+                <div style="width: 760px; background-color: white; color: black; padding: 20px 40px; font-family: Arial, sans-serif; line-height: 1.6;">
                     <style>
                         h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 24px; margin-bottom: 16px; font-weight: bold; }
                         p { margin-bottom: 16px; color: #000; }
