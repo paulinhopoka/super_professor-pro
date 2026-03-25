@@ -2114,9 +2114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            const element = document.createElement('div');
-            // Append to body temporarily so html2canvas can render computed styles and SVGs correctly
-            // Use styles that ensure visibility and proper rendering for html2canvas
+            const element = aiToolResultContainer.cloneNode(true);
             element.style.position = 'absolute';
             element.style.left = '0';
             element.style.top = '0';
@@ -2124,35 +2122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             element.style.backgroundColor = 'white';
             element.style.padding = '40px';
             element.style.zIndex = '9999';
-            
-            element.innerHTML = `
-                <style>
-                    .pdf-content {
-                        font-family: Arial, sans-serif;
-                        line-height: 1.6;
-                        color: #333;
-                    }
-                    .pdf-content p, .pdf-content h1, .pdf-content h2, .pdf-content h3, .pdf-content li {
-                        page-break-inside: avoid;
-                    }
-                    /* Ensure SVGs don't overflow */
-                    .pdf-content svg {
-                        max-width: 100%;
-                        height: auto;
-                        display: block;
-                    }
-                    /* Add some spacing for MathJax blocks in PDF */
-                    .pdf-content mjx-container[display="true"] {
-                        margin: 1em 0;
-                    }
-                </style>
-                <div class="pdf-content">
-                    <h1 style="border-bottom: 2px solid #4285f4; padding-bottom: 10px; page-break-after: avoid;">${aiToolTitle.textContent}</h1>
-                    <div style="margin-top: 20px;" class="markdown-body">
-                        ${aiToolResultContent.innerHTML}
-                    </div>
-                </div>
-            `;
+            element.classList.remove('hidden');
             
             document.body.appendChild(element);
 
