@@ -28,20 +28,40 @@
     <main class="app-content" id="main-content">
         <!-- Seções Horários, Escolas, Turmas -->
         <section id="schedule-section" class="section">
-            <h2><span class="icon icon-horario"></span>Meus Horários</h2>
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-horario"></span>Meus Horários</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
             <button type="button" id="add-schedule-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button>
             <div id="schedule-list"><p style="text-align: center; padding: 1rem;">Nenhum horário cadastrado.</p></div>
             <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p>
         </section>
-        <section id="schools-section" class="section"> <h2><span class="icon icon-escola"></span>Minhas Escolas</h2> <button type="button" id="add-school-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button> <div id="school-list"><p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p></div> </section>
-        <section id="classes-section" class="section"> <h2> <button type="button" id="back-to-schools-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button> <span class="icon icon-turmas"></span>Turmas - <span id="classes-school-name">Selecione Escola</span> </h2> <button type="button" id="add-class-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button> <div id="class-list"><p style="text-align: center; padding: 1rem;">Selecione uma escola.</p></div> </section>
+        <section id="schools-section" class="section">
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-escola"></span>Minhas Escolas</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            <button type="button" id="add-school-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button>
+            <div id="school-list"><p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p></div>
+        </section>
+        <section id="classes-section" class="section">
+            <div class="section-header">
+                <button type="button" id="back-to-schools-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button>
+                <h2><span class="icon icon-turmas"></span>Turmas - <span id="classes-school-name">Selecione Escola</span></h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            <button type="button" id="add-class-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button>
+            <div id="class-list"><p style="text-align: center; padding: 1rem;">Selecione uma escola.</p></div>
+        </section>
 
         <!-- Seção Detalhes da Turma -->
         <section id="class-details-section" class="section">
-            <div id="class-details-header">
+            <div id="class-details-header" class="section-header">
                  <button type="button" id="back-to-classes-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button>
                  <h2><span class="icon icon-alunos"></span><span id="class-details-title">Detalhes da Turma</span></h2>
-                 <button type="button" id="details-help-button" class="icon-button" title="Ajuda">
+                 <button type="button" id="details-help-button" class="icon-button header-right-button" title="Ajuda">
                      <span class="icon icon-ajuda icon-only"></span>
                  </button>
             </div>
@@ -91,9 +111,19 @@
         </section>
 
         <!-- Seções Ferramentas, Contato, Configurações -->
-        <section id="tools-section" class="section"> <h2><span class="icon icon-ferramentas"></span>Ferramentas</h2> <div class="tools-grid"> <button type="button" class="tool-card" data-tool="name-sorter"> <span class="icon icon-sorteio"></span> <span class="tool-card-title">Sorteador de Nomes</span> </button> <button type="button" class="tool-card" data-tool="timer-stopwatch"> <span class="icon icon-cronometro"></span> <span class="tool-card-title">Cronômetro/ Timer</span> </button> <button type="button" class="tool-card" data-tool="group-generator"> <span class="icon icon-grupos"></span> <span class="tool-card-title">Gerador de Grupos</span> </button> <button type="button" class="tool-card" data-tool="advanced-calculator"> <span class="icon icon-calculadora-avancada"></span> <span class="tool-card-title">Calculadora Avançada</span> </button> </div> <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p> </section>
+        <section id="tools-section" class="section">
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-ferramentas"></span>Ferramentas</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            <div class="tools-grid"> <button type="button" class="tool-card" data-tool="name-sorter"> <span class="icon icon-sorteio"></span> <span class="tool-card-title">Sorteador de Nomes</span> </button> <button type="button" class="tool-card" data-tool="timer-stopwatch"> <span class="icon icon-cronometro"></span> <span class="tool-card-title">Cronômetro/ Timer</span> </button> <button type="button" class="tool-card" data-tool="group-generator"> <span class="icon icon-grupos"></span> <span class="tool-card-title">Gerador de Grupos</span> </button> <button type="button" class="tool-card" data-tool="advanced-calculator"> <span class="icon icon-calculadora-avancada"></span> <span class="tool-card-title">Calculadora Avançada</span> </button> </div> <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p> </section>
         <section id="profile-section" class="section">
-            <h2><span class="icon icon-perfil"></span>Perfil de Usuário</h2>
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-perfil"></span>Perfil de Usuário</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
             <div class="card">
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
                     <div id="profile-avatar-container" style="width: 100px; height: 100px; border-radius: 50%; background-color: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--accent-primary); cursor: pointer; position: relative;">
@@ -113,7 +143,11 @@
         </section>
 
         <section id="settings-section" class="section">
-            <h2><span class="icon icon-config"></span>Ajustes & Contato</h2>
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-config"></span>Ajustes & Contato</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
             
             <div class="card">
                 <h3><span class="icon icon-contato"></span>Contato & Apoio</h3>
@@ -157,17 +191,7 @@
                 </div>
             </div>
 
-            <div class="card mt-2">
-                <h3><span class="icon icon-language"></span> Idioma / Language / Idioma</h3>
-                <div class="form-group">
-                    <label for="language-select">Selecione o idioma:</label>
-                    <select id="language-select">
-                        <option value="pt-BR">Português (Brasil)</option>
-                        <option value="en-US">English (USA)</option>
-                        <option value="es-ES">Español (España)</option>
-                    </select>
-                </div>
-            </div>
+
 
             <div class="card mt-2">
                 <h3>Navegação</h3>
@@ -182,7 +206,62 @@
 
             <div class="card mt-2">
                 <h3>Temas</h3>
- <div id="theme-selector" style="display: flex; flex-wrap: wrap; gap: 5px;"> <button type="button" class="theme-button" data-theme="theme-light">Claro</button> <button type="button" class="theme-button" data-theme="theme-dark">Escuro</button> <button type="button" class="theme-button" data-theme="theme-forest-green">Verde Floresta</button> <button type="button" class="theme-button" data-theme="theme-math-master">Mestre da Matemática</button> <button type="button" class="theme-button" data-theme="theme-historic-scroll">Papiro Histórico</button> <button type="button" class="theme-button" data-theme="theme-alchemist">O Alquimista</button> </div> </div> <div class="card mt-2"> <h3>Dados</h3> <div style="display: flex; flex-direction: column; gap: 10px;"> <button type="button" id="export-data-button" class="secondary"><span class="icon icon-upload"></span> Exportar Dados (JSON)</button> <label for="import-data-input" class="button-like secondary" style="cursor: pointer;"><span class="icon icon-download"></span> Importar Dados (JSON)</label> <input type="file" id="import-data-input" accept=".json" class="hidden"> <button type="button" id="clear-data-button" class="danger"><span class="icon icon-warning"></span> Limpar Todos os Dados</button> </div> </div> <div class="card mt-2"> <h3>Notificações de Horários</h3> <div class="checkbox-group"> <input type="checkbox" id="enable-global-notifications"> <label for="enable-global-notifications">Ativar Notificações Globais</label> </div> <div class="checkbox-group"> <input type="checkbox" id="enable-notification-sound"> <label for="enable-notification-sound">Ativar Som nas Notificações</label> </div> <div class="custom-sound-container"> <label for="custom-notification-sound-input">Som Personalizado (Opcional - máx 2MB):</label> <div class="custom-sound-input-group"> <label for="custom-notification-sound-input" class="button-like secondary" style="cursor: pointer;"><span class="icon icon-arquivo"></span> Escolher arquivo</label> <span id="custom-sound-filename">Nenhum arquivo escolhido</span> <input type="file" id="custom-notification-sound-input" accept="audio/*" class="hidden"> </div> <div id="current-custom-sound-display" class="hidden"> <span id="current-custom-sound-name"></span> <button type="button" id="remove-custom-sound-button" class="danger icon-button" title="Remover Som Personalizado"><span class="icon icon-excluir icon-only"></span></button> </div> </div> <p class="text-sm text-secondary mt-1"> Notificações podem ser ativadas/desativadas individualmente para cada horário na tela "Meus Horários" (clicando no <span class="icon icon-notifications"></span>/<span class="icon icon-notifications-off"></span>). Elas aparecerão 5 minutos antes do início e do fim da aula programada. </p> </div>
+                <div class="form-group">
+                    <label for="theme-select">Escolha o Tema:</label>
+                    <select id="theme-select">
+                        <option value="theme-light">Claro</option>
+                        <option value="theme-dark">Escuro</option>
+                        <option value="theme-forest-green">Verde Floresta</option>
+                        <option value="theme-math-master">Mestre da Matemática</option>
+                        <option value="theme-historic-scroll">Papiro Histórico</option>
+                        <option value="theme-alchemist">O Alquimista</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card mt-2">
+                <h3>Dados</h3>
+                <div class="form-group">
+                    <label for="data-action-select">Gerenciar Dados:</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="data-action-select" style="flex: 1;">
+                            <option value="">Selecione uma ação...</option>
+                            <option value="export">Exportar Dados (JSON)</option>
+                            <option value="import">Importar Dados (JSON)</option>
+                            <option value="clear">Limpar Todos os Dados</option>
+                        </select>
+                        <button type="button" id="execute-data-action" class="primary">Executar</button>
+                    </div>
+                    <input type="file" id="import-data-input" accept=".json" class="hidden">
+                </div>
+            </div>
+
+            <div class="card mt-2">
+                <h3>Notificações de Horários</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable-global-notifications">
+                    <label for="enable-global-notifications">Ativar Notificações Globais</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable-notification-sound">
+                    <label for="enable-notification-sound">Ativar Som nas Notificações</label>
+                </div>
+                <div class="custom-sound-container">
+                    <label for="custom-notification-sound-input">Som Personalizado (Opcional - máx 2MB):</label>
+                    <div class="custom-sound-input-group">
+                        <label for="custom-notification-sound-input" class="button-like secondary" style="cursor: pointer;"><span class="icon icon-arquivo"></span> Escolher arquivo</label>
+                        <span id="custom-sound-filename">Nenhum arquivo escolhido</span>
+                        <input type="file" id="custom-notification-sound-input" accept="audio/*" class="hidden">
+                    </div>
+                    <div id="current-custom-sound-display" class="hidden">
+                        <span id="current-custom-sound-name"></span>
+                        <button type="button" id="remove-custom-sound-button" class="danger icon-button" title="Remover Som Personalizado"><span class="icon icon-excluir icon-only"></span></button>
+                    </div>
+                </div>
+                <p class="text-sm text-secondary mt-1">
+                    Notificações podem ser ativadas/desativadas individualmente para cada horário na tela "Meus Horários" (clicando no <span class="icon icon-notifications"></span>/<span class="icon icon-notifications-off"></span>). Elas aparecerão 5 minutos antes do início e do fim da aula programada.
+                </p>
+            </div>
          <div class="card mt-2">
              <h3>Novidades da Versão</h3>
              <button type="button" id="show-whats-new-manual-button" class="secondary">
@@ -237,10 +316,10 @@
             </div>
             <div class="modal-body" id="whats-new-body">
                 <ul>
-                    <li><span class="icon icon-auto-awesome"></span> <strong>Novo Menu Lateral:</strong> Agora você pode escolher entre a barra inferior ou um menu vertical (hambúrguer)!</li>
-                    <li><span class="icon icon-smartphone"></span> <strong>Navegação Flexível:</strong> Escolha o estilo que melhor se adapta ao seu uso nas configurações.</li>
-                    <li><span class="icon icon-bug-report"></span> <strong>Correções de UI:</strong> O botão flutuante foi ajustado para não sumir ao mudar o tema e ocupar menos espaço.</li>
-                    <li><span class="icon icon-perfil"></span> <strong>Gestão de Conta:</strong> Nova área de conta nas configurações para facilitar o login e sincronização.</li>
+                    <li><span class="icon icon-auto-awesome"></span> <strong>Configurações Otimizadas:</strong> A aba de ajustes agora conta com menus suspensos (dropdowns) para Temas e Dados, economizando espaço e facilitando o uso!</li>
+                    <li><span class="icon icon-bug-report"></span> <strong>Correções e Melhorias:</strong> Diversos ajustes internos foram realizados para garantir mais estabilidade, rapidez e uma melhor experiência de uso.</li>
+                    <li><span class="icon icon-smartphone"></span> <strong>Navegação Flexível:</strong> Escolha entre a barra inferior ou um menu vertical (hambúrguer) nas configurações.</li>
+                    <li><span class="icon icon-perfil"></span> <strong>Gestão de Conta:</strong> Área de conta nas configurações para facilitar o login e sincronização na nuvem.</li>
                 </ul>
             </div>
             <div class="modal-footer">

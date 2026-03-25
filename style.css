@@ -256,7 +256,7 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .card-header h3 { margin: 0; font-size: 1.1rem; flex-basis: calc(100% - 50px); margin-bottom: 5px; display: flex; align-items: center; gap: 0.5em; margin-top: 0.1rem; }
 .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-left: auto; flex-shrink: 0; }
 .card-actions button, .card-actions .button-like { margin-left: 0.3rem; padding: 0.3rem 0.6rem; font-size: 0.85rem; }
-.card-content { padding-top: 0.5rem; transition: opacity 0.3s ease, max-height 0.4s ease-out; max-height: 1500px; overflow: hidden; opacity: 1; }
+.card-content { padding-top: 0.5rem; transition: opacity 0.3s ease, max-height 0.4s ease-out; max-height: 10000px; overflow: hidden; opacity: 1; }
 .card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background: transparent !important; border: none !important; color: var(--text-secondary); cursor: pointer; margin-left: auto; order: 99; margin-top: 0.1rem; }
 .card-toggle-button:hover { color: var(--accent-primary); }
 .card.collapsed { padding-bottom: 0.5rem; }
@@ -394,7 +394,7 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #monthly-attendance-controls label { margin-bottom: 0; }
 #monthly-attendance-controls select { width: auto; padding: 0.4rem; font-size: 0.9rem; margin-bottom: 0; }
 #monthly-attendance-controls .export-buttons { display: flex; gap: 5px; }
-#monthly-attendance-table-wrapper { max-height: 60vh; overflow: auto; margin-top: 10px; }
+#monthly-attendance-table-wrapper { overflow-x: auto; margin-top: 10px; }
 .monthly-attendance-table { width: 100%; min-width: 800px; border-collapse: collapse; font-size: 0.75rem; }
 .monthly-attendance-table th, .monthly-attendance-table td { border: 1px solid var(--border-color); padding: 0.3rem; text-align: center; min-width: 32px; white-space: nowrap; }
 .monthly-attendance-table th { background-color: var(--bg-tertiary); font-weight: 600; }
@@ -412,7 +412,7 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
  .chart-bar:hover::after { opacity: 1; }
 .chart-label { font-size: 0.7rem; margin-top: 3px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50px; }
 
-.student-notes-modal #student-observations-list { max-height: 35vh; overflow-y: auto; margin-bottom: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem; border: none; background: none; padding: 0; }
+.student-notes-modal #student-observations-list { margin-bottom: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem; border: none; background: none; padding: 0; }
 .student-notes-modal .observation-item { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 5px; padding: 0.7rem 0.8rem; margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border-left-width: 5px; transition: border-left-color 0.3s, background-color 0.3s; }
 .student-notes-modal .observation-item .observation-details { flex-grow: 1; }
 .student-notes-modal .observation-item .observation-info { font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
@@ -592,20 +592,20 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 .tool-card .icon { font-size: 2rem; margin-bottom: 0.6rem; color: var(--accent-primary); }
 .tool-card-title { font-size: 0.9rem; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
 
-#class-details-section #class-details-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.5rem; margin: 0 -1rem 1rem -1rem; position: sticky; top: 0; background-color: var(--bg-details-sticky-alpha); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-bottom: 1px solid var(--border-color); z-index: 999; box-shadow: 0 1px 3px var(--shadow-color); transition: padding 0.2s ease-in-out; gap: 0.5rem; }
-#class-details-section #class-details-header h2 { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--accent-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: font-size 0.2s ease-in-out; flex-grow: 1; text-align: center; padding: 0 5px; display: flex; align-items: center; justify-content: center; gap: 0.4em; }
-#class-details-section #class-details-header .back-button { position: static; transform: none; margin: 0; flex-shrink: 0; }
-#class-details-section #class-details-header #details-help-button { flex-shrink: 0; margin-left: auto; }
-#class-details-section #class-details-header.scrolled { padding: 0.3rem 0.5rem; }
-#class-details-section #class-details-header.scrolled h2 { font-size: 0.95rem; }
-#class-details-section #class-details-header.scrolled .icon { font-size: 1em; }
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.5rem; margin: 0 -1rem 1rem -1rem; position: sticky; top: 0; background-color: var(--bg-details-sticky-alpha); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-bottom: 1px solid var(--border-color); z-index: 999; box-shadow: 0 1px 3px var(--shadow-color); transition: padding 0.2s ease-in-out; gap: 0.5rem; }
+.section-header h2 { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--accent-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: font-size 0.2s ease-in-out; flex-grow: 1; text-align: center; padding: 0 5px; display: flex; align-items: center; justify-content: center; gap: 0.4em; }
+.section-header .back-button { position: static; transform: none; margin: 0; flex-shrink: 0; }
+.section-header .header-right-button { flex-shrink: 0; margin-left: auto; }
+.section-header.scrolled { padding: 0.3rem 0.5rem; }
+.section-header.scrolled h2 { font-size: 0.95rem; }
+.section-header.scrolled .icon { font-size: 1em; }
 
 #class-details-section .card { background-color: var(--bg-primary); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px var(--shadow-color); transition: padding-bottom 0.3s ease, margin-bottom 0.3s ease, box-shadow 0.2s ease; }
 #class-details-section .card:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
 #class-details-section .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 5px; }
 #class-details-section .card-header h3 { margin: 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5em; color: var(--text-primary); }
 #class-details-section .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-left: auto; flex-shrink: 0; }
-#class-details-section .card-content { padding-top: 0.5rem; transition: max-height 0.35s ease-out, opacity 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out, margin-top 0.3s ease-out, visibility 0.3s; max-height: 1500px; opacity: 1; overflow: hidden; visibility: visible; }
+#class-details-section .card-content { padding-top: 0.5rem; transition: max-height 0.35s ease-out, opacity 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out, margin-top 0.3s ease-out, visibility 0.3s; max-height: 10000px; opacity: 1; overflow: hidden; visibility: visible; }
 #student-list-container.card-content { max-height: none; }
 #class-details-section .card.collapsed { padding-top: 0.8rem; padding-bottom: 0.8rem; margin-bottom: 1rem; }
 #class-details-section .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -712,7 +712,7 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 .calculator-modal .grade-weight-input-group { display: flex; gap: 8px; margin-bottom: 0.8rem; }
 .calculator-modal .grade-weight-input-group input[type="number"] { margin-bottom: 0; padding: 0.5rem; font-size: 0.9rem; text-align: center; width: 40%; }
 .calculator-modal .grade-weight-input-group button { padding: 0.5rem 0.8rem; font-size: 0.9rem; width: auto; flex-shrink: 0; margin: 0; }
-.calculator-modal .pairs-list { list-style: none; padding: 8px; margin-bottom: 0.8rem; max-height: 150px; overflow-y: auto; background-color: var(--bg-tertiary-alpha); border: 1px dashed var(--border-color); border-radius: 5px; }
+.calculator-modal .pairs-list { list-style: none; padding: 8px; margin-bottom: 0.8rem; background-color: var(--bg-tertiary-alpha); border: 1px dashed var(--border-color); border-radius: 5px; }
 .calculator-modal .pairs-list p { font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin: 1rem 0; }
 .calculator-modal .pair-item { display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-secondary-alpha); padding: 5px 8px; border-radius: 4px; margin-bottom: 5px; font-size: 0.9rem; border: 1px solid var(--border-color); }
 .calculator-modal .pair-item span { flex-grow: 1; }
@@ -731,7 +731,7 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 .group-generator-modal .group-options input[type="radio"] { width: auto; margin: 0; }
 .group-generator-modal .group-options label { margin-bottom: 0; }
 .group-generator-modal .group-options input[type="number"] { width: 70px; margin-bottom: 0; padding: 0.4rem; font-size: 0.9rem; }
-.group-generator-modal #group-results-container { margin-top: 1rem; max-height: 50vh; overflow-y: auto; padding-right: 5px;}
+.group-generator-modal #group-results-container { margin-top: 1rem; padding-right: 5px;}
 .group-generator-modal .generated-group { margin-bottom: 1rem; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--bg-tertiary-alpha); }
 .group-generator-modal .generated-group h5 { margin-bottom: 0.5rem; font-size: 1rem; color: var(--accent-primary); }
 .group-generator-modal .generated-group ul { list-style: none; padding-left: 0; }

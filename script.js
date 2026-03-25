@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let scheduleUpdateInterval = null;
 
     // ATUALIZADO: Versão do App
-    const CURRENT_APP_VERSION = '1.8.1';
+    const CURRENT_APP_VERSION = '1.8.2';
 
     const DATA_STORAGE_KEY = 'superProfessorProData_v15'; // Mantido por enquanto, mas a estrutura interna mudou
     const OLD_DATA_STORAGE_KEY_V14 = 'superProfessorProData_v14';
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return true;
             } catch (e) {
                 console.error("Erro ao carregar ou migrar dados:", e);
-                appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null, language: 'pt-BR' } };
+                appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null, language: 'pt-BR' }, userProfile: { name: '', avatar: '' } };
                 // Inicializa campo para novos dados vazios
                 appData.students.forEach(s => s.governmentPrograms = []);
                 localStorage.removeItem(OLD_DATA_STORAGE_KEY_V14);
@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
         } else {
-            appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null, language: 'pt-BR' } };
+            appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null, language: 'pt-BR' }, userProfile: { name: '', avatar: '' } };
             // Inicializa campo para novos dados vazios
             appData.students.forEach(s => s.governmentPrograms = []);
             updateLanguageUI();
@@ -384,7 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add(themeName || 'theme-light');
         
         appData.settings.theme = themeName; 
-        document.querySelectorAll('.theme-button').forEach(btn => { btn.style.border = btn.dataset.theme === themeName ? '2px solid var(--accent-primary)' : 'none'; }); 
+        const themeSelect = document.getElementById('theme-select');
+        if (themeSelect) {
+            themeSelect.value = themeName;
+        }
     };
     const applyNavStyle = (navStyle) => {
         console.log("Applying nav style:", navStyle);
@@ -1197,10 +1200,36 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(textArea);
         }
     });
-    document.querySelectorAll('.theme-button').forEach(button => { button.addEventListener('click', () => {applyTheme(button.dataset.theme); saveData();}); });
-    document.getElementById('export-data-button').addEventListener('click', exportData);
-    document.getElementById('import-data-input').addEventListener('change', importData);
-    document.getElementById('clear-data-button').addEventListener('click', clearAllData);
+    const themeSelect = document.getElementById('theme-select');
+    if (themeSelect) {
+        themeSelect.addEventListener('change', (e) => {
+            applyTheme(e.target.value);
+            saveData();
+        });
+    }
+
+    const executeDataActionBtn = document.getElementById('execute-data-action');
+    const dataActionSelect = document.getElementById('data-action-select');
+    const importDataInput = document.getElementById('import-data-input');
+
+    if (executeDataActionBtn && dataActionSelect) {
+        executeDataActionBtn.addEventListener('click', () => {
+            const action = dataActionSelect.value;
+            if (action === 'export') {
+                exportData();
+            } else if (action === 'import') {
+                importDataInput.click();
+            } else if (action === 'clear') {
+                clearAllData();
+            } else {
+                alert("Por favor, selecione uma ação.");
+            }
+        });
+    }
+    
+    if (importDataInput) {
+        importDataInput.addEventListener('change', importData);
+    }
     
     if (profileAvatarContainer && profileAvatarInput) {
         profileAvatarContainer.addEventListener('click', () => profileAvatarInput.click());
