@@ -2022,7 +2022,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Instruções adicionais para a IA sobre matemática e geometria
-            const mathAndGeometryInstructions = `\n\nIMPORTANTE:\n1. Use formatação LaTeX para todas as equações matemáticas, envolvendo-as em cifrões (ex: $x = 5$ ou $$y = x^2$$).\n2. Se precisar incluir figuras geométricas (como triângulos, gráficos, etc.), NÃO tente desenhá-las com caracteres de texto. Em vez disso, gere o código SVG correspondente DIRETAMENTE no texto (sem blocos de código markdown), para que seja renderizado como imagem, ou descreva a figura detalhadamente em texto.`;
+            const mathAndGeometryInstructions = `\n\nIMPORTANTE (FORMATAÇÃO E MATEMÁTICA):\n1. Use formatação LaTeX para todas as equações matemáticas.\n2. Para equações em linha, use um cifrão (ex: $x = 5$).\n3. Para equações em bloco (passo a passo, fórmulas maiores), use DOIS cifrões (ex: $$y = x^2$$) e SEMPRE pule uma linha antes e depois do bloco $$ para não ficarem coladas no texto.\n4. Quando for mostrar a resolução de um problema passo a passo, NUNCA coloque várias equações na mesma linha. Coloque CADA PASSO em uma linha separada usando blocos $$...$$ ou pulando linha.\n5. Se precisar incluir figuras geométricas (como triângulos, gráficos, etc.), NÃO tente desenhá-las com caracteres de texto. Em vez disso, gere o código SVG correspondente DIRETAMENTE no texto (sem blocos de código markdown), para que seja renderizado como imagem. O SVG deve ter atributos width e height definidos.\n6. Para questões de múltipla escolha, as opções (A, B, C, D, E) DEVEM ser listadas uma abaixo da outra, usando quebra de linha ou uma lista markdown, nunca na mesma linha. Exemplo:\n- A) ...\n- B) ...\n- C) ...`;
             promptText += mathAndGeometryInstructions;
 
             aiToolGenerateBtn.disabled = true;
@@ -2108,39 +2108,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (aiToolExportPdfBtn) {
-        aiToolExportPdfBtn.addEventListener('click', () => {
+        aiToolExportPdfBtn.addEventListener('click', async () => {
             if (typeof html2pdf === 'undefined') {
                 showNotification('Biblioteca de PDF não carregada.', 'error');
                 return;
             }
             
             const element = document.createElement('div');
+            element.className = 'markdown-body'; // Apply markdown styles
+            // Append to body temporarily so html2canvas can render computed styles and SVGs correctly
+            element.style.position = 'absolute';
+            element.style.left = '-9999px';
+            element.style.top = '0';
+            element.style.width = '800px'; // Fixed width for consistent PDF rendering
+            element.style.backgroundColor = 'white';
+            element.style.padding = '20px';
+            
             element.innerHTML = `
                 <style>
                     .pdf-content p, .pdf-content h1, .pdf-content h2, .pdf-content h3, .pdf-content li {
                         page-break-inside: avoid;
                     }
+                    /* Ensure SVGs don't overflow */
+                    .pdf-content svg {
+                        max-width: 100%;
+                        height: auto;
+                    }
+                    /* Add some spacing for MathJax blocks in PDF */
+                    .pdf-content mjx-container[display="true"] {
+                        margin: 1em 0;
+                    }
                 </style>
-                <div style="font-family: Arial, sans-serif; padding: 20px;" class="pdf-content">
+                <div style="font-family: Arial, sans-serif;" class="pdf-content">
                     <h1 style="color: #333; border-bottom: 2px solid #4285f4; padding-bottom: 10px; page-break-after: avoid;">${aiToolTitle.textContent}</h1>
                     <div style="margin-top: 20px; line-height: 1.6;">
                         ${aiToolResultContent.innerHTML}
                     </div>
                 </div>
             `;
+            
+            document.body.appendChild(element);
+
+            // Ensure MathJax typesets the temporary element before PDF generation
+            if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                await MathJax.typesetPromise([element]);
+            }
+            
+            // Wait for rendering
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
             const opt = {
                 margin:       10,
                 filename:     `${aiToolTitle.textContent.replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, allowTaint: true, logging: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
+                document.body.removeChild(element);
                 showNotification('PDF exportado com sucesso!', 'success');
             }).catch(err => {
+                document.body.removeChild(element);
                 console.error('Erro ao exportar PDF:', err);
                 showNotification('Erro ao exportar PDF.', 'error');
             });
