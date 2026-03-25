@@ -56,13 +56,14 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsSection.querySelectorAll('.card h3').forEach(h3 => {
                 const icon = h3.querySelector('.icon');
                 const text = h3.textContent.trim();
-                if (text.includes('Sincronização')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_sync)); }
-                else if (text.includes('Conta')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_account)); }
-                else if (text.includes('Temas')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_themes)); }
-                else if (text.includes('Dados')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_data)); }
-                else if (text.includes('Notificações')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_notifications)); }
-                else if (text.includes('Novidades')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_news)); }
-                else if (text.includes('Navegação')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_nav)); }
+                if (text.includes('Sincronização') || text.includes('Sync') || text.includes('Sincronización')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_sync)); }
+                else if (text === 'Conta' || text === 'Account' || text === 'Cuenta') { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_account)); }
+                else if (text.includes('Temas') || text.includes('Themes')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_themes)); }
+                else if (text.includes('Dados') || text.includes('Data') || text.includes('Datos')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_data)); }
+                else if (text.includes('Notificações') || text.includes('Notifications') || text.includes('Notificaciones')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_notifications)); }
+                else if (text.includes('Novidades') || text.includes('News') || text.includes('Novedades')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_news)); }
+                else if (text.includes('Navegação') || text.includes('Navigation') || text.includes('Navegación')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.settings_nav)); }
+                else if (text.includes('Contato') || text.includes('Contact') || text.includes('Contacto')) { h3.innerHTML = ''; if(icon) h3.appendChild(icon); h3.appendChild(document.createTextNode(' ' + t.nav_contact)); }
             });
         }
 
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nav_schedule: 'Horários', nav_schools: 'Escolas', nav_tools: 'Ferramentas', nav_contact: 'Contato', nav_settings: 'Ajustes',
             title_schedule: 'Meus Horários', title_schools: 'Minhas Escolas', title_classes: 'Minhas Turmas', title_tools: 'Ferramentas Úteis', title_contact: 'Contato & Suporte', title_settings: 'Configurações',
             search_placeholder: 'Pesquisar...',
-            settings_sync: 'Sincronização e Nuvem', settings_account: 'Conta', settings_themes: 'Temas', settings_data: 'Dados', settings_notifications: 'Notificaciones de Horários', settings_news: 'Novidades da Versão', settings_nav: 'Navegação'
+            settings_sync: 'Sincronização e Nuvem', settings_account: 'Conta', settings_themes: 'Temas', settings_data: 'Dados', settings_notifications: 'Notificações de Horários', settings_news: 'Novidades da Versão', settings_nav: 'Navegação'
         },
         'en-US': {
             nav_schedule: 'Schedule', nav_schools: 'Schools', nav_tools: 'Tools', nav_contact: 'Contact', nav_settings: 'Settings',
@@ -448,7 +449,14 @@ document.addEventListener('DOMContentLoaded', () => {
             newBtn.addEventListener('click', hideModal); 
         }); 
     };
-    const hideModal = () => { if (stopwatchInterval) { clearInterval(stopwatchInterval); stopwatchInterval = null; isStopwatchRunning = false; } modal.classList.remove('show'); calculatorModal?.classList.remove('show'); setTimeout(() => { modalTitle.textContent = ''; modalBody.innerHTML = ''; modalFooter.innerHTML = ''; modal.className = 'modal'; }, 300); };
+    const hideModal = () => { 
+        if (stopwatchInterval) { clearInterval(stopwatchInterval); stopwatchInterval = null; isStopwatchRunning = false; } 
+        modal.classList.remove('show'); 
+        calculatorModal?.classList.remove('show'); 
+        const aiToolModal = document.getElementById('ai-tool-modal');
+        if (aiToolModal) aiToolModal.classList.remove('show');
+        setTimeout(() => { modalTitle.textContent = ''; modalBody.innerHTML = ''; modalFooter.innerHTML = ''; modal.className = 'modal'; }, 300); 
+    };
 
     const showAlert = (message, title = 'Alerta') => {
         showModal(title, `<p style="text-align: center; padding: 1rem;">${message}</p>`, `<button type="button" class="primary" data-dismiss="modal">OK</button>`);
@@ -1038,6 +1046,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let newsContent = `
             <p>Confira as últimas melhorias e funcionalidades adicionadas para facilitar ainda mais seu dia a dia:</p>
             
+            <h4 style="color: #9b72cb;"><span class="icon icon-auto-awesome"></span> Novas Ferramentas de IA</h4>
+            <ul>
+                <li><strong><span class="icon icon-auto-awesome"></span> Assistente de Provas:</strong> Gere provas completas com base no assunto e nível escolar, direto na aba Ferramentas.</li>
+                <li><strong><span class="icon icon-auto-awesome"></span> Gerador de Questões:</strong> Crie questões específicas (múltipla escolha, dissertativas, etc.) rapidamente.</li>
+                <li><strong><span class="icon icon-auto-awesome"></span> Análise de Turma:</strong> Obtenha insights pedagógicos sobre sua turma com base no número de alunos e anotações.</li>
+                <li><strong><span class="icon icon-plano"></span> Plano de Aula Inteligente:</strong> O gerador de esboço de aula foi aprimorado e agora conta com uma interface dedicada.</li>
+                <li><strong><span class="icon icon-pdf"></span> Exportação para PDF:</strong> Exporte facilmente os conteúdos gerados pela IA (provas, questões, planos) diretamente para PDF.</li>
+            </ul>
+
             <h4 style="color: #28a745;"><span class="icon icon-language"></span> Uso Offline e Nuvem</h4>
             <ul>
                 <li><strong><span class="icon icon-signal-cellular-alt"></span> Modo Offline Total:</strong> Agora você pode usar o app sem internet em tempo integral! Suas alterações são salvas no seu dispositivo e sincronizadas automaticamente quando houver conexão.</li>
@@ -1046,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <li><strong><span class="icon icon-warning"></span> Aviso de Segurança:</strong> Ao fazer <strong>Logout (Sair)</strong>, seus dados locais são removidos por segurança. Certifique-se de estar conectado à internet antes de sair para garantir que tudo foi sincronizado com a nuvem!</li>
             </ul>
 
-            <h4><span class="icon icon-auto-awesome"></span> Novas Funcionalidades</h4>
+            <h4><span class="icon icon-auto-awesome"></span> Outras Funcionalidades</h4>
             <ul>
                 <li><strong><span class="icon icon-menu"></span> Novo Menu Lateral:</strong> Agora você pode escolher entre a barra inferior clássica ou um menu lateral (hambúrguer) para ganhar mais espaço na tela!</li>
                 <li><strong><span class="icon icon-palette"></span> Temas e Cores:</strong> O menu lateral agora se adapta perfeitamente ao seu tema escolhido, com cores sólidas e elegantes.</li>
@@ -1056,14 +1073,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <li><strong><span class="icon icon-notas"></span> Quórum da Escola:</strong> Veja a porcentagem de presença geral diretamente na lista de escolas.</li>
                 <li><strong><span class="icon icon-anotacao"></span> Categorias de Observações:</strong> Anotações, Ocorrências, Advertências e Suspensões com períodos específicos.</li>
                 <li><strong><span class="icon icon-alarm"></span> Barra de Progresso:</strong> Acompanhe o andamento da sua aula atual em tempo real.</li>
-            </ul>
-
-            <h4><span class="icon icon-rocket-launch"></span> Melhorias e Correções</h4>
-            <ul>
-                <li><strong><span class="icon icon-palette"></span> Interface Renovada:</strong> Detalhes da turma mais organizados e navegação fluida.</li>
-                <li><strong><span class="icon icon-mouse"></span> Ações Rápidas:</strong> Menu simplificado na lista de alunos para edições velozes.</li>
-                <li><strong><span class="icon icon-calendario"></span> Ordenação Automática:</strong> Seus horários agora se organizam sozinhos por hora.</li>
-                <li><strong><span class="icon icon-bug-report"></span> Estabilidade:</strong> Diversos erros corrigidos para uma experiência mais suave.</li>
             </ul>
         `;
 
@@ -1145,6 +1154,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const combinedModalCloseHandler = (e) => { const targetModal = e.currentTarget; if (e.target === targetModal || e.target.closest('.close-button[data-dismiss="modal"]') || e.target.matches('button[data-dismiss="modal"]')) { if (targetModal.id === 'generic-modal' && targetModal.querySelector('#timer-display')) { pauseStopwatch(); } hideModal(); } };
     modal.addEventListener('click', combinedModalCloseHandler);
     calculatorModal.addEventListener('click', combinedModalCloseHandler);
+    const aiToolModalEl = document.getElementById('ai-tool-modal');
+    if (aiToolModalEl) aiToolModalEl.addEventListener('click', combinedModalCloseHandler);
     addStudentButton?.addEventListener('click', () => { if(currentClassId) openStudentModal(); else alert("Selecione uma turma primeiro!"); });
     gradeSetSelect.addEventListener('change', (e) => { if(currentClassId) { renderGradesTable(currentClassId, e.target.value); } });
     manageGradeStructureButton.addEventListener('click', openGradeStructureModal);
@@ -1684,6 +1695,327 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Versão vista atualizada no localStorage para:', CURRENT_APP_VERSION);
             }
         }, 1000);
+    }
+
+    // --- Lógica de IA (Assistente Gemini) ---
+    const aiEnableToggle = document.getElementById('ai-enable-toggle');
+    const aiSettingsContent = document.getElementById('ai-settings-content');
+    const aiTutorialBtn = document.getElementById('ai-tutorial-btn');
+    const aiTutorialContent = document.getElementById('ai-tutorial-content');
+    const aiApiKeyInput = document.getElementById('ai-api-key');
+    const saveAiKeyBtn = document.getElementById('save-ai-key-btn');
+    const aiGeneratePlanBtn = document.getElementById('ai-generate-plan-btn');
+    // lessonPlanTextarea is already declared at the top of the file
+    
+    // Carregar estado inicial
+    const isAiEnabled = localStorage.getItem('ai_enabled') === 'true';
+    const savedApiKey = localStorage.getItem('gemini_api_key') || '';
+    
+    if (aiEnableToggle) {
+        aiEnableToggle.checked = isAiEnabled;
+        aiSettingsContent.style.display = isAiEnabled ? 'block' : 'none';
+        aiApiKeyInput.value = savedApiKey;
+        
+        aiEnableToggle.addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+            localStorage.setItem('ai_enabled', enabled);
+            aiSettingsContent.style.display = enabled ? 'block' : 'none';
+            updateAiButtonVisibility();
+        });
+    }
+
+    if (aiTutorialBtn) {
+        aiTutorialBtn.addEventListener('click', () => {
+            const isHidden = aiTutorialContent.style.display === 'none';
+            aiTutorialContent.style.display = isHidden ? 'block' : 'none';
+        });
+    }
+
+    if (saveAiKeyBtn) {
+        saveAiKeyBtn.addEventListener('click', () => {
+            const key = aiApiKeyInput.value.trim();
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                showNotification('Chave de IA salva com sucesso!', 'success');
+                updateAiButtonVisibility();
+            } else {
+                localStorage.removeItem('gemini_api_key');
+                showNotification('Chave removida.', 'info');
+                updateAiButtonVisibility();
+            }
+        });
+    }
+
+    function updateAiButtonVisibility() {
+        const enabled = localStorage.getItem('ai_enabled') === 'true';
+        const hasKey = !!localStorage.getItem('gemini_api_key');
+        const show = (enabled && hasKey);
+        
+        const aiTools = document.querySelectorAll('.ai-tool');
+        aiTools.forEach(tool => {
+            tool.style.display = show ? '' : 'none';
+        });
+    }
+
+    // Chama na inicialização para mostrar/esconder o botão na aba da turma
+    updateAiButtonVisibility();
+
+    // --- Lógica do Modal de IA ---
+    const aiToolModal = document.getElementById('ai-tool-modal');
+    const aiToolTitle = document.getElementById('ai-tool-title');
+    const aiToolInputsContainer = document.getElementById('ai-tool-inputs-container');
+    const aiToolGenerateBtn = document.getElementById('ai-tool-generate-btn');
+    const aiToolLoading = document.getElementById('ai-tool-loading');
+    const aiToolResultContainer = document.getElementById('ai-tool-result-container');
+    const aiToolResultContent = document.getElementById('ai-tool-result-content');
+    const aiToolCopyBtn = document.getElementById('ai-tool-copy-btn');
+    const aiToolApplyBtn = document.getElementById('ai-tool-apply-btn');
+    const aiToolExportPdfBtn = document.getElementById('ai-tool-export-pdf-btn');
+
+    let currentAiTool = null;
+
+    function openAiModal(toolType) {
+        currentAiTool = toolType;
+        aiToolResultContainer.classList.add('hidden');
+        aiToolResultContent.innerHTML = '';
+        aiToolInputsContainer.innerHTML = '';
+        aiToolApplyBtn.classList.add('hidden');
+        
+        if (toolType === 'lesson-plan') {
+            aiToolTitle.textContent = 'Gerar Esboço de Aula';
+            aiToolInputsContainer.innerHTML = `
+                <div class="form-group">
+                    <label>Tema da Aula e Ano Escolar:</label>
+                    <input type="text" id="ai-input-tema" placeholder="Ex: Revolução Francesa, 8º ano" class="w-full">
+                </div>
+            `;
+            aiToolApplyBtn.classList.remove('hidden');
+        } else if (toolType === 'exam-assistant') {
+            aiToolTitle.textContent = 'Assistente de Provas';
+            aiToolInputsContainer.innerHTML = `
+                <div class="form-group">
+                    <label>Assunto/Conteúdo da Prova:</label>
+                    <input type="text" id="ai-input-assunto" placeholder="Ex: Equações do 2º grau" class="w-full">
+                </div>
+                <div class="form-group">
+                    <label>Nível/Ano Escolar:</label>
+                    <input type="text" id="ai-input-nivel" placeholder="Ex: 9º ano do Ensino Fundamental" class="w-full">
+                </div>
+                <div class="form-group">
+                    <label>Quantidade de Questões:</label>
+                    <input type="number" id="ai-input-qtd" value="5" min="1" max="20" class="w-full">
+                </div>
+            `;
+        } else if (toolType === 'question-generator') {
+            aiToolTitle.textContent = 'Gerador de Questões (Específicas)';
+            aiToolInputsContainer.innerHTML = `
+                <div class="form-group">
+                    <label>Tópico Específico:</label>
+                    <input type="text" id="ai-input-topico" placeholder="Ex: Fotossíntese" class="w-full">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Questão:</label>
+                    <select id="ai-input-tipo" class="w-full">
+                        <option value="Múltipla Escolha">Múltipla Escolha</option>
+                        <option value="Dissertativa">Dissertativa</option>
+                        <option value="Verdadeiro ou Falso">Verdadeiro ou Falso</option>
+                    </select>
+                </div>
+            `;
+        } else if (toolType === 'analyze-class') {
+            aiToolTitle.textContent = 'Analisar Turma';
+            
+            // Pega os dados da turma atual
+            let contextText = "Nenhuma turma selecionada.";
+            
+            if (currentClassId) {
+                const students = getStudentsByClass(currentClassId);
+                const classNotes = document.getElementById('class-notes-content').textContent;
+                contextText = `Turma com ${students.length} alunos.\nAnotações atuais: ${classNotes}`;
+            }
+            
+            aiToolInputsContainer.innerHTML = `
+                <div class="form-group">
+                    <label>Contexto da Turma:</label>
+                    <textarea id="ai-input-contexto" rows="4" class="w-full" readonly>${contextText}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>O que você deseja analisar?</label>
+                    <input type="text" id="ai-input-pergunta" placeholder="Ex: Sugira estratégias para melhorar o engajamento" class="w-full">
+                </div>
+            `;
+        }
+        
+        aiToolModal.classList.add('show');
+    }
+
+    if (aiGeneratePlanBtn) {
+        aiGeneratePlanBtn.addEventListener('click', () => {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                showNotification('Configure sua chave de IA na aba de Ajustes.', 'error');
+                return;
+            }
+            openAiModal('lesson-plan');
+        });
+    }
+
+    const toolExamAssistant = document.getElementById('tool-exam-assistant');
+    if (toolExamAssistant) {
+        toolExamAssistant.addEventListener('click', () => {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                showNotification('Configure sua chave de IA na aba de Ajustes.', 'error');
+                return;
+            }
+            openAiModal('exam-assistant');
+        });
+    }
+
+    const toolQuestionGenerator = document.getElementById('tool-question-generator');
+    if (toolQuestionGenerator) {
+        toolQuestionGenerator.addEventListener('click', () => {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                showNotification('Configure sua chave de IA na aba de Ajustes.', 'error');
+                return;
+            }
+            openAiModal('question-generator');
+        });
+    }
+
+    const aiAnalyzeClassBtn = document.getElementById('ai-analyze-class-btn');
+    if (aiAnalyzeClassBtn) {
+        aiAnalyzeClassBtn.addEventListener('click', () => {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                showNotification('Configure sua chave de IA na aba de Ajustes.', 'error');
+                return;
+            }
+            openAiModal('analyze-class');
+        });
+    }
+
+    if (aiToolGenerateBtn) {
+        aiToolGenerateBtn.addEventListener('click', async () => {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) return;
+
+            let promptText = "";
+
+            if (currentAiTool === 'lesson-plan') {
+                const tema = document.getElementById('ai-input-tema').value.trim();
+                if (!tema) return showNotification('Preencha o tema.', 'error');
+                promptText = `Aja como um professor experiente. Crie um esboço de plano de aula sobre: "${tema}". Inclua: 1. Objetivos, 2. Introdução, 3. Desenvolvimento, 4. Conclusão/Atividade. Seja direto e prático. Formate em Markdown.`;
+            } else if (currentAiTool === 'exam-assistant') {
+                const assunto = document.getElementById('ai-input-assunto').value.trim();
+                const nivel = document.getElementById('ai-input-nivel').value.trim();
+                const qtd = document.getElementById('ai-input-qtd').value;
+                if (!assunto || !nivel) return showNotification('Preencha os campos.', 'error');
+                promptText = `Aja como um professor experiente elaborando uma prova. Crie uma prova com ${qtd} questões sobre "${assunto}" para alunos do "${nivel}". Inclua uma mistura de questões objetivas e discursivas. No final, forneça o gabarito. Formate em Markdown.`;
+            } else if (currentAiTool === 'question-generator') {
+                const topico = document.getElementById('ai-input-topico').value.trim();
+                const tipo = document.getElementById('ai-input-tipo').value;
+                if (!topico) return showNotification('Preencha o tópico.', 'error');
+                promptText = `Aja como um professor. Crie 1 questão do tipo "${tipo}" sobre o tópico "${topico}". Inclua a resposta correta e uma breve explicação. Formate em Markdown.`;
+            } else if (currentAiTool === 'analyze-class') {
+                const contexto = document.getElementById('ai-input-contexto').value;
+                const pergunta = document.getElementById('ai-input-pergunta').value.trim();
+                if (!pergunta) return showNotification('Preencha o que deseja analisar.', 'error');
+                promptText = `Aja como um coordenador pedagógico experiente. Baseado no seguinte contexto da turma: "${contexto}", responda à seguinte solicitação do professor: "${pergunta}". Seja prático e ofereça estratégias acionáveis. Formate em Markdown.`;
+            }
+
+            aiToolGenerateBtn.disabled = true;
+            aiToolLoading.classList.remove('hidden');
+            aiToolResultContainer.classList.add('hidden');
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                const generatedText = data.candidates[0].content.parts[0].text;
+                
+                // Renderiza (pode usar marked.js se disponível, senão apenas texto)
+                aiToolResultContent.innerHTML = generatedText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                aiToolResultContent.dataset.rawText = generatedText;
+                
+                aiToolResultContainer.classList.remove('hidden');
+                showNotification('Conteúdo gerado com sucesso!', 'success');
+
+            } catch (error) {
+                showNotification('Erro ao conectar com a IA: ' + error.message, 'error');
+            } finally {
+                aiToolGenerateBtn.disabled = false;
+                aiToolLoading.classList.add('hidden');
+            }
+        });
+    }
+
+    if (aiToolCopyBtn) {
+        aiToolCopyBtn.addEventListener('click', () => {
+            const text = aiToolResultContent.dataset.rawText || aiToolResultContent.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Texto copiado!', 'success');
+            }).catch(() => {
+                showNotification('Erro ao copiar texto.', 'error');
+            });
+        });
+    }
+
+    if (aiToolApplyBtn) {
+        aiToolApplyBtn.addEventListener('click', () => {
+            const text = aiToolResultContent.dataset.rawText || aiToolResultContent.innerText;
+            const currentText = lessonPlanTextarea.value;
+            lessonPlanTextarea.value = currentText ? currentText + '\n\n--- Gerado por IA ---\n' + text : text;
+            lessonPlanTextarea.dispatchEvent(new Event('input'));
+            showNotification('Aplicado ao plano de aula!', 'success');
+            aiToolModal.classList.remove('show');
+        });
+    }
+
+    if (aiToolExportPdfBtn) {
+        aiToolExportPdfBtn.addEventListener('click', () => {
+            if (typeof html2pdf === 'undefined') {
+                showNotification('Biblioteca de PDF não carregada.', 'error');
+                return;
+            }
+            
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h1 style="color: #333; border-bottom: 2px solid #4285f4; padding-bottom: 10px;">${aiToolTitle.textContent}</h1>
+                    <div style="margin-top: 20px; line-height: 1.6;">
+                        ${aiToolResultContent.innerHTML}
+                    </div>
+                </div>
+            `;
+
+            const opt = {
+                margin:       10,
+                filename:     `${aiToolTitle.textContent.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                showNotification('PDF exportado com sucesso!', 'success');
+            }).catch(err => {
+                console.error('Erro ao exportar PDF:', err);
+                showNotification('Erro ao exportar PDF.', 'error');
+            });
+        });
     }
 
 }); // Fim do DOMContentLoaded
