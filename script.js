@@ -552,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderScheduleList = () => { scheduleListContainer.innerHTML = ''; if (appData.schedule.length === 0) { scheduleListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhum horário cadastrado.</p>'; return; } const now = new Date(); const currentDayIndex = now.getDay(); const currentDayName = weekdays[currentDayIndex]; const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes(); const scheduleByDay = {}; weekdays.forEach(day => scheduleByDay[day] = []); appData.schedule.forEach(item => { if (scheduleByDay[item.day]) scheduleByDay[item.day].push(item); }); const scheduleTemplate = document.getElementById('schedule-item-template'); const fragment = document.createDocumentFragment(); weekdays.forEach((day, dayIndex) => { const itemsForDay = scheduleByDay[day]; if (itemsForDay.length > 0) { itemsForDay.sort((a, b) => (timeToMinutes(a.startTime) || 0) - (timeToMinutes(b.startTime) || 0)); const dayGroup = document.createElement('div'); dayGroup.classList.add('schedule-day-group'); const dayTitle = document.createElement('h3'); dayTitle.classList.add('schedule-day-title'); dayTitle.textContent = (dayIndex === currentDayIndex) ? `${day} (Hoje)` : day; dayGroup.appendChild(dayTitle); let nextItemFoundForToday = false; itemsForDay.forEach(item => { const clone = scheduleTemplate.content.cloneNode(true); const scheduleElement = clone.querySelector('.schedule-item'); const progressBar = clone.querySelector('.progress-bar'); scheduleElement.dataset.id = item.id; const startMinutes = timeToMinutes(item.startTime); const endMinutes = timeToMinutes(item.endTime); scheduleElement.dataset.startMinutes = isNaN(startMinutes) ? '' : String(startMinutes); scheduleElement.dataset.endMinutes = isNaN(endMinutes) ? '' : String(endMinutes); const school = findSchoolById(item.schoolId); scheduleElement.querySelector('.schedule-time').textContent = `${item.startTime || '?'} - ${item.endTime || '?'}`; scheduleElement.querySelector('.school-name').textContent = school ? sanitizeHTML(school.name) : 'Escola não encontrada'; scheduleElement.querySelector('.note').textContent = sanitizeHTML(item.note || ''); const notificationButton = clone.querySelector('.notification-toggle-button'); const notificationIndicator = clone.querySelector('.notification-indicator'); updateNotificationIcon(notificationIndicator, item.notificationsEnabled); notificationButton.addEventListener('click', (e) => { e.stopPropagation(); toggleScheduleNotification(item.id, notificationIndicator); }); clone.querySelector('.edit-schedule-button').addEventListener('click', (e) => { e.stopPropagation(); openScheduleModal(item.id); }); clone.querySelector('.delete-schedule-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir horário (${item.startTime} na ${school?.name || 'escola'})?`)) { deleteScheduleEntry(item.id); } }); if (dayIndex === currentDayIndex && !isNaN(startMinutes) && !isNaN(endMinutes)) { const isCurrent = currentTimeInMinutes >= startMinutes && currentTimeInMinutes < endMinutes; const isUpcoming = currentTimeInMinutes < startMinutes; if (isCurrent) { scheduleElement.classList.add('current'); const duration = endMinutes - startMinutes; const elapsed = currentTimeInMinutes - startMinutes; const progress = duration > 0 ? Math.min(100, Math.max(0, (elapsed / duration) * 100)) : 0; if (progressBar) progressBar.style.width = `${progress}%`; } else if (isUpcoming && !nextItemFoundForToday) { scheduleElement.classList.add('next'); nextItemFoundForToday = true; if (progressBar) progressBar.style.width = '0%'; } else { if (progressBar) progressBar.style.width = '0%'; } } else { if (progressBar) progressBar.style.width = '0%'; } dayGroup.appendChild(clone); }); fragment.appendChild(dayGroup); } }); scheduleListContainer.appendChild(fragment); };
     const updateNotificationIcon = (indicatorElement, isEnabled) => { if (!indicatorElement) return; indicatorElement.classList.remove('icon-notificacao-on', 'icon-notificacao-off'); if (isEnabled) { indicatorElement.classList.add('icon-notificacao-on'); indicatorElement.parentElement.title = "Notificações Ativadas (Clique para desativar)"; } else { indicatorElement.classList.add('icon-notificacao-off'); indicatorElement.parentElement.title = "Notificações Desativadas (Clique para ativar)"; } };
     const renderSchoolList = () => { schoolListContainer.innerHTML = ''; if (appData.schools.length === 0) { schoolListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p>'; return; } const template = document.getElementById('school-item-template'); const today = getCurrentDateString(); appData.schools.sort((a, b) => a.name.localeCompare(b.name)).forEach(school => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = school.id; item.querySelector('.school-name').textContent = sanitizeHTML(school.name); item.querySelector('.view-classes-button').addEventListener('click', (e) => { e.stopPropagation(); selectSchool(school.id); showSection('classes-section'); }); item.querySelector('.edit-school-button').addEventListener('click', (e) => { e.stopPropagation(); openSchoolModal(school.id); }); item.querySelector('.delete-school-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir escola "${sanitizeHTML(school.name)}" e TODOS os dados associados (turmas, alunos, etc.)?`)) { deleteSchool(school.id); } }); const quorumContainer = item.querySelector('.school-quorum-info'); const quorumDateInput = quorumContainer.querySelector('.quorum-date-input'); const quorumShiftSelect = quorumContainer.querySelector('.quorum-shift-select'); const quorumDisplay = quorumContainer.querySelector('.quorum-display'); const quorumDateLabel = quorumContainer.querySelector('label[for="quorum-date-input-ID_ESCOLA"]'); const uniqueId = `quorum-date-input-${school.id}`; if (quorumDateLabel) quorumDateLabel.setAttribute('for', uniqueId); if (quorumDateInput) { quorumDateInput.id = uniqueId; quorumDateInput.value = today; quorumDateInput.addEventListener('click', (e) => e.stopPropagation()); } if (quorumShiftSelect) { quorumShiftSelect.addEventListener('click', (e) => e.stopPropagation()); } const updateQuorumDisplay = () => { const selectedDate = quorumDateInput.value; const selectedShift = quorumShiftSelect.value; if (!selectedDate) { quorumDisplay.textContent = 'Data inválida'; quorumDisplay.classList.add('no-data'); quorumDisplay.title = 'Selecione uma data válida'; return; } const quorumData = calculateSchoolQuorum(school.id, selectedDate, selectedShift); quorumDisplay.classList.remove('no-data'); if (quorumData.message) { quorumDisplay.textContent = `(${quorumData.message})`; quorumDisplay.classList.add('no-data'); if (quorumData.message.includes('Sem turmas')) { quorumDisplay.title = `Não há turmas cadastradas para calcular o quórum (${selectedShift}) em ${formatDate(selectedDate)}`; } else if (quorumData.message.includes('Sem alunos')) { quorumDisplay.title = `Não há alunos cadastrados nas turmas para calcular o quórum (${selectedShift}) em ${formatDate(selectedDate)}`; } else { quorumDisplay.title = quorumData.message; } } else { quorumDisplay.textContent = `${quorumData.present}/${quorumData.total} (${quorumData.percentage}%)`; quorumDisplay.title = `${quorumData.present} de ${quorumData.total} alunos presentes (${selectedShift}) em ${formatDate(selectedDate)}`; } }; quorumDateInput.addEventListener('change', updateQuorumDisplay); quorumShiftSelect.addEventListener('change', updateQuorumDisplay); updateQuorumDisplay(); item.addEventListener('click', (e) => { if (!e.target.closest('.school-quorum-info, .list-item-actions')) { selectSchool(school.id); showSection('classes-section'); } }); schoolListContainer.appendChild(clone); }); };
-    const renderClassList = (schoolId) => { classListContainer.innerHTML = ''; const school = findSchoolById(schoolId); classesSchoolName.textContent = school ? sanitizeHTML(school.name) : 'Selecione Escola'; if (!school) { classListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Escola não encontrada.</p>'; return; } const classesInSchool = appData.classes.filter(c => c.schoolId === schoolId); if (classesInSchool.length === 0) { classListContainer.innerHTML = `<p style="text-align: center; padding: 1rem;">Nenhuma turma cadastrada para ${sanitizeHTML(school.name)}.</p>`; return; } const template = document.getElementById('class-item-template'); classesInSchool.sort((a, b) => a.name.localeCompare(b.name)).forEach(cls => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = cls.id; const itemInfo = item.querySelector('.item-info'); itemInfo.querySelector('.class-name').textContent = sanitizeHTML(cls.name); itemInfo.querySelector('.class-details').textContent = `${sanitizeHTML(cls.subject || 'Sem matéria')} - ${sanitizeHTML(cls.shift || 'Sem turno')} - ${sanitizeHTML(cls.schedule || 'Sem horário')}`; if(cls.id === currentClassId) item.classList.add('active'); const actions = item.querySelector('.list-item-actions'); actions.querySelector('.view-details-button').addEventListener('click', (e) => { e.stopPropagation(); selectClass(cls.id); showSection('class-details-section'); }); actions.querySelector('.edit-class-button').addEventListener('click', (e) => { e.stopPropagation(); openClassModal(cls.id); }); actions.querySelector('.delete-class-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir turma "${sanitizeHTML(cls.name)}" e TODOS os dados associados?`)) { deleteClass(cls.id); } }); item.addEventListener('click', () => { selectClass(cls.id); showSection('class-details-section'); }); classListContainer.appendChild(clone); }); };
+    const renderClassList = (schoolId) => { classListContainer.innerHTML = ''; const school = findSchoolById(schoolId); classesSchoolName.textContent = school ? sanitizeHTML(school.name) : 'Selecione Escola'; if (!school) { classListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Escola não encontrada.</p>'; return; } const classesInSchool = appData.classes.filter(c => c.schoolId === schoolId); if (classesInSchool.length === 0) { classListContainer.innerHTML = `<p style="text-align: center; padding: 1rem;">Nenhuma turma cadastrada para ${sanitizeHTML(school.name)}.</p>`; return; } const template = document.getElementById('class-item-template'); classesInSchool.sort((a, b) => a.name.localeCompare(b.name)).forEach(cls => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = cls.id; const itemInfo = item.querySelector('.item-info'); itemInfo.querySelector('.class-name').textContent = `${sanitizeHTML(cls.name)}${cls.year ? ' (' + sanitizeHTML(cls.year) + ')' : ''}`; itemInfo.querySelector('.class-details').textContent = `${sanitizeHTML(cls.subject || 'Sem matéria')} - ${sanitizeHTML(cls.shift || 'Sem turno')} - ${sanitizeHTML(cls.schedule || 'Sem horário')}`; if(cls.id === currentClassId) item.classList.add('active'); const actions = item.querySelector('.list-item-actions'); actions.querySelector('.view-details-button').addEventListener('click', (e) => { e.stopPropagation(); selectClass(cls.id); showSection('class-details-section'); }); actions.querySelector('.edit-class-button').addEventListener('click', (e) => { e.stopPropagation(); openClassModal(cls.id); }); actions.querySelector('.delete-class-button').addEventListener('click', (e) => { e.stopPropagation(); if (confirm(`Excluir turma "${sanitizeHTML(cls.name)}" e TODOS os dados associados?`)) { deleteClass(cls.id); } }); item.addEventListener('click', () => { selectClass(cls.id); showSection('class-details-section'); }); classListContainer.appendChild(clone); }); };
     const renderStudentList = (classId) => {
         studentListContainer.innerHTML = '';
         const studentsInClass = getStudentsByClass(classId);
@@ -642,10 +642,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveSchool = () => { const form = document.getElementById('school-form'); if (!form || !form.checkValidity()) { alert('Preencha o nome da escola.'); form?.reportValidity(); return; } const id = document.getElementById('school-id').value; const newSchoolData = { id: id || generateId('sch'), name: document.getElementById('school-name').value.trim() }; if (id) { const index = appData.schools.findIndex(s => s.id === id); if (index > -1) appData.schools[index] = newSchoolData; } else { appData.schools.push(newSchoolData); } saveData(); renderSchoolList(); if(currentSection === 'schedule-section') renderScheduleList(); hideModal(); };
     const deleteSchool = (id) => { const classesToDelete = appData.classes.filter(c => c.schoolId === id).map(c => c.id); appData.schools = appData.schools.filter(s => s.id !== id); appData.classes = appData.classes.filter(c => c.schoolId !== id); appData.students = appData.students.filter(s => !classesToDelete.includes(s.classId)); appData.schedule = appData.schedule.filter(sch => sch.schoolId !== id); if (currentSchoolId === id) { currentSchoolId = null; currentClassId = null; showSection('schools-section'); } saveData(); renderSchoolList(); if (currentSection === 'schedule-section') renderScheduleList(); if (currentSection === 'classes-section' && !currentSchoolId) { showSection('schools-section'); } else if (currentSection === 'classes-section') { renderClassList(currentSchoolId); } saveAppState(); };
     const selectSchool = (id) => { currentSchoolId = id; currentClassId = null; renderClassList(id); navClassesButton.disabled = false; navDetailsButton.disabled = true; saveAppState(); };
-    const openClassModal = (classIdToEdit = null) => { if (!currentSchoolId) return; const isEditing = classIdToEdit !== null; const classData = isEditing ? findClassById(classIdToEdit) : {}; const title = isEditing ? 'Editar Turma' : 'Nova Turma'; const schoolName = findSchoolById(currentSchoolId)?.name || '?'; const modalContent = `<form id="class-form"><input type="hidden" id="class-id" value="${isEditing ? classIdToEdit : ''}"><p class="mb-1"><strong>Escola:</strong> ${sanitizeHTML(schoolName)}</p><div class="form-group"><label for="class-name">Nome Turma:</label><input type="text" id="class-name" required value="${sanitizeHTML(classData.name || '')}"></div><div class="form-group"><label for="class-subject">Matéria:</label><input type="text" id="class-subject" value="${sanitizeHTML(classData.subject || '')}"></div><div class="form-group d-flex"><div style="flex: 1; margin-right: 5px;"><label for="class-schedule">Horário:</label><input type="time" id="class-schedule" value="${classData.schedule || ''}"></div><div style="flex: 1; margin-left: 5px;"><label for="class-shift">Turno:</label><select id="class-shift"><option value="">--</option><option value="Manhã" ${classData.shift === 'Manhã' ? 'selected' : ''}>Manhã</option><option value="Tarde" ${classData.shift === 'Tarde' ? 'selected' : ''}>Tarde</option><option value="Noite" ${classData.shift === 'Noite' ? 'selected' : ''}>Noite</option><option value="Integral" ${classData.shift === 'Integral' ? 'selected' : ''}>Integral</option></select></div></div></form>`; const footerButtons = `<button type="button" id="save-class-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; showModal(title, modalContent, footerButtons); document.getElementById('save-class-button').addEventListener('click', saveClass); };
-    const saveClass = () => { const form = document.getElementById('class-form'); if (!form || !form.checkValidity() || !currentSchoolId) { alert('Preencha nome da turma e verifique escola.'); form?.reportValidity(); return; } const id = document.getElementById('class-id').value; const isEditing = !!id; const existingData = isEditing ? findClassById(id) : {}; const newClassData = { id: id || generateId('cls'), schoolId: currentSchoolId, name: document.getElementById('class-name').value.trim(), subject: document.getElementById('class-subject').value.trim(), schedule: document.getElementById('class-schedule').value, shift: document.getElementById('class-shift').value, notes: existingData?.notes || '', gradeStructure: existingData?.gradeStructure || [], lessonPlans: existingData?.lessonPlans || {}, classroomLayout: existingData?.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }, representativeId: existingData?.representativeId || null, viceRepresentativeId: existingData?.viceRepresentativeId || null }; if (isEditing) { const index = appData.classes.findIndex(c => c.id === id); if (index > -1) appData.classes[index] = newClassData; } else { appData.classes.push(newClassData); } saveData(); renderClassList(currentSchoolId); if (id && id === currentClassId && currentSection === 'class-details-section') { selectClass(id, true); } hideModal(); };
+    const openClassModal = (classIdToEdit = null) => { if (!currentSchoolId) return; const isEditing = classIdToEdit !== null; const classData = isEditing ? findClassById(classIdToEdit) : {}; const title = isEditing ? 'Editar Turma' : 'Nova Turma'; const schoolName = findSchoolById(currentSchoolId)?.name || '?'; const modalContent = `<form id="class-form"><input type="hidden" id="class-id" value="${isEditing ? classIdToEdit : ''}"><p class="mb-1"><strong>Escola:</strong> ${sanitizeHTML(schoolName)}</p><div class="form-group"><label for="class-name">Nome Turma:</label><input type="text" id="class-name" required value="${sanitizeHTML(classData.name || '')}"></div><div class="form-group"><label for="class-year">Ano/Série (Opcional):</label><input type="text" id="class-year" placeholder="Ex: 6º ano do fundamental" value="${sanitizeHTML(classData.year || '')}"></div><div class="form-group"><label for="class-subject">Matéria:</label><input type="text" id="class-subject" value="${sanitizeHTML(classData.subject || '')}"></div><div class="form-group d-flex"><div style="flex: 1; margin-right: 5px;"><label for="class-schedule">Horário:</label><input type="time" id="class-schedule" value="${classData.schedule || ''}"></div><div style="flex: 1; margin-left: 5px;"><label for="class-shift">Turno:</label><select id="class-shift"><option value="">--</option><option value="Manhã" ${classData.shift === 'Manhã' ? 'selected' : ''}>Manhã</option><option value="Tarde" ${classData.shift === 'Tarde' ? 'selected' : ''}>Tarde</option><option value="Noite" ${classData.shift === 'Noite' ? 'selected' : ''}>Noite</option><option value="Integral" ${classData.shift === 'Integral' ? 'selected' : ''}>Integral</option></select></div></div></form>`; const footerButtons = `<button type="button" id="save-class-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; showModal(title, modalContent, footerButtons); document.getElementById('save-class-button').addEventListener('click', saveClass); };
+    const saveClass = () => { const form = document.getElementById('class-form'); if (!form || !form.checkValidity() || !currentSchoolId) { alert('Preencha nome da turma e verifique escola.'); form?.reportValidity(); return; } const id = document.getElementById('class-id').value; const isEditing = !!id; const existingData = isEditing ? findClassById(id) : {}; const newClassData = { id: id || generateId('cls'), schoolId: currentSchoolId, name: document.getElementById('class-name').value.trim(), year: document.getElementById('class-year').value.trim(), subject: document.getElementById('class-subject').value.trim(), schedule: document.getElementById('class-schedule').value, shift: document.getElementById('class-shift').value, notes: existingData?.notes || '', gradeStructure: existingData?.gradeStructure || [], lessonPlans: existingData?.lessonPlans || {}, classroomLayout: existingData?.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }, representativeId: existingData?.representativeId || null, viceRepresentativeId: existingData?.viceRepresentativeId || null }; if (isEditing) { const index = appData.classes.findIndex(c => c.id === id); if (index > -1) appData.classes[index] = newClassData; } else { appData.classes.push(newClassData); } saveData(); renderClassList(currentSchoolId); if (id && id === currentClassId && currentSection === 'class-details-section') { selectClass(id, true); } hideModal(); };
     const deleteClass = (id) => { appData.classes = appData.classes.filter(c => c.id !== id); appData.students = appData.students.filter(s => s.classId !== id); if (currentClassId === id) { currentClassId = null; showSection('classes-section'); } saveData(); renderClassList(currentSchoolId); if (!currentClassId) navDetailsButton.disabled = true; saveAppState(); };
-    const selectClass = (id, forceReload = false) => { if (currentClassId !== id || forceReload) { console.log(`Selecionando Turma: ${id}, Forçar Recarga: ${forceReload}`); if (tempClassroomLayout) { cancelClassroomMapEdit(); } currentClassId = id; const selectedClass = findClassById(id); if (selectedClass) { classDetailsTitle.textContent = `${sanitizeHTML(selectedClass.name)} (${sanitizeHTML(selectedClass.subject || 'Sem matéria')})`; renderStudentList(id); renderGradeSets(id); const currentDate = attendanceDateInput.value || getCurrentDateString(); attendanceDateInput.value = currentDate; lessonPlanDateInput.value = currentDate; renderAttendanceTable(id, currentDate); renderLessonPlan(id, currentDate); renderClassroomMap(id); classNotesContent.textContent = sanitizeHTML(selectedClass.notes || 'Nenhuma anotação.'); classNotesTextarea.value = selectedClass.notes || ''; classNotesEdit.classList.add('hidden'); classNotesDisplay.classList.remove('hidden'); if (currentSection === 'classes-section') renderClassList(selectedClass.schoolId); navDetailsButton.disabled = false; classDetailsSection.querySelectorAll('.card').forEach(card => { card.classList.remove('collapsed'); const toggleBtn = card.querySelector('.card-toggle-button .icon'); if (toggleBtn) { toggleBtn.classList.remove('icon-chevron-down'); toggleBtn.classList.add('icon-chevron-up'); if(toggleBtn.parentElement) toggleBtn.parentElement.title = 'Esconder'; } }); } else { currentClassId = null; classDetailsTitle.textContent = "Erro: Turma não encontrada"; studentListContainer.innerHTML = '<p>Erro</p>'; gradesTableContainer.innerHTML = '<p>Erro</p>'; attendanceTableContainer.innerHTML = '<p>Erro</p>'; lessonPlanTextarea.value = ''; saveLessonPlanButton.classList.add('hidden'); classNotesContent.textContent = 'Erro'; classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro ao carregar mapa.</p>'; navDetailsButton.disabled = true; } saveAppState(); } else { console.log(`Turma ${id} já selecionada.`); } };
+    const selectClass = (id, forceReload = false) => { if (currentClassId !== id || forceReload) { console.log(`Selecionando Turma: ${id}, Forçar Recarga: ${forceReload}`); if (tempClassroomLayout) { cancelClassroomMapEdit(); } currentClassId = id; const selectedClass = findClassById(id); if (selectedClass) { classDetailsTitle.textContent = `${sanitizeHTML(selectedClass.name)}${selectedClass.year ? ' (' + sanitizeHTML(selectedClass.year) + ')' : ''} - ${sanitizeHTML(selectedClass.subject || 'Sem matéria')}`; renderStudentList(id); renderGradeSets(id); const currentDate = attendanceDateInput.value || getCurrentDateString(); attendanceDateInput.value = currentDate; lessonPlanDateInput.value = currentDate; renderAttendanceTable(id, currentDate); renderLessonPlan(id, currentDate); renderClassroomMap(id); classNotesContent.textContent = sanitizeHTML(selectedClass.notes || 'Nenhuma anotação.'); classNotesTextarea.value = selectedClass.notes || ''; classNotesEdit.classList.add('hidden'); classNotesDisplay.classList.remove('hidden'); if (currentSection === 'classes-section') renderClassList(selectedClass.schoolId); navDetailsButton.disabled = false; classDetailsSection.querySelectorAll('.card').forEach(card => { card.classList.remove('collapsed'); const toggleBtn = card.querySelector('.card-toggle-button .icon'); if (toggleBtn) { toggleBtn.classList.remove('icon-chevron-down'); toggleBtn.classList.add('icon-chevron-up'); if(toggleBtn.parentElement) toggleBtn.parentElement.title = 'Esconder'; } }); } else { currentClassId = null; classDetailsTitle.textContent = "Erro: Turma não encontrada"; studentListContainer.innerHTML = '<p>Erro</p>'; gradesTableContainer.innerHTML = '<p>Erro</p>'; attendanceTableContainer.innerHTML = '<p>Erro</p>'; lessonPlanTextarea.value = ''; saveLessonPlanButton.classList.add('hidden'); classNotesContent.textContent = 'Erro'; classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro ao carregar mapa.</p>'; navDetailsButton.disabled = true; } saveAppState(); } else { console.log(`Turma ${id} já selecionada.`); } };
     const openStudentModal = (studentIdToEdit = null) => {
         if (!currentClassId) return;
         const isEditing = studentIdToEdit !== null;
@@ -1783,24 +1783,65 @@ document.addEventListener('DOMContentLoaded', () => {
         aiToolInputsContainer.innerHTML = '';
         aiToolApplyBtn.classList.add('hidden');
         
+        let classSelectOptions = `<option value="">-- Selecionar Turma (Opcional) --</option>`;
+        appData.classes.forEach(c => {
+            const school = findSchoolById(c.schoolId);
+            const schoolName = school ? school.name : '';
+            const isSelected = (currentClassId === c.id) ? 'selected' : '';
+            classSelectOptions += `<option value="${c.id}" ${isSelected}>${sanitizeHTML(c.name)} ${c.year ? '(' + sanitizeHTML(c.year) + ')' : ''} - ${sanitizeHTML(c.subject || 'Sem Matéria')} - ${sanitizeHTML(schoolName)}</option>`;
+        });
+        
         if (toolType === 'lesson-plan') {
             aiToolTitle.textContent = 'Gerar Esboço de Aula';
             aiToolInputsContainer.innerHTML = `
                 <div class="form-group">
-                    <label>Tema da Aula e Ano Escolar:</label>
-                    <input type="text" id="ai-input-tema" placeholder="Ex: Revolução Francesa, 8º ano" class="w-full">
+                    <label>Turma (Opcional):</label>
+                    <select id="ai-input-turma" class="w-full">
+                        ${classSelectOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tema da Aula:</label>
+                    <input type="text" id="ai-input-tema" placeholder="Ex: Revolução Francesa" class="w-full">
+                </div>
+                <div class="form-group">
+                    <label>Ano Escolar (Preenchido automaticamente se turma selecionada):</label>
+                    <input type="text" id="ai-input-nivel" placeholder="Ex: 8º ano do Ensino Fundamental" class="w-full">
                 </div>
             `;
             aiToolApplyBtn.classList.remove('hidden');
+            
+            setTimeout(() => {
+                const turmaSelect = document.getElementById('ai-input-turma');
+                if (turmaSelect) {
+                    const updateNivel = () => {
+                        const classId = turmaSelect.value;
+                        if (classId) {
+                            const selectedClass = findClassById(classId);
+                            if (selectedClass && selectedClass.year) {
+                                document.getElementById('ai-input-nivel').value = selectedClass.year;
+                            }
+                        }
+                    };
+                    turmaSelect.addEventListener('change', updateNivel);
+                    updateNivel(); // Call initially
+                }
+            }, 0);
         } else if (toolType === 'exam-assistant') {
             aiToolTitle.textContent = 'Assistente de Provas';
             aiToolInputsContainer.innerHTML = `
+                <div class="form-group">
+                    <label>Turma (Opcional):</label>
+                    <select id="ai-input-turma" class="w-full">
+                        ${classSelectOptions}
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Assunto/Conteúdo da Prova:</label>
                     <input type="text" id="ai-input-assunto" placeholder="Ex: Equações do 2º grau" class="w-full">
                 </div>
                 <div class="form-group">
-                    <label>Nível/Ano Escolar:</label>
+                    <label>Nível/Ano Escolar (Preenchido automaticamente se turma selecionada):</label>
                     <input type="text" id="ai-input-nivel" placeholder="Ex: 9º ano do Ensino Fundamental" class="w-full">
                 </div>
                 <div class="form-group">
@@ -1808,9 +1849,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     <input type="number" id="ai-input-qtd" value="5" min="1" max="20" class="w-full">
                 </div>
             `;
+            
+            setTimeout(() => {
+                const turmaSelect = document.getElementById('ai-input-turma');
+                if (turmaSelect) {
+                    const updateNivel = () => {
+                        const classId = turmaSelect.value;
+                        if (classId) {
+                            const selectedClass = findClassById(classId);
+                            if (selectedClass && selectedClass.year) {
+                                document.getElementById('ai-input-nivel').value = selectedClass.year;
+                            }
+                        }
+                    };
+                    turmaSelect.addEventListener('change', updateNivel);
+                    updateNivel(); // Call initially
+                }
+            }, 0);
         } else if (toolType === 'question-generator') {
             aiToolTitle.textContent = 'Gerador de Questões (Específicas)';
             aiToolInputsContainer.innerHTML = `
+                <div class="form-group">
+                    <label>Turma (Opcional):</label>
+                    <select id="ai-input-turma" class="w-full">
+                        ${classSelectOptions}
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Tópico Específico:</label>
                     <input type="text" id="ai-input-topico" placeholder="Ex: Fotossíntese" class="w-full">
@@ -1831,15 +1895,20 @@ document.addEventListener('DOMContentLoaded', () => {
             let contextText = "Nenhuma turma selecionada.";
             
             if (currentClassId) {
+                const selectedClass = findClassById(currentClassId);
                 const students = getStudentsByClass(currentClassId);
                 const classNotes = document.getElementById('class-notes-content').textContent;
-                contextText = `Turma com ${students.length} alunos.\nAnotações atuais: ${classNotes}`;
+                contextText = `Turma: ${selectedClass.name}\n`;
+                if (selectedClass.year) contextText += `Ano/Série: ${selectedClass.year}\n`;
+                if (selectedClass.subject) contextText += `Disciplina: ${selectedClass.subject}\n`;
+                contextText += `Total de alunos: ${students.length}\n`;
+                contextText += `Anotações atuais: ${classNotes}`;
             }
             
             aiToolInputsContainer.innerHTML = `
                 <div class="form-group">
                     <label>Contexto da Turma:</label>
-                    <textarea id="ai-input-contexto" rows="4" class="w-full" readonly>${contextText}</textarea>
+                    <textarea id="ai-input-contexto" rows="5" class="w-full" readonly>${contextText}</textarea>
                 </div>
                 <div class="form-group">
                     <label>O que você deseja analisar?</label>
@@ -1907,25 +1976,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentAiTool === 'lesson-plan') {
                 const tema = document.getElementById('ai-input-tema').value.trim();
-                if (!tema) return showNotification('Preencha o tema.', 'error');
-                promptText = `Aja como um professor experiente. Crie um esboço de plano de aula sobre: "${tema}". Inclua: 1. Objetivos, 2. Introdução, 3. Desenvolvimento, 4. Conclusão/Atividade. Seja direto e prático. Formate em Markdown.`;
+                const nivel = document.getElementById('ai-input-nivel').value.trim();
+                const turmaId = document.getElementById('ai-input-turma')?.value;
+                let context = '';
+                if (turmaId) {
+                    const selectedClass = findClassById(turmaId);
+                    if (selectedClass) {
+                        context = `A aula é para a turma "${selectedClass.name}"${selectedClass.year ? ' do ano/série "' + selectedClass.year + '"' : ''}${selectedClass.subject ? ' da disciplina de "' + selectedClass.subject + '"' : ''}. Adapte a linguagem e a complexidade para este público específico. `;
+                    }
+                }
+                if (!tema || !nivel) return showNotification('Preencha o tema e o ano escolar.', 'error');
+                promptText = `Aja como um professor experiente. ${context}Crie um esboço de plano de aula sobre: "${tema}" para alunos do "${nivel}". Inclua: 1. Objetivos, 2. Introdução, 3. Desenvolvimento, 4. Conclusão/Atividade. Seja direto e prático. Formate em Markdown.`;
             } else if (currentAiTool === 'exam-assistant') {
                 const assunto = document.getElementById('ai-input-assunto').value.trim();
                 const nivel = document.getElementById('ai-input-nivel').value.trim();
                 const qtd = document.getElementById('ai-input-qtd').value;
+                const turmaId = document.getElementById('ai-input-turma')?.value;
+                let context = '';
+                if (turmaId) {
+                    const selectedClass = findClassById(turmaId);
+                    if (selectedClass) {
+                        context = `A prova é para a turma "${selectedClass.name}"${selectedClass.year ? ' do ano/série "' + selectedClass.year + '"' : ''}${selectedClass.subject ? ' da disciplina de "' + selectedClass.subject + '"' : ''}. Adapte a linguagem e a complexidade para este público específico. `;
+                    }
+                }
                 if (!assunto || !nivel) return showNotification('Preencha os campos.', 'error');
-                promptText = `Aja como um professor experiente elaborando uma prova. Crie uma prova com ${qtd} questões sobre "${assunto}" para alunos do "${nivel}". Inclua uma mistura de questões objetivas e discursivas. No final, forneça o gabarito. Formate em Markdown.`;
+                promptText = `Aja como um professor experiente elaborando uma prova. ${context}Crie uma prova com ${qtd} questões sobre "${assunto}" para alunos do "${nivel}". Inclua uma mistura de questões objetivas e discursivas. No final, forneça o gabarito. Formate em Markdown.`;
             } else if (currentAiTool === 'question-generator') {
                 const topico = document.getElementById('ai-input-topico').value.trim();
                 const tipo = document.getElementById('ai-input-tipo').value;
+                const turmaId = document.getElementById('ai-input-turma')?.value;
+                let context = '';
+                if (turmaId) {
+                    const selectedClass = findClassById(turmaId);
+                    if (selectedClass) {
+                        context = `A questão é para a turma "${selectedClass.name}"${selectedClass.year ? ' do ano/série "' + selectedClass.year + '"' : ''}${selectedClass.subject ? ' da disciplina de "' + selectedClass.subject + '"' : ''}. Adapte a linguagem e a complexidade para este público específico. `;
+                    }
+                }
                 if (!topico) return showNotification('Preencha o tópico.', 'error');
-                promptText = `Aja como um professor. Crie 1 questão do tipo "${tipo}" sobre o tópico "${topico}". Inclua a resposta correta e uma breve explicação. Formate em Markdown.`;
+                promptText = `Aja como um professor. ${context}Crie 1 questão do tipo "${tipo}" sobre o tópico "${topico}". Inclua a resposta correta e uma breve explicação. Formate em Markdown.`;
             } else if (currentAiTool === 'analyze-class') {
                 const contexto = document.getElementById('ai-input-contexto').value;
                 const pergunta = document.getElementById('ai-input-pergunta').value.trim();
                 if (!pergunta) return showNotification('Preencha o que deseja analisar.', 'error');
                 promptText = `Aja como um coordenador pedagógico experiente. Baseado no seguinte contexto da turma: "${contexto}", responda à seguinte solicitação do professor: "${pergunta}". Seja prático e ofereça estratégias acionáveis. Formate em Markdown.`;
             }
+
+            // Instruções adicionais para a IA sobre matemática e geometria
+            const mathAndGeometryInstructions = `\n\nIMPORTANTE:\n1. Use formatação LaTeX para todas as equações matemáticas, envolvendo-as em cifrões (ex: $x = 5$ ou $$y = x^2$$).\n2. Se precisar incluir figuras geométricas (como triângulos, gráficos, etc.), NÃO tente desenhá-las com caracteres de texto. Em vez disso, gere o código SVG correspondente DIRETAMENTE no texto (sem blocos de código markdown), para que seja renderizado como imagem, ou descreva a figura detalhadamente em texto.`;
+            promptText += mathAndGeometryInstructions;
 
             aiToolGenerateBtn.disabled = true;
             aiToolLoading.classList.remove('hidden');
@@ -1940,8 +2038,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const generatedText = response.text;
                 
-                // Renderiza (pode usar marked.js se disponível, senão apenas texto)
-                aiToolResultContent.innerHTML = generatedText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                // Renderiza usando marked.js se disponível, senão fallback
+                if (typeof marked !== 'undefined') {
+                    let textToParse = generatedText;
+                    const mathBlocks = [];
+                    
+                    // Protege blocos de matemática (display e inline)
+                    textToParse = textToParse.replace(/\$\$([\s\S]+?)\$\$/g, (match) => {
+                        mathBlocks.push(match);
+                        return `@@MATHBLOCK${mathBlocks.length - 1}@@`;
+                    });
+                    textToParse = textToParse.replace(/\$([^$\n]+?)\$/g, (match) => {
+                        mathBlocks.push(match);
+                        return `@@MATHBLOCK${mathBlocks.length - 1}@@`;
+                    });
+
+                    let html = marked.parse(textToParse);
+
+                    // Restaura blocos de matemática
+                    mathBlocks.forEach((block, index) => {
+                        html = html.replace(`@@MATHBLOCK${index}@@`, block);
+                    });
+
+                    aiToolResultContent.innerHTML = html;
+                    
+                    // Renderiza fórmulas matemáticas com MathJax
+                    if (typeof MathJax !== 'undefined') {
+                        MathJax.typesetPromise([aiToolResultContent]).catch(function (err) {
+                            console.error('MathJax error:', err.message);
+                        });
+                    }
+                } else {
+                    aiToolResultContent.innerHTML = generatedText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                }
                 aiToolResultContent.dataset.rawText = generatedText;
                 
                 aiToolResultContainer.classList.remove('hidden');

@@ -11,6 +11,22 @@
     <!-- Link para o arquivo CSS externo -->
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <!-- Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <script type="importmap">
       {
         "imports": {
@@ -391,7 +407,7 @@
                             <span class="icon icon-pdf"></span> Exportar PDF
                         </button>
                     </div>
-                    <div id="ai-tool-result-content" class="markdown-body" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; min-height: 100px; white-space: pre-wrap; font-family: var(--font-primary); overflow-y: auto; max-height: 400px;"></div>
+                    <div id="ai-tool-result-content" class="markdown-body" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; min-height: 100px; font-family: var(--font-primary); overflow-y: auto; max-height: 400px;"></div>
                     <button type="button" id="ai-tool-copy-btn" class="secondary w-full mt-1">Copiar Texto</button>
                     <button type="button" id="ai-tool-apply-btn" class="success w-full mt-1 hidden">Aplicar ao Plano de Aula</button>
                 </div>
