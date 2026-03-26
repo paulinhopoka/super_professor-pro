@@ -72,7 +72,10 @@
         <section id="classes-section" class="section">
             <div class="section-header">
                 <button type="button" id="back-to-schools-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button>
-                <h2><span class="icon icon-turmas"></span>Turmas - <span id="classes-school-name">Selecione Escola</span></h2>
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; overflow: hidden; padding: 0 5px;">
+                    <h2 style="white-space: nowrap; line-height: 1.1; margin-bottom: 2px; padding: 0; flex-grow: 0;"><span class="icon icon-turmas"></span>Turmas</h2>
+                    <span id="classes-school-name" style="font-size: 0.85rem; color: var(--text-secondary); text-align: center; line-height: 1.2; display: block; width: 100%; word-wrap: break-word;">Selecione Escola</span>
+                </div>
                 <div style="width: 40px;" class="header-right-button"></div>
             </div>
             <button type="button" id="add-class-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button>
@@ -522,8 +525,7 @@
                 </div>
                 <div class="list-item-actions">
                     <button type="button" class="view-classes-button button-like primary" title="Ver Turmas"><span class="icon icon-turmas"></span> Turmas</button>
-                    <button type="button" class="edit-school-button secondary icon-button" title="Editar Escola"><span class="icon icon-editar icon-only"></span></button>
-                    <button type="button" class="delete-school-button danger icon-button" title="Excluir Escola"><span class="icon icon-excluir icon-only"></span></button>
+                    <button type="button" class="edit-school-button secondary icon-button" title="Opções da Escola"><span class="icon icon-more-vert icon-only"></span></button>
                 </div>
             </div>
             <div class="school-quorum-info">
@@ -548,8 +550,7 @@
             </div>
             <div class="list-item-actions">
                 <button type="button" class="view-details-button primary" title="Ver Detalhes"><span class="icon icon-alunos"></span> Ver</button>
-                <button type="button" class="edit-class-button secondary icon-button" title="Editar Turma"><span class="icon icon-editar icon-only"></span></button>
-                <button type="button" class="delete-class-button danger icon-button" title="Excluir Turma"><span class="icon icon-excluir icon-only"></span></button>
+                <button type="button" class="edit-class-button secondary icon-button" title="Opções da Turma"><span class="icon icon-more-vert icon-only"></span></button>
             </div>
         </div>
     </template>
@@ -591,25 +592,24 @@
         </div>
     </template>
     <template id="schedule-item-template">
-        <div class="schedule-item" data-id="">
-            <span class="schedule-time"></span>
-            <div class="schedule-info">
-                <div class="school-name"></div>
-                <div class="note"></div>
+        <div class="schedule-item" data-id="" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); margin-bottom: 8px;">
+            <!-- Progress bar as background -->
+            <div class="progress-bar"></div>
+            
+            <!-- Content -->
+            <div style="position: relative; z-index: 1; display: flex; align-items: center; gap: 15px; flex: 1; min-width: 0;">
+                <span class="schedule-time" style="font-weight: bold; white-space: nowrap; font-size: 0.95em;"></span>
+                <div class="schedule-info" style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; flex: 1;">
+                    <div class="school-name" style="font-weight: 500; font-size: 0.9em; word-break: break-word; line-height: 1.2;"></div>
+                    <div class="note" style="color: var(--text-secondary); font-size: 0.85em; word-break: break-word; line-height: 1.2;"></div>
+                </div>
             </div>
-            <div class="schedule-actions">
-                <button type="button" class="notification-toggle-button" title="Ativar/Desativar Notificações">
-                    <span class="icon notification-indicator"></span>
+            
+            <!-- Actions -->
+            <div class="schedule-actions" style="position: relative; z-index: 1; margin-left: 10px;">
+                <button type="button" class="edit-schedule-button secondary icon-button" title="Editar Horário" style="background: transparent; border: none; font-weight: bold; font-size: 1.2em; padding: 5px; color: var(--text-secondary);">
+                    ...
                 </button>
-                <button type="button" class="edit-schedule-button secondary icon-button" title="Editar Horário">
-                    <span class="icon icon-editar icon-only"></span>
-                </button>
-                <button type="button" class="delete-schedule-button danger icon-button" title="Excluir Horário">
-                    <span class="icon icon-excluir icon-only"></span>
-                </button>
-            </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar"></div>
             </div>
         </div>
     </template>
