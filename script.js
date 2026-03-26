@@ -982,7 +982,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const editClassroomMap = () => { const cls = findClassById(currentClassId); if (!cls) return; tempClassroomLayout = JSON.parse(JSON.stringify(cls.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] })); clearSeatSelection(); mapRowsInput.value = tempClassroomLayout.rows; mapColsInput.value = tempClassroomLayout.cols; teacherDeskPositionSelect.value = tempClassroomLayout.teacherDeskPosition; classroomMapEditControls.classList.remove('hidden'); renderClassroomMap(currentClassId, true); mapRowsInput.removeEventListener('input', handleDimensionChange); mapColsInput.removeEventListener('input', handleDimensionChange); teacherDeskPositionSelect.removeEventListener('change', handleTeacherDeskChange); mapRowsInput.addEventListener('input', handleDimensionChange); mapColsInput.addEventListener('input', handleDimensionChange); teacherDeskPositionSelect.addEventListener('change', handleTeacherDeskChange); };
     const cancelClassroomMapEdit = () => { tempClassroomLayout = null; clearSeatSelection(); classroomMapEditControls.classList.add('hidden'); renderClassroomMap(currentClassId, false); mapRowsInput.removeEventListener('input', handleDimensionChange); mapColsInput.removeEventListener('input', handleDimensionChange); teacherDeskPositionSelect.removeEventListener('change', handleTeacherDeskChange); };
     const saveClassroomLayout = () => { if (!currentClassId || !tempClassroomLayout) return; const cls = findClassById(currentClassId); if (!cls) return; const newLayout = { rows: parseInt(mapRowsInput.value) || 5, cols: parseInt(mapColsInput.value) || 6, teacherDeskPosition: teacherDeskPositionSelect.value || 'top-center', seats: tempClassroomLayout.seats }; if (newLayout.rows < 1 || newLayout.rows > 20 || newLayout.cols < 1 || newLayout.cols > 20) { alert("Fileiras e Colunas devem estar entre 1 e 20."); return; } cls.classroomLayout = newLayout; saveData(); tempClassroomLayout = null; cancelClassroomMapEdit(); alert("Mapa da sala salvo!"); };
-    const randomizeClassroomMap = () => { try { if (!currentClassId || !tempClassroomLayout) return; const students = getStudentsByClass(currentClassId); if (students.length === 0) { alert("Não há alunos nesta turma para distribuir."); return; } const shuffledStudents = [...students]; for (let i = shuffledStudents.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffledStudents[i], shuffledStudents[j]] = [shuffledStudents[j], shuffledStudents[i]]; } const rows = tempClassroomLayout.rows; const cols = tempClassroomLayout.cols; const availableSeats = []; for (let r = 1; r <= rows; r++) { for (let c = 1; c <= cols; c++) { availableSeats.push({ row: r, col: c }); } } for (let i = availableSeats.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [availableSeats[i], availableSeats[j]] = [availableSeats[j], availableSeats[i]]; } tempClassroomLayout.seats = []; for (let i = 0; i < shuffledStudents.length && i < availableSeats.length; i++) { tempClassroomLayout.seats.push({ row: availableSeats[i].row, col: availableSeats[i].col, studentId: shuffledStudents[i].id }); } clearSeatSelection(); renderClassroomMap(currentClassId, true); } catch (error) { console.error(error); alert("Erro ao randomizar: " + error.message); } };
+    const randomizeClassroomMap = () => {
+        try {
+            if (!currentClassId || !tempClassroomLayout) return;
+            const students = getStudentsByClass(currentClassId);
+            if (students.length === 0) { alert("Não há alunos nesta turma para distribuir."); return; }
+            
+            const assignedStudentIds = new Set(tempClassroomLayout.seats.map(s => s.studentId).filter(id => id));
+            const unassignedStudents = students.filter(s => !assignedStudentIds.has(s.id));
+            
+            if (unassignedStudents.length === 0) {
+                alert("Todos os alunos já estão posicionados.");
+                return;
+            }
+
+            const shuffledStudents = [...unassignedStudents];
+            for (let i = shuffledStudents.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledStudents[i], shuffledStudents[j]] = [shuffledStudents[j], shuffledStudents[i]];
+            }
+
+            const rows = tempClassroomLayout.rows;
+            const cols = tempClassroomLayout.cols;
+            const availableSeats = [];
+            
+            for (let r = 1; r <= rows; r++) {
+                for (let c = 1; c <= cols; c++) {
+                    const isOccupied = tempClassroomLayout.seats.some(s => s.row === r && s.col === c);
+                    if (!isOccupied) {
+                        availableSeats.push({ row: r, col: c });
+                    }
+                }
+            }
+
+            if (availableSeats.length < shuffledStudents.length) {
+                alert("Não há mesas vazias suficientes para os alunos restantes.");
+                return;
+            }
+
+            for (let i = availableSeats.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableSeats[i], availableSeats[j]] = [availableSeats[j], availableSeats[i]];
+            }
+
+            for (let i = 0; i < shuffledStudents.length && i < availableSeats.length; i++) {
+                tempClassroomLayout.seats.push({ row: availableSeats[i].row, col: availableSeats[i].col, studentId: shuffledStudents[i].id });
+            }
+            
+            clearSeatSelection();
+            renderClassroomMap(currentClassId, true);
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao randomizar: " + error.message);
+        }
+    };
     const handleDimensionChange = () => { if (!tempClassroomLayout) return; const newRows = parseInt(mapRowsInput.value) || tempClassroomLayout.rows; const newCols = parseInt(mapColsInput.value) || tempClassroomLayout.cols; if (newRows !== tempClassroomLayout.rows || newCols !== tempClassroomLayout.cols) { const oldSeats = tempClassroomLayout.seats; tempClassroomLayout.rows = newRows; tempClassroomLayout.cols = newCols; tempClassroomLayout.seats = oldSeats.filter(seat => seat.row <= newRows && seat.col <= newCols); renderClassroomMap(currentClassId, true); } };
     const handleTeacherDeskChange = () => { if (!tempClassroomLayout) return; tempClassroomLayout.teacherDeskPosition = teacherDeskPositionSelect.value; renderClassroomMap(currentClassId, true); };
     const handleStudentListDragStart = (e) => { draggedElement = e.target; draggedStudentId = e.target.dataset.studentId; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', draggedStudentId); setTimeout(() => draggedElement?.classList.add('dragging'), 0); clearSeatSelection(); console.log(`Drag Start (List): Student ID ${draggedStudentId}`); };

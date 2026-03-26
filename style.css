@@ -258,8 +258,8 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; flex-shrink: 0; }
 .card-actions button, .card-actions .button-like { margin-left: 0.3rem; padding: 0.3rem 0.6rem; font-size: 0.85rem; }
 .card-content { padding-top: 0.5rem; transition: opacity 0.3s ease, max-height 0.4s ease-out; max-height: 10000px; overflow: hidden; opacity: 1; }
-.card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background: transparent !important; border: none !important; color: var(--text-secondary); cursor: pointer; margin-left: auto; order: 99; margin-top: 0.1rem; }
-.card-toggle-button:hover { color: var(--accent-primary); }
+.card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background-color: var(--bg-tertiary) !important; border: 1px solid var(--border-color) !important; border-radius: 4px; color: var(--text-secondary); cursor: pointer; margin-left: auto; order: 99; margin-top: 0.1rem; transition: background-color 0.2s, color 0.2s; }
+.card-toggle-button:hover { background-color: var(--bg-tertiary-alpha) !important; color: var(--accent-primary); }
 .card.collapsed { padding-bottom: 0.5rem; }
 .card.collapsed .card-content { max-height: 0; opacity: 0; padding-top: 0; margin-top: -1px; border-top: none; visibility: hidden; }
 .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; }
@@ -535,11 +535,10 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 .color-range-item button { flex-shrink: 0; margin-left: auto; }
 .grade-structure-modal .add-color-range-button { font-size: 0.85rem !important; padding: 0.3rem 0.8rem !important; margin-top: 0.3rem !important; display: block; margin-left: auto; margin-right: auto; }
 
- #grades-card .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-left: auto; }
- #grades-card .card-header .options label { margin-bottom: 0; font-size: 0.85rem; white-space: nowrap; margin-right: 2px; }
- #grades-card .card-header .options select { padding: 0.3rem 0.4rem; font-size: 0.85rem; margin-bottom: 0; flex-shrink: 0; margin-right: 5px; }
- #grades-card .card-header .options button.icon-button { margin-left: 0; margin-right: 5px; }
- #grades-card .card-header .options .export-buttons { display: flex; gap: 5px; margin-left: 0; }
+ #grades-card .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+ #grades-card .card-header .options select { padding: 0.3rem 0.4rem; font-size: 0.85rem; margin-bottom: 0; flex-shrink: 1; max-width: 150px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+ #grades-card .card-header .options button.icon-button { margin-left: 0; }
+ #grades-card .card-header .options .export-buttons { display: flex; gap: 8px; margin-left: 0; }
 
  #class-notes-edit textarea { min-height: 120px; margin-bottom: 0.5rem;}
  #class-notes-edit .text-right { margin-bottom: 0.5rem; margin-top: 0; }
@@ -566,8 +565,8 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 #current-custom-sound-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: calc(100% - 40px); }
 #remove-custom-sound-button { padding: 0.3rem 0.5rem; font-size: 0.8rem; flex-shrink: 0; }
 
-.classroom-container { display: grid; grid-template-rows: auto auto auto; grid-template-columns: auto auto auto; gap: 10px; padding: 15px; border: 1px solid var(--border-color); border-radius: 5px; margin-top: 1rem; overflow: auto; align-items: center; justify-items: center; align-content: safe center; justify-content: safe center; min-height: 200px; width: fit-content; margin-left: auto; margin-right: auto; max-width: 100%; }
-.classroom-map-grid { grid-area: 2 / 2 / 3 / 3; display: grid; gap: var(--seat-gap); justify-content: center; padding: 5px; width: fit-content; max-width: 100%; }
+.classroom-container { display: grid; grid-template-rows: max-content max-content max-content; grid-template-columns: max-content max-content max-content; gap: 10px; padding: 15px; border: 1px solid var(--border-color); border-radius: 5px; margin-top: 1rem; overflow: auto; align-items: center; justify-items: center; align-content: safe center; justify-content: safe center; min-height: 200px; width: fit-content; margin-left: auto; margin-right: auto; max-width: 100%; }
+.classroom-map-grid { grid-area: 2 / 2 / 3 / 3; display: grid; gap: var(--seat-gap); justify-content: center; padding: 5px; width: max-content; }
 .seat { width: var(--seat-width); height: var(--seat-height); border: 2px solid var(--map-seat-border); background-color: var(--map-seat-bg); border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 0.7rem; color: var(--map-seat-text); overflow: hidden; cursor: default; position: relative; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
 .seat.occupied { background-color: var(--map-seat-occupied-bg); color: var(--map-seat-occupied-text); font-weight: 500; border-style: solid; }
 .map-edit-area .seat.occupied { cursor: pointer; }
@@ -626,16 +625,18 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 
 #class-details-section .card { background-color: var(--bg-primary); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px var(--shadow-color); transition: padding-bottom 0.3s ease, margin-bottom 0.3s ease, box-shadow 0.2s ease; }
 #class-details-section .card:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
-#class-details-section .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px; }
-#class-details-section .card-header h3 { margin: 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5em; color: var(--text-primary); flex-shrink: 0; }
-#class-details-section .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; flex-shrink: 0; }
+#class-details-section .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); flex-wrap: nowrap; gap: 8px; overflow: hidden; }
+#class-details-section .card-header h3 { margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.4em; color: var(--text-primary); flex-shrink: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#class-details-section .card-header .options { display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; margin-left: auto; flex-shrink: 0; }
+#class-details-section .card-header .options button { padding: 0.3rem 0.5rem; font-size: 0.8rem; white-space: nowrap; }
+#class-details-section .card-header .options button.icon-button { padding: 0.3rem; }
 #class-details-section .card-content { padding-top: 0.5rem; transition: max-height 0.35s ease-out, opacity 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out, margin-top 0.3s ease-out, visibility 0.3s; max-height: 10000px; opacity: 1; overflow: hidden; visibility: visible; }
 #student-list-container.card-content { max-height: none; }
 #class-details-section .card.collapsed { padding-top: 0.8rem; padding-bottom: 0.8rem; margin-bottom: 1rem; }
 #class-details-section .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 #class-details-section .card.collapsed .card-content { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; overflow: hidden; visibility: hidden; }
-#class-details-section .card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background: transparent !important; border: none !important; color: var(--text-secondary); cursor: pointer; margin-left: auto; }
-#class-details-section .card-toggle-button:hover { color: var(--accent-primary); }
+#class-details-section .card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background-color: var(--bg-tertiary) !important; border: 1px solid var(--border-color) !important; border-radius: 4px; color: var(--text-secondary); cursor: pointer; margin-left: auto; transition: background-color 0.2s, color 0.2s; }
+#class-details-section .card-toggle-button:hover { background-color: var(--bg-tertiary-alpha) !important; color: var(--accent-primary); }
 
 #student-list-container .list-item { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 0.5rem; transition: border-color 0.2s ease; position: relative; overflow: hidden; display: block; padding: 0; cursor: default; align-items: stretch; flex-direction: column; }
 #student-list-container .list-item:hover { border-color: var(--accent-primary); background-color: var(--bg-primary); }
