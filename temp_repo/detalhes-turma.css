@@ -1,0 +1,527 @@
+/* --- INÍCIO ARQUIVO: detalhes-turma.css --- */
+
+/* Estilos específicos para #class-details-section */
+#class-details-section * { box-sizing: border-box; } /* Escopo básico dentro da seção */
+
+#class-details-section {
+    display: block;
+    animation: none; /* Se houver animação global, pode ser removida ou ajustada */
+    padding-top: 1rem;
+}
+
+/* Cabeçalho Sticky com Botão de Ajuda */
+#class-details-section #class-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 0.5rem; /* Reduz padding lateral para caber botão */
+    margin: 0 -1rem 1rem -1rem; /* Ajusta margem negativa ao padding do container pai */
+    position: sticky;
+    top: 0; /* Deveria colar no topo do container de scroll (#main-content) */
+    background-color: var(--bg-sticky-alpha, rgba(248, 249, 250, 0.98)); /* Usa variável global com fallback */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 999; /* Abaixo do header principal (1000) mas acima do conteúdo */
+    box-shadow: 0 1px 3px var(--shadow-color);
+    transition: padding 0.2s ease-in-out, background-color 0.4s ease;
+    gap: 0.5rem; /* Espaço entre título e botão de ajuda */
+}
+#class-details-section #class-details-header h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: font-size 0.2s ease-in-out;
+    flex-grow: 1; /* Permite que o título cresça */
+    text-align: center;
+    /* Removido: display: flex, align-items: center, justify-content: center, position: relative, padding-left/right */
+    /* Os botões de voltar/ajuda estão fora do H2 agora */
+}
+/* Oculta o h2 original da section que foi movido para o header sticky */
+#class-details-section > h2:not(#class-details-header) {
+    display: none;
+}
+/* Ajuste para o botão voltar que agora está DENTRO do header sticky */
+#class-details-section #class-details-header .back-button {
+    position: static; /* Remove position absolute */
+    transform: none; /* Remove transform */
+    margin-right: 0.5rem; /* Adiciona um espaço à direita */
+    flex-shrink: 0; /* Não encolhe */
+}
+#class-details-section #class-details-header .icon {
+    font-size: 1.1em;
+    margin-right: 0.4em;
+    vertical-align: middle;
+    transition: font-size 0.2s ease-in-out;
+}
+#class-details-section #details-help-button {
+    flex-shrink: 0; /* Não encolhe */
+    margin-left: 0.5rem; /* Adiciona espaço à esquerda */
+}
+#class-details-section #class-details-header.scrolled { padding: 0.3rem 0.5rem; }
+#class-details-section #class-details-header.scrolled h2 { font-size: 0.9rem; }
+#class-details-section #class-details-header.scrolled .icon { font-size: 1em; }
+
+/* Cards com Estilo Melhorado (Escopado) */
+#class-details-section .card {
+    /* Herda estilos do .card global em style.css */
+    /* Adiciona/Sobrescreve apenas o necessário para esta seção, se houver */
+    transition: padding-bottom 0.3s ease, margin-bottom 0.3s ease, box-shadow 0.2s ease, background-color 0.4s ease; /* Adiciona transição de background */
+    /* Os estilos base de .card já estão em style.css, não precisa repetir tudo */
+}
+#class-details-section .card:hover {
+     box-shadow: 0 4px 10px rgba(0,0,0,0.12); /* Pode ajustar se quiser diferente do global */
+}
+/* Estilos de header/content/collapse do card já são globais e devem funcionar */
+/* O seletor .card-toggle-button já existe globalmente */
+
+/* Lista de Alunos com Wrapper Interno (Escopado) */
+/* Usa template student-list-item-template específico */
+#class-details-section #student-list-container .list-item {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s ease, background-color 0.4s ease; /* Adiciona transição de background */
+    position: relative;
+    overflow: hidden;
+    /* Remove flex, padding, cursor, etc. que conflitam com o template novo */
+    display: block; /* Reseta display */
+    cursor: default;
+    padding: 0;
+}
+#class-details-section #student-list-container .list-item:hover {
+    border-color: var(--accent-primary); /* Feedback hover */
+    background-color: var(--bg-primary); /* Mantém fundo */
+}
+#class-details-section #student-list-container .list-item:active {
+    transform: none; /* Sem scale */
+}
+
+#class-details-section .list-item-content-wrapper {
+    padding: 0.65rem 0.9rem;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+}
+#class-details-section .list-item-main-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+#class-details-section .list-item .student-number {
+    font-weight: 600;
+    margin-right: 10px;
+    min-width: 25px;
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.8em;
+}
+#class-details-section .list-item .student-name {
+    white-space: normal;
+    word-break: break-word;
+    flex-grow: 1;
+    margin-right: 10px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+#class-details-section .expand-actions-button {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 0.3rem 0.6rem !important; /* Usa !important para sobrescrever padding de .button-like global se necessário */
+    font-size: 0.8rem !important;
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    /* Herda outros estilos de button-like */
+    line-height: 1; /* Garante alinhamento do ícone */
+}
+#class-details-section .expand-actions-button .icon {
+    transition: transform 0.3s ease;
+    margin-right: 0; /* Ícone único */
+}
+#class-details-section .list-item.expanded .expand-actions-button .icon {
+    transform: rotate(180deg);
+}
+#class-details-section .list-item-hidden-actions {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0 0.2rem;
+    margin-top: 0;
+    visibility: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out, padding 0.3s ease-out, margin-top 0.3s ease-out, visibility 0.3s, border-color 0.3s ease-out 0.1s;
+    border-top: 1px dashed transparent;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: space-around;
+}
+#class-details-section .list-item.expanded .list-item-hidden-actions {
+    max-height: 100px; /* Ou valor suficiente */
+    opacity: 1;
+    padding: 0.6rem 0.2rem 0.3rem 0.2rem;
+    margin-top: 0.6rem;
+    visibility: visible;
+    border-top-color: var(--border-color);
+}
+#class-details-section .list-item-hidden-actions .action-button {
+    padding: 0.35rem !important;
+    font-size: 0.95rem !important;
+    line-height: 1;
+    min-width: 36px;
+    flex-grow: 1;
+    max-width: 48px; /* Pouco mais espaço */
+    background-color: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    border-radius: 4px; /* Menor raio */
+    /* Herda outros estilos */
+    margin: 0; /* Reseta margem */
+}
+#class-details-section .list-item-hidden-actions .action-button:hover {
+    background-color: var(--bg-tertiary-alpha);
+    border-color: var(--border-color);
+    color: var(--accent-primary);
+    opacity: 1; /* Garante hover */
+}
+#class-details-section .list-item-hidden-actions .action-button.danger:hover {
+    color: var(--accent-danger);
+}
+#class-details-section .list-item-hidden-actions .action-button.warning:hover {
+    color: var(--accent-warning);
+}
+#class-details-section .list-item-hidden-actions .action-button.secondary:hover {
+    color: var(--accent-secondary);
+}
+#class-details-section .list-item-hidden-actions .action-button:active {
+    transform: scale(var(--active-scale)); /* Usa variável global */
+}
+
+/* Estilos Representantes - Animação Neon Flow (Escopado) */
+/* Define a propriedade --angle globalmente se ainda não existir no style.css principal */
+/* Se já existir, esta definição pode ser redundante mas não deve causar problema */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes dt-rotate-border-glow { /* Nome prefixado dt- */
+  to { --angle: 360deg; }
+}
+
+#class-details-section .list-item.representative::before,
+#class-details-section .list-item.vice-representative::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    border-radius: 6px; /* Mesmo raio do item */
+    padding: 2px; /* Espessura da borda */
+    background: conic-gradient(
+        from var(--angle),
+        transparent 0%,
+        var(--gradient-color-1) 10%,
+        var(--gradient-color-2) 90%,
+        transparent 100%
+    );
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: destination-out; /* Para compatibilidade */
+    animation: dt-rotate-border-glow 3s linear infinite; /* Usa animação prefixada */
+    opacity: 0.8;
+}
+
+/* Define as cores das variáveis de gradiente usando as globais */
+#class-details-section .list-item.representative::before {
+    --gradient-color-1: var(--rep-gold-start, #ffd700); /* Usa variável global com fallback */
+    --gradient-color-2: var(--rep-gold-end, #fca311);
+}
+#class-details-section .list-item.vice-representative::before {
+    --gradient-color-1: var(--vice-silver-start, #e0e0e0);
+    --gradient-color-2: var(--vice-silver-end, #adb5bd);
+}
+/* Adiciona as variáveis de cor se não existirem globalmente (opcional, fallback funciona) */
+:root {
+    --rep-gold-start: #ffd700; --rep-gold-end: #fca311;
+    --vice-silver-start: #e0e0e0; --vice-silver-end: #adb5bd;
+}
+
+
+/* Tabela Presença (Escopado) */
+/* Wrapper e table já são globais, mas podemos refinar dentro da seção */
+#class-details-section #attendance-table-container .table-scroll-wrapper {
+    margin-top: 0.5rem;
+    /* Herda estilos globais */
+}
+#class-details-section #attendance-table-container .data-table {
+    /* Herda estilos globais */
+    table-layout: fixed; /* Garante layout fixo aqui */
+}
+/* Sobrescreve ou ajusta estilos de th/td se necessário */
+#class-details-section #attendance-table-container .data-table th,
+#class-details-section #attendance-table-container .data-table td {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+#class-details-section #attendance-table-container .data-table .student-col {
+    width: auto; /* Largura automática é melhor aqui */
+    min-width: 160px;
+    white-space: normal; /* Permite quebra de linha no nome */
+    word-break: break-word;
+    font-weight: 500; /* Definido no template JS, mas pode forçar aqui */
+    /* Remove position sticky/left/z-index se já estiver no global */
+    background-color: var(--bg-sticky-alpha); /* Garante fundo sticky */
+    /* Herda display flex do global */
+}
+#class-details-section #attendance-table-container .data-table .student-col .student-number {
+    color: var(--text-secondary);
+    font-size: 0.8em;
+    margin-right: 5px;
+    font-weight: 600; /* Ajustado */
+    /* Herda do global */
+}
+#class-details-section #attendance-table-container .data-table .attendance-status {
+    width: 100px; /* Aumentado um pouco */
+    text-align: center;
+    /* Remove position sticky/left/z-index se já estiver no global */
+}
+#class-details-section .attendance-toggle {
+    padding: 0.3rem 0.45rem;
+    margin: 0 1px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.1s;
+    /* Remove opacity: 0.7 se existir no global */
+    /* Garante que herde de button-like mas com ajustes */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+#class-details-section .attendance-toggle .icon {
+    margin-right: 0.2em;
+    /* Herda tamanho do pai */
+}
+#class-details-section .attendance-toggle.present.selected {
+    background-color: var(--accent-success);
+    border-color: var(--accent-success);
+    color: #fff;
+    transform: scale(1.05); /* Efeito de seleção */
+}
+#class-details-section .attendance-toggle.absent.selected:not(.justified) {
+    background-color: var(--accent-danger);
+    border-color: var(--accent-danger);
+    color: #fff;
+     transform: scale(1.05);
+}
+#class-details-section .attendance-toggle.absent.justified.selected {
+    background-color: var(--accent-warning);
+    border-color: var(--accent-warning);
+    color: var(--text-primary); /* Usa variável global */
+     transform: scale(1.05);
+}
+#class-details-section .attendance-toggle:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    color: var(--text-secondary) !important;
+    transform: none !important;
+}
+
+/* Estilos de Aluno Suspenso (Escopado) */
+#class-details-section .suspended-indicator {
+    color: var(--accent-danger);
+    font-weight: bold;
+    margin-right: 5px;
+    font-size: 0.8em; /* Menor */
+}
+#class-details-section .data-table tr.suspended-student td {
+    background-color: var(--suspended-bg, rgba(220, 53, 69, 0.08)) !important; /* Usa var com fallback */
+}
+/* Adiciona variável suspended-bg se não existir */
+:root {
+    --suspended-bg: rgba(220, 53, 69, 0.08);
+}
+body.theme-dark { /* Ajuste para tema escuro */
+     --suspended-bg: rgba(239, 68, 68, 0.15);
+}
+/* ... outros temas podem precisar ajustar --suspended-bg ... */
+
+#class-details-section .data-table tr.suspended-student.clickable-suspended {
+    cursor: pointer;
+}
+#class-details-section .data-table tr.suspended-student.clickable-suspended:hover td {
+    background-color: color-mix(in srgb, var(--suspended-bg) 80%, black) !important; /* Escurece um pouco */
+}
+#class-details-section .data-table tr.suspended-student td.attendance-status {
+    font-weight: bold;
+}
+
+/* Estilos Formulários (Escopado - a maioria deve herdar do global) */
+#class-details-section .form-group { margin-bottom: 1rem; }
+#class-details-section label { /* Herda do global */ }
+#class-details-section input[type="text"],
+#class-details-section input[type="number"],
+#class-details-section input[type="date"],
+#class-details-section select,
+#class-details-section textarea {
+    /* Herda do global */
+    font-size: 0.95rem; /* Ajuste específico se necessário */
+}
+#class-details-section input:focus,
+#class-details-section select:focus,
+#class-details-section textarea:focus {
+    /* Herda do global */
+}
+#class-details-section textarea { min-height: 80px; /* Herda global */ }
+
+/* Modal Observações (Escopado) */
+/* O modal em si é global, mas o conteúdo interno pode ser estilizado especificamente se necessário */
+#generic-modal.student-notes-modal #student-observations-list { /* Usa classe do modal */
+    max-height: 35vh; /* Ou outro valor adequado */
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.8rem;
+    /* Remove background-color se quiser que use o fundo do modal */
+}
+#generic-modal.student-notes-modal .observation-item {
+    background-color: var(--bg-primary); /* Fundo do item */
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 0.7rem 0.8rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    border-left-width: 5px; /* Largura da borda esquerda */
+    transition: border-left-color 0.3s, background-color 0.3s;
+}
+#generic-modal.student-notes-modal .observation-item .observation-details { flex-grow: 1; }
+#generic-modal.student-notes-modal .observation-item .observation-info {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Permite quebra se necessário */
+    gap: 5px; /* Espaço entre categoria e data */
+}
+#generic-modal.student-notes-modal .observation-item .observation-info .category {
+    font-weight: bold;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    color: var(--text-primary); /* Cor base do texto da categoria */
+    margin-left: 0px; /* Sem margem extra */
+}
+#generic-modal.student-notes-modal .observation-item .observation-info .observation-date {
+    margin-left: auto; /* Empurra data para a direita */
+    padding-left: 5px; /* Espaço antes da data */
+    white-space: nowrap; /* Evita quebra da data */
+}
+#generic-modal.student-notes-modal .observation-item .observation-text {
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-top: 0.3rem;
+    line-height: 1.5;
+}
+#generic-modal.student-notes-modal .observation-item .observation-suspension-dates {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--accent-danger);
+    margin-top: 3px;
+    display: block;
+    font-weight: 500;
+}
+#generic-modal.student-notes-modal .observation-item .delete-observation-button {
+    flex-shrink: 0;
+    /* Herda .danger.icon-button do global */
+    padding: 0.2rem !important; /* Ajuste */
+    font-size: 0.9rem !important; /* Ajuste */
+    line-height: 1;
+}
+#generic-modal.student-notes-modal #add-observation-section { margin-top: 0.5rem; }
+#generic-modal.student-notes-modal #add-observation-section textarea { min-height: 70px; }
+#generic-modal.student-notes-modal .observation-item.highlighted-note {
+    background-color: var(--highlight-bg, rgba(0, 123, 255, 0.1)); /* Usa var com fallback */
+    border: 1px solid var(--accent-primary);
+    border-left-width: 5px; /* Garante borda esquerda */
+    box-shadow: 0 0 5px var(--highlight-bg, rgba(0, 123, 255, 0.1));
+}
+/* Adiciona variável highlight-bg se não existir */
+:root {
+    --highlight-bg: rgba(0, 123, 255, 0.1);
+}
+body.theme-dark {
+    --highlight-bg: rgba(59, 130, 246, 0.2);
+}
+/* ... outros temas podem precisar ajustar --highlight-bg ... */
+
+
+/* Estilos por Categoria de Observação (com variáveis globais) */
+/* Garante que as variáveis de categoria existam no :root */
+:root {
+    --cat-anotacao-border: #6c757d; --cat-anotacao-bg: #e9ecef; --cat-anotacao-text: #343a40;
+    --cat-observacao-border: #007bff; --cat-observacao-bg: #cce5ff; --cat-observacao-text: #004085;
+    --cat-ocorrencia-border: #ffc107; --cat-ocorrencia-bg: #fff3cd; --cat-ocorrencia-text: #856404;
+    --cat-advertencia-border: #fd7e14; --cat-advertencia-bg: #ffe8d6; --cat-advertencia-text: #8a4d0f;
+    --cat-suspensao-border: #dc3545; --cat-suspensao-bg: #f8d7da; --cat-suspensao-text: #721c24;
+}
+/* Ajustes para tema escuro (Exemplo) */
+body.theme-dark {
+    --cat-anotacao-border: #adb5bd; --cat-anotacao-bg: #495057; --cat-anotacao-text: #e9ecef;
+    --cat-observacao-border: #3b82f6; --cat-observacao-bg: #374151; --cat-observacao-text: #93c5fd;
+    --cat-ocorrencia-border: #f59e0b; --cat-ocorrencia-bg: #4f46e5; --cat-ocorrencia-text: #fef3c7; /* Ajustar cores */
+    --cat-advertencia-border: #f97316; --cat-advertencia-bg: #57534e; --cat-advertencia-text: #fed7aa;
+    --cat-suspensao-border: #ef4444; --cat-suspensao-bg: #450a0a; --cat-suspensao-text: #fecaca;
+}
+/* Outros temas podem precisar de ajustes similares */
+
+#generic-modal.student-notes-modal .observation-item.category-anotacao { border-left-color: var(--cat-anotacao-border); }
+#generic-modal.student-notes-modal .observation-item.category-anotacao .category { background-color: var(--cat-anotacao-bg); color: var(--cat-anotacao-text); }
+
+#generic-modal.student-notes-modal .observation-item.category-observacao { border-left-color: var(--cat-observacao-border); }
+#generic-modal.student-notes-modal .observation-item.category-observacao .category { background-color: var(--cat-observacao-bg); color: var(--cat-observacao-text); }
+
+#generic-modal.student-notes-modal .observation-item.category-ocorrencia { border-left-color: var(--cat-ocorrencia-border); }
+#generic-modal.student-notes-modal .observation-item.category-ocorrencia .category { background-color: var(--cat-ocorrencia-bg); color: var(--cat-ocorrencia-text); }
+
+#generic-modal.student-notes-modal .observation-item.category-advertencia { border-left-color: var(--cat-advertencia-border); }
+#generic-modal.student-notes-modal .observation-item.category-advertencia .category { background-color: var(--cat-advertencia-bg); color: var(--cat-advertencia-text); }
+
+#generic-modal.student-notes-modal .observation-item.category-suspensao { border-left-color: var(--cat-suspensao-border); }
+#generic-modal.student-notes-modal .observation-item.category-suspensao .category { background-color: var(--cat-suspensao-bg); color: var(--cat-suspensao-text); }
+
+/* Botões no modal de observação herdam estilos globais */
+#generic-modal.student-notes-modal #add-observation-button,
+#generic-modal.student-notes-modal #save-observations-button {
+   /* Herda .success */
+}
+
+/* Ajustes finos se necessário */
+#class-details-section #attendance-card .options label {
+    font-size: 0.85rem;
+    margin-right: 5px;
+}
+#class-details-section #attendance-card .options #attendance-date {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.85rem;
+}
+
+/* --- FIM ARQUIVO: detalhes-turma.css --- */

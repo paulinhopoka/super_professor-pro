@@ -309,7 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 appData.settings.navStyle = appData.settings.navStyle || 'fixed';
                 appData.settings.globalNotificationsEnabled = appData.settings.globalNotificationsEnabled !== undefined ? appData.settings.globalNotificationsEnabled : true;
                 appData.settings.notificationSoundEnabled = appData.settings.notificationSoundEnabled !== undefined ? appData.settings.notificationSoundEnabled : true;
-                appData.settings.interactionSoundsEnabled = appData.settings.interactionSoundsEnabled !== undefined ? appData.settings.interactionSoundsEnabled : true;
                 appData.settings.customNotificationSound = appData.settings.customNotificationSound || null;
                 
                 // Migrate schedule days to add '-Feira' back or capitalize 'F'
@@ -1251,7 +1250,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         appData.settings.theme = appData.settings.theme || 'theme-light';
                         appData.settings.globalNotificationsEnabled = appData.settings.globalNotificationsEnabled !== undefined ? appData.settings.globalNotificationsEnabled : true;
                         appData.settings.notificationSoundEnabled = appData.settings.notificationSoundEnabled !== undefined ? appData.settings.notificationSoundEnabled : true;
-                appData.settings.interactionSoundsEnabled = appData.settings.interactionSoundsEnabled !== undefined ? appData.settings.interactionSoundsEnabled : true;
                         appData.settings.customNotificationSound = appData.settings.customNotificationSound || null;
                         if (appData.settings.nonSchoolDays) delete appData.settings.nonSchoolDays;
                         if (appData.settings.customNotificationSound && typeof appData.settings.customNotificationSound === 'string' && !appData.settings.customNotificationSound.startsWith('data:audio')) {
@@ -3007,7 +3005,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            if (!localStorage.getItem('gemini_api_key')) {
+            if (!appData.settings.geminiApiKey) {
                 showModal("Aviso", "<p>Você precisa configurar a Chave de API do Gemini na aba Ajustes para usar esta funcionalidade.</p>");
                 return;
             }
@@ -4166,61 +4164,6 @@ Exemplo de formato esperado:
     showSection(currentSection || 'schedule-section');
     if (appData.settings.globalNotificationsEnabled) { startNotificationChecker(); }
 
-    // --- New Settings Logic ---
-    const soundEffectsToggle = document.getElementById('sound-effects-toggle');
-    if (soundEffectsToggle) {
-        soundEffectsToggle.checked = appData.settings.interactionSoundsEnabled !== false;
-        soundEffectsToggle.addEventListener('change', (e) => {
-            appData.settings.interactionSoundsEnabled = e.target.checked;
-            saveData();
-        });
-    }
-
-    const shareWhatsappBtn = document.getElementById('share-whatsapp-btn');
-    if (shareWhatsappBtn) {
-        shareWhatsappBtn.addEventListener('click', () => {
-            const text = "Conheça o Super Professor Pro! Um app incrível para ajudar professores a gerenciar turmas, notas, frequências e gerar planos de aula com IA. Acesse: " + window.location.href;
-            const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(text);
-            window.open(url, '_blank');
-        });
-    }
-    
-    // --- Interaction Sounds ---
-    let sharedAudioCtx = null;
-    const playInteractionSound = () => {
-        if (appData.settings.interactionSoundsEnabled !== false) {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                if (!sharedAudioCtx) sharedAudioCtx = new AudioContext();
-                if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
-                
-                const osc = sharedAudioCtx.createOscillator();
-                const gain = sharedAudioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(sharedAudioCtx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, sharedAudioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(300, sharedAudioCtx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.1, sharedAudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, sharedAudioCtx.currentTime + 0.05);
-                osc.start(sharedAudioCtx.currentTime);
-                osc.stop(sharedAudioCtx.currentTime + 0.05);
-            } catch (e) {
-                // Ignore audio errors
-            }
-        }
-    };
-
-    // Attach interaction sound to all buttons and nav items
-    document.addEventListener('click', (e) => {
-        const target = e.target.closest('button, .nav-item, .tab-button, .action-btn');
-        if (target) {
-            playInteractionSound();
-        }
-    });
-
-
     // Lógica de Verificação da Versão e Login
     const lastSeenVersion = localStorage.getItem('lastSeenAppVersion');
     const isNewUser = lastSeenVersion === null;
@@ -4417,43 +4360,6 @@ Exemplo de formato esperado:
                     </select>
                 </div>
             `;
-        } else if (toolType === 'exam-corrector') {
-            aiToolTitle.textContent = 'Corretor de Provas';
-            aiToolInputsContainer.innerHTML = `
-                <div class="form-group">
-                    <label>Imagem da Prova:</label>
-                    <input type="file" id="ai-input-prova-img" accept="image/*" capture="environment" class="w-full">
-                    <img id="ai-preview-prova-img" style="display: none; max-width: 100%; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border-color);" />
-                </div>
-                <div class="form-group">
-                    <label>Gabarito / Respostas Esperadas (Opcional):</label>
-                    <textarea id="ai-input-gabarito" rows="4" placeholder="Ex: 1-A, 2-B, 3-C..." class="w-full"></textarea>
-                </div>
-            `;
-            setTimeout(() => {
-                const fileInput = document.getElementById('ai-input-prova-img');
-                const imgPreview = document.getElementById('ai-preview-prova-img');
-                if (fileInput) {
-                    fileInput.addEventListener('change', (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                imgPreview.src = e.target.result;
-                                imgPreview.style.display = 'block';
-                            };
-                            reader.readAsDataURL(file);
-                        } else {
-                            imgPreview.style.display = 'none';
-                            imgPreview.src = '';
-                        }
-                    });
-                }
-            }, 0);
-
-
-
-
         } else if (toolType === 'analyze-class') {
             aiToolTitle.textContent = 'Analisar Turma';
             
@@ -4583,18 +4489,6 @@ Exemplo de formato esperado:
         });
     }
 
-    const toolExamCorrector = document.getElementById('tool-exam-corrector');
-    if (toolExamCorrector) {
-        toolExamCorrector.addEventListener('click', () => {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) {
-                showNotification('Configure sua chave de IA na aba de Ajustes.', 'error');
-                return;
-            }
-            openAiModal('exam-corrector');
-        });
-    }
-
     const toolClassAnalyzerBtn = document.getElementById('tool-class-analyzer');
     if (toolClassAnalyzerBtn) {
         toolClassAnalyzerBtn.addEventListener('click', () => {
@@ -4648,22 +4542,6 @@ Exemplo de formato esperado:
                 }
                 if (!topico) return showNotification('Preencha o tópico.', 'error');
                 promptText = `Aja como um professor. ${context}Crie 1 questão do tipo "${tipo}" sobre o tópico "${topico}". Inclua a resposta correta e uma breve explicação. Formate em Markdown.`;
-            } else if (currentAiTool === 'exam-corrector') {
-                const gabarito = document.getElementById('ai-input-gabarito').value.trim();
-                const imgPreview = document.getElementById('ai-preview-prova-img');
-                
-                if (!imgPreview.src || imgPreview.src === '' || imgPreview.style.display === 'none') {
-                    aiToolGenerateBtn.disabled = false;
-                    aiToolLoading.classList.add('hidden');
-                    return showNotification('Por favor, tire uma foto ou selecione uma imagem da prova.', 'error');
-                }
-                
-                let context = '';
-                if (gabarito) {
-                    context = `Utilize o seguinte gabarito/respostas corretas como base para a correção: "\n${gabarito}\n".\n`;
-                }
-                
-                promptText = `Aja como um professor corrigindo uma prova. ${context}Analise a imagem da prova do aluno fornecida. Identifique as questões, as respostas do aluno e avalie se estão corretas, incorretas ou parcialmente corretas. Forneça um feedback construtivo e, se possível, uma nota estimada. Formate a saída em Markdown, destacando os acertos e erros.`;
             } else if (currentAiTool === 'analyze-class') {
                 const turmaId = document.getElementById('ai-input-turma').value;
                 const periodo = document.getElementById('ai-input-periodo').value;
@@ -4777,35 +4655,10 @@ Exemplo de formato esperado:
 
             try {
                 const ai = new GoogleGenAI({ apiKey: apiKey });
-                let response;
-                
-                if (currentAiTool === 'exam-corrector') {
-                    const imgPreview = document.getElementById('ai-preview-prova-img');
-                    const base64Data = imgPreview.src.split(',')[1];
-                    const mimeType = imgPreview.src.split(';')[0].split(':')[1];
-                    
-                    response = await ai.models.generateContent({
-                        model: 'gemini-3.1-flash-image-preview',
-                        contents: {
-                            parts: [
-                                {
-                                    inlineData: {
-                                        data: base64Data,
-                                        mimeType: mimeType
-                                    }
-                                },
-                                {
-                                    text: promptText
-                                }
-                            ]
-                        }
-                    });
-                } else {
-                    response = await ai.models.generateContent({
-                        model: 'gemini-3-flash-preview',
-                        contents: promptText
-                    });
-                }
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3-flash-preview',
+                    contents: promptText
+                });
 
                 const generatedText = response.text;
                 
