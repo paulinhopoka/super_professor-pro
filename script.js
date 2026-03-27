@@ -126,15 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const markAllPresentButton = document.getElementById('mark-all-present-button');
     const markNonSchoolDayButton = document.getElementById('mark-non-school-day-button');
     const lessonPlanDateInput = document.getElementById('lesson-plan-date');
-    const lessonPlanTextarea = document.getElementById('lesson-plan-textarea');
-    const saveLessonPlanButton = document.getElementById('save-lesson-plan-button');
-    const classNotesDisplay = document.getElementById('class-notes-display');
-    const classNotesContent = document.getElementById('class-notes-content');
-    const classNotesEdit = document.getElementById('class-notes-edit');
-    const classNotesTextarea = document.getElementById('class-notes-textarea');
+    const classNotesDisplay = document.getElementById('class-notes-display-container');
     const editClassNotesButton = document.getElementById('edit-class-notes-button');
-    const saveClassNotesButton = document.getElementById('save-class-notes-button');
-    const cancelClassNotesButton = document.getElementById('cancel-class-notes-button');
     const addScheduleButton = document.getElementById('add-schedule-button');
     const addSchoolButton = document.getElementById('add-school-button');
     const addClassButton = document.getElementById('add-class-button');
@@ -730,8 +723,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateAndUpdateSumAndAverage = (tableRow, gradeLabels, colorRanges) => { let sum = 0; let count = 0; gradeLabels.forEach(label => { const input = tableRow.querySelector(`input[data-label="${label}"]`); const value = parseFloat(input?.value); if (!isNaN(value)) { sum += value; count++; } }); const sumCell = tableRow.querySelector('.sum'); const avgCell = tableRow.querySelector('.average'); if (sumCell) { sumCell.textContent = count > 0 ? sum.toFixed(1) : '--'; } if (avgCell) { const avg = count > 0 ? (sum / count) : null; avgCell.textContent = avg !== null ? avg.toFixed(1) : '--'; if (colorRanges && colorRanges.length > 0) { applyGradeColor(avgCell, avg, colorRanges); avgCell.classList.remove('grade-low', 'grade-medium', 'grade-high'); } else { avgCell.style.backgroundColor = ''; avgCell.style.color = ''; avgCell.classList.remove('grade-low', 'grade-medium', 'grade-high'); if(avg !== null) { if (avg < 5) avgCell.classList.add('grade-low'); else if (avg < 7) avgCell.classList.add('grade-medium'); else avgCell.classList.add('grade-high'); } } } };
     const calculateSumAndAverageForData = (gradesObject) => { let sum = 0; let count = 0; let average = null; if (gradesObject) { for(const label in gradesObject) { if (label !== 'average' && label !== 'sum') { const value = parseFloat(gradesObject[label]); if (!isNaN(value)) { sum += value; count++; } } } } if (count > 0) { average = parseFloat((sum / count).toFixed(1)); sum = parseFloat(sum.toFixed(1)); } else { sum = null; } return { sum: sum, average: average }; };
     const renderAttendanceTable = (classId, date) => { attendanceTableContainer.innerHTML = ''; saveAttendanceButton.classList.add('hidden'); attendanceActionsContainer.classList.add('hidden'); const studentsInClass = getStudentsByClass(classId); if (!date) { attendanceTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione uma data.</p>'; return; } if (studentsInClass.length === 0) { attendanceTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Nenhum aluno para registrar presença.</p>'; return; } const isNonSchoolDay = studentsInClass.every(std => std.attendance[date]?.status === 'H'); console.log(`Rendering attendance for ${date}. Is Non-School Day: ${isNonSchoolDay}`); attendanceActionsContainer.classList.remove('hidden'); saveAttendanceButton.classList.remove('hidden'); markAllPresentButton.disabled = isNonSchoolDay; if (isNonSchoolDay) { markNonSchoolDayButton.innerHTML = `<span class="icon icon-nao-letivo"></span>Desm. Não Letivo`; markNonSchoolDayButton.classList.remove('secondary'); markNonSchoolDayButton.classList.add('danger'); markNonSchoolDayButton.title = "Reverter para dia letivo normal"; } else { markNonSchoolDayButton.innerHTML = `<span class="icon icon-nao-letivo"></span>Não Letivo`; markNonSchoolDayButton.classList.remove('danger'); markNonSchoolDayButton.classList.add('secondary'); markNonSchoolDayButton.title = "Marcar este dia como não letivo"; } const table = document.createElement('table'); table.classList.add('data-table'); table.innerHTML = `<thead><tr><th class="student-col">Aluno</th><th class="attendance-status">Status</th></tr></thead><tbody></tbody>`; const tbody = table.querySelector('tbody'); const template = document.getElementById('attendance-row-template'); studentsInClass.forEach(std => { const studentId = std.id; const clone = template.content.cloneNode(true); const row = clone.querySelector('tr'); row.dataset.studentId = studentId; const studentCol = row.querySelector('.student-col'); studentCol.querySelector('.student-number').textContent = std.number ? `${std.number}.` : '-.'; studentCol.querySelector('.student-name').textContent = sanitizeHTML(std.name); const statusCell = row.querySelector('.attendance-status'); statusCell.innerHTML = ''; const activeSuspension = isStudentSuspendedOnDate(studentId, date); const attendanceRecord = std.attendance[date] || { status: null, justification: '' }; const currentStatus = attendanceRecord.status; const currentJustification = attendanceRecord.justification || ''; if (activeSuspension) { const noteIndex = appData.students.find(s => s.id === studentId)?.notes.findIndex(n => n === activeSuspension) ?? -1; row.classList.add('suspended-student', 'clickable-suspended'); if (noteIndex !== -1) { row.dataset.suspensionNoteIndex = noteIndex; } statusCell.innerHTML = `<span class="suspended-indicator" title="${sanitizeHTML(activeSuspension.text)}"><span class="icon icon-block"></span> Susp.</span>`; studentCol.style.opacity = '0.7'; } else if (currentStatus === 'H') { statusCell.textContent = 'H'; statusCell.classList.add('status-H'); statusCell.title = "Dia não letivo"; } else { row.classList.remove('suspended-student', 'clickable-suspended'); row.removeAttribute('data-suspension-note-index'); studentCol.style.opacity = '1'; statusCell.innerHTML = ` <button type="button" class="attendance-toggle present"><span class="icon icon-presenca"></span> P</button> <button type="button" class="attendance-toggle absent"><span class="icon icon-falta"></span> F</button> `; const presentButton = statusCell.querySelector('.present'); const absentButton = statusCell.querySelector('.absent'); presentButton.disabled = isNonSchoolDay; absentButton.disabled = isNonSchoolDay; const updateButtonUI = (status, justification) => { presentButton.classList.toggle('selected', status === 'P'); absentButton.classList.toggle('selected', status === 'F'); const isJustified = status === 'F' && !!justification; absentButton.classList.toggle('justified', isJustified); absentButton.innerHTML = `<span class="icon icon-falta"></span> ${isJustified ? 'FJ' : 'F'}`; absentButton.title = isJustified ? `Just.: ${sanitizeHTML(justification.substring(0, 30))}... (Clique para editar)` : 'Faltou (Clique para justificar)'; }; updateButtonUI(currentStatus, currentJustification); presentButton.addEventListener('click', () => { if (presentButton.disabled) return; updateAttendanceStatus(studentId, date, 'P'); }); absentButton.addEventListener('click', () => { if (absentButton.disabled) return; const currentAttendance = findStudentById(studentId)?.attendance[date]; if (currentAttendance?.status === 'F') { openJustificationModal(studentId, date); } else { updateAttendanceStatus(studentId, date, 'F'); } }); } tbody.appendChild(row); }); attendanceTableContainer.appendChild(table); };
-    const renderLessonPlan = (classId, date) => { const currentClass = findClassById(classId); if (!currentClass || !date || !lessonPlanTextarea) { if(lessonPlanTextarea) lessonPlanTextarea.value = ''; if(saveLessonPlanButton) saveLessonPlanButton.classList.add('hidden'); return; } currentClass.lessonPlans = currentClass.lessonPlans || {}; const plan = currentClass.lessonPlans[date] || ''; lessonPlanTextarea.value = plan; saveLessonPlanButton.classList.remove('hidden'); };
-    const renderClassroomMap = (classId, isEditing = false) => { const cls = findClassById(classId); if (!cls) { console.error("Class not found for map:", classId); classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro: Turma não encontrada.</p>'; classroomContainerEdit.innerHTML = ''; mapEditArea.classList.add('hidden'); return; } const layout = cls.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }; const currentLayoutData = isEditing ? tempClassroomLayout : layout; const students = getStudentsByClass(classId); const container = isEditing ? classroomContainerEdit : classroomContainerDisplay; container.innerHTML = ''; const teacherDeskClone = teacherDeskTemplate.content.cloneNode(true); const teacherDeskElement = teacherDeskClone.querySelector('.teacher-desk'); const gridClone = classroomGridTemplate.content.cloneNode(true); const gridContainerElement = gridClone.querySelector('.classroom-map-grid'); teacherDeskElement.className = 'teacher-desk'; const teacherPos = currentLayoutData.teacherDeskPosition || 'top-center'; teacherDeskElement.classList.add(`position-${teacherPos}`); gridContainerElement.style.gridTemplateColumns = `repeat(${currentLayoutData.cols}, auto)`; container.appendChild(teacherDeskElement); container.appendChild(gridContainerElement); const seatTemplate = document.getElementById('seat-template'); const emptySeatPlaceholder = "Toque/Arraste Aluno"; if (isEditing) clearSeatSelection(); if (currentLayoutData.rows > 0 && currentLayoutData.cols > 0) { for (let r = 1; r <= currentLayoutData.rows; r++) { for (let c = 1; c <= currentLayoutData.cols; c++) { const seatData = currentLayoutData.seats.find(s => s.row === r && s.col === c); const studentId = seatData?.studentId; const student = studentId ? findStudentById(studentId) : null; const seatClone = seatTemplate.content.cloneNode(true); const seatElement = seatClone.querySelector('.seat'); seatElement.dataset.row = r; seatElement.dataset.col = c; const numberSpan = seatElement.querySelector('.seat-student-number'); const nameSpan = seatElement.querySelector('.seat-student-name'); const placeholderSpan = seatElement.querySelector('.seat-placeholder-text'); numberSpan.textContent = ''; nameSpan.textContent = ''; placeholderSpan.textContent = ''; placeholderSpan.classList.remove('seat-placeholder-text'); seatElement.classList.remove('occupied', 'empty', 'selected-for-assignment'); seatElement.removeAttribute('data-student-id'); seatElement.setAttribute('draggable', 'false'); if (student) { seatElement.classList.add('occupied'); seatElement.dataset.studentId = student.id; numberSpan.textContent = student.number ? `${student.number}.` : ''; nameSpan.textContent = sanitizeHTML(student.name); if (isEditing) { seatElement.setAttribute('draggable', 'true'); seatElement.addEventListener('dragstart', handleSeatDragStart); seatElement.addEventListener('click', handleOccupiedSeatClick); seatElement.style.cursor = 'grab'; } else { seatElement.style.cursor = 'default'; } } else { seatElement.classList.add('empty'); if (isEditing) { seatElement.addEventListener('click', handleSeatClickForAssignment); placeholderSpan.textContent = emptySeatPlaceholder; placeholderSpan.classList.add('seat-placeholder-text'); seatElement.style.cursor = 'pointer'; } else { seatElement.style.cursor = 'default'; } } if (isEditing) { seatElement.addEventListener('dragover', handleDragOver); seatElement.addEventListener('dragleave', handleDragLeave); seatElement.addEventListener('drop', handleDropOnSeat); } gridContainerElement.appendChild(seatElement); } } } else if (!isEditing) { gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p>'; } else { gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Dimensões inválidas (0 fileiras ou colunas).</p>'; } if (isEditing) { renderUnassignedStudents(classId); } classroomContainerDisplay.classList.toggle('hidden', isEditing); mapEditArea.classList.toggle('hidden', !isEditing); };
+    const renderLessonPlan = (classId, date) => { 
+        const currentClass = findClassById(classId); 
+        const displayDiv = document.getElementById('lesson-plan-display');
+        if (!currentClass || !date || !displayDiv) { 
+            if(displayDiv) displayDiv.innerHTML = 'Nenhum planejamento para esta data.'; 
+            return; 
+        } 
+        currentClass.lessonPlans = currentClass.lessonPlans || {}; 
+        const plan = currentClass.lessonPlans[date] || ''; 
+        displayDiv.innerHTML = plan ? marked.parse(plan) : 'Nenhum planejamento para esta data.'; 
+    };
+    const renderClassNotes = (classId, date) => { 
+        const currentClass = findClassById(classId); 
+        const displayDiv = document.getElementById('class-notes-display');
+        if (!currentClass || !date || !displayDiv) { 
+            if(displayDiv) displayDiv.innerHTML = 'Nenhuma anotação para esta data.'; 
+            return; 
+        } 
+        currentClass.classNotes = currentClass.classNotes || {}; 
+        const notes = currentClass.classNotes[date] || ''; 
+        displayDiv.innerHTML = notes ? marked.parse(notes) : 'Nenhuma anotação para esta data.'; 
+    };
+
+    const renderClassroomMap = (classId, isEditing = false) => { const cls = findClassById(classId); if (!cls) { console.error("Class not found for map:", classId); classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro: Turma não encontrada.</p>'; classroomContainerEdit.innerHTML = ''; mapEditArea.classList.add('hidden'); return; } const layout = cls.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }; const currentLayoutData = isEditing ? tempClassroomLayout : layout; const students = getStudentsByClass(classId); const container = isEditing ? classroomContainerEdit : classroomContainerDisplay; container.innerHTML = ''; const teacherDeskClone = teacherDeskTemplate.content.cloneNode(true); const teacherDeskElement = teacherDeskClone.querySelector('.teacher-desk'); const gridClone = classroomGridTemplate.content.cloneNode(true); const gridContainerElement = gridClone.querySelector('.classroom-map-grid'); teacherDeskElement.className = 'teacher-desk'; const teacherPos = currentLayoutData.teacherDeskPosition || 'top-center'; teacherDeskElement.classList.add(`position-${teacherPos}`); gridContainerElement.style.gridTemplateColumns = `repeat(${currentLayoutData.cols}, minmax(0, 1fr))`; container.appendChild(teacherDeskElement); container.appendChild(gridContainerElement); const seatTemplate = document.getElementById('seat-template'); const emptySeatPlaceholder = "Toque/Arraste Aluno"; if (isEditing) clearSeatSelection(); if (currentLayoutData.rows > 0 && currentLayoutData.cols > 0) { for (let r = 1; r <= currentLayoutData.rows; r++) { for (let c = 1; c <= currentLayoutData.cols; c++) { const seatData = currentLayoutData.seats.find(s => s.row === r && s.col === c); const studentId = seatData?.studentId; const student = studentId ? findStudentById(studentId) : null; const seatClone = seatTemplate.content.cloneNode(true); const seatElement = seatClone.querySelector('.seat'); seatElement.dataset.row = r; seatElement.dataset.col = c; const numberSpan = seatElement.querySelector('.seat-student-number'); const nameSpan = seatElement.querySelector('.seat-student-name'); const placeholderSpan = seatElement.querySelector('.seat-placeholder-text'); numberSpan.textContent = ''; nameSpan.textContent = ''; placeholderSpan.textContent = ''; placeholderSpan.classList.remove('seat-placeholder-text'); seatElement.classList.remove('occupied', 'empty', 'selected-for-assignment'); seatElement.removeAttribute('data-student-id'); seatElement.setAttribute('draggable', 'false'); if (student) { seatElement.classList.add('occupied'); seatElement.dataset.studentId = student.id; numberSpan.textContent = student.number ? `${student.number}.` : ''; nameSpan.textContent = sanitizeHTML(student.name); if (isEditing) { seatElement.setAttribute('draggable', 'true'); seatElement.addEventListener('dragstart', handleSeatDragStart); seatElement.addEventListener('click', handleOccupiedSeatClick); seatElement.style.cursor = 'grab'; } else { seatElement.style.cursor = 'default'; } } else { seatElement.classList.add('empty'); if (isEditing) { seatElement.addEventListener('click', handleSeatClickForAssignment); placeholderSpan.textContent = emptySeatPlaceholder; placeholderSpan.classList.add('seat-placeholder-text'); seatElement.style.cursor = 'pointer'; } else { seatElement.style.cursor = 'default'; } } if (isEditing) { seatElement.addEventListener('dragover', handleDragOver); seatElement.addEventListener('dragleave', handleDragLeave); seatElement.addEventListener('drop', handleDropOnSeat); } gridContainerElement.appendChild(seatElement); } } } else if (!isEditing) { gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p>'; } else { gridContainerElement.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Dimensões inválidas (0 fileiras ou colunas).</p>'; } if (isEditing) { renderUnassignedStudents(classId); } classroomContainerDisplay.classList.toggle('hidden', isEditing); mapEditArea.classList.toggle('hidden', !isEditing); };
     const renderUnassignedStudents = (classId) => { if (!tempClassroomLayout) return; const allStudents = getStudentsByClass(classId); const assignedStudentIds = new Set(tempClassroomLayout.seats.map(s => s.studentId).filter(id => id)); unassignedStudentsContainer.innerHTML = '<h5>Alunos sem lugar (Clique aqui após selecionar mesa vazia)</h5>'; const studentTemplate = document.getElementById('draggable-student-template'); allStudents.forEach(student => { if (!assignedStudentIds.has(student.id)) { const clone = studentTemplate.content.cloneNode(true); const studentDiv = clone.querySelector('.draggable-student'); studentDiv.dataset.studentId = student.id; studentDiv.querySelector('.student-number').textContent = student.number ? `${student.number}.` : ''; studentDiv.querySelector('.student-name').textContent = sanitizeHTML(student.name); const oldNode = studentDiv; studentDiv.replaceWith(oldNode.cloneNode(true)); const newNode = unassignedStudentsContainer.appendChild(oldNode); newNode.addEventListener('dragstart', handleStudentListDragStart); newNode.addEventListener('click', handleUnassignedStudentClickForAssignment); } }); };
     const renderStudentObservations = (studentId, noteIndexToHighlight = -1, useLocalCopy = false) => { const listContainer = document.getElementById('student-observations-list'); if (!listContainer) { console.error("Container #student-observations-list não encontrado no modal."); return; } const notes = useLocalCopy ? currentStudentObservations : (findStudentById(studentId)?.notes || []); listContainer.innerHTML = ''; if (notes.length === 0) { listContainer.innerHTML = '<p style="text-align: center; padding: 1rem; color: var(--text-secondary);">Nenhuma observação registrada.</p>'; return; } const sortedNotes = [...notes].sort((a, b) => (b.date || '').localeCompare(a.date || '')); const template = document.getElementById('observation-item-template'); sortedNotes.forEach(note => { const originalIndex = notes.findIndex(n => n === note); if (originalIndex === -1) return; const clone = template.content.cloneNode(true); const itemElement = clone.querySelector('.observation-item'); itemElement.dataset.index = originalIndex; const categoryClean = (note.category || 'anotacao').toLowerCase().replace(/[^a-z0-9]/g, ''); itemElement.classList.add(`category-${categoryClean}`); itemElement.querySelector('.category').textContent = `${note.category || 'Anotação'}`; itemElement.querySelector('.observation-date').textContent = formatDate(note.date); itemElement.querySelector('.observation-text').textContent = sanitizeHTML(note.text); const suspDatesSpan = itemElement.querySelector('.observation-suspension-dates'); if (note.category === 'Suspensão' && note.suspensionStartDate && note.suspensionEndDate) { suspDatesSpan.textContent = `Período: ${formatDate(note.suspensionStartDate)} a ${formatDate(note.suspensionEndDate)}`; suspDatesSpan.classList.remove('hidden'); } else { suspDatesSpan.classList.add('hidden'); } if (!useLocalCopy && originalIndex === noteIndexToHighlight) { itemElement.classList.add('highlighted-note'); setTimeout(() => itemElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); } listContainer.appendChild(clone); }); };
 
@@ -942,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const openClassModal = (classIdToEdit = null) => { if (!currentSchoolId) return; const isEditing = classIdToEdit !== null; const classData = isEditing ? findClassById(classIdToEdit) : {}; const title = isEditing ? 'Editar Turma' : 'Nova Turma'; const schoolName = findSchoolById(currentSchoolId)?.name || '?'; const modalContent = `<form id="class-form"><input type="hidden" id="class-id" value="${isEditing ? classIdToEdit : ''}"><p class="mb-1"><strong>Escola:</strong> ${sanitizeHTML(schoolName)}</p><div class="form-group"><label for="class-name">Nome Turma:</label><input type="text" id="class-name" required value="${sanitizeHTML(classData.name || '')}"></div><div class="form-group"><label for="class-year">Ano/Série (Opcional):</label><input type="text" id="class-year" placeholder="Ex: 6º ano do fundamental" value="${sanitizeHTML(classData.year || '')}"></div><div class="form-group"><label for="class-subject">Matéria:</label><input type="text" id="class-subject" value="${sanitizeHTML(classData.subject || '')}"></div><div class="form-group d-flex"><div style="flex: 1; margin-right: 5px;"><label for="class-schedule">Horário:</label><input type="time" id="class-schedule" value="${classData.schedule || ''}"></div><div style="flex: 1; margin-left: 5px;"><label for="class-shift">Turno:</label><select id="class-shift"><option value="">--</option><option value="Manhã" ${classData.shift === 'Manhã' ? 'selected' : ''}>Manhã</option><option value="Tarde" ${classData.shift === 'Tarde' ? 'selected' : ''}>Tarde</option><option value="Noite" ${classData.shift === 'Noite' ? 'selected' : ''}>Noite</option><option value="Integral" ${classData.shift === 'Integral' ? 'selected' : ''}>Integral</option></select></div></div></form>`; let footerButtons = `<button type="button" id="save-class-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; if (isEditing) { footerButtons = `<button type="button" id="delete-class-btn-modal" class="danger"><span class="icon icon-excluir"></span> Excluir</button>` + footerButtons; } showModal(title, modalContent, footerButtons); document.getElementById('save-class-button').addEventListener('click', saveClass); if (isEditing) { document.getElementById('delete-class-btn-modal').addEventListener('click', async () => { if (await customConfirm(`Excluir turma "${sanitizeHTML(classData.name)}" e TODOS os dados associados?`)) { deleteClass(classIdToEdit); hideModal(); } }); } };
     const saveClass = () => { const form = document.getElementById('class-form'); if (!form || !form.checkValidity() || !currentSchoolId) { customAlert('Preencha nome da turma e verifique escola.'); form?.reportValidity(); return; } const id = document.getElementById('class-id').value; const isEditing = !!id; const existingData = isEditing ? findClassById(id) : {}; const newClassData = { id: id || generateId('cls'), schoolId: currentSchoolId, name: document.getElementById('class-name').value.trim(), year: document.getElementById('class-year').value.trim(), subject: document.getElementById('class-subject').value.trim(), schedule: document.getElementById('class-schedule').value, shift: document.getElementById('class-shift').value, notes: existingData?.notes || '', gradeStructure: existingData?.gradeStructure || [], lessonPlans: existingData?.lessonPlans || {}, classroomLayout: existingData?.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }, representativeId: existingData?.representativeId || null, viceRepresentativeId: existingData?.viceRepresentativeId || null }; if (isEditing) { const index = appData.classes.findIndex(c => c.id === id); if (index > -1) appData.classes[index] = newClassData; } else { appData.classes.push(newClassData); } saveData(); renderClassList(currentSchoolId); if (id && id === currentClassId && currentSection === 'class-details-section') { selectClass(id, true); } hideModal(); };
     const deleteClass = (id) => { appData.classes = appData.classes.filter(c => c.id !== id); appData.students = appData.students.filter(s => s.classId !== id); if (currentClassId === id) { currentClassId = null; showSection('classes-section'); } saveData(); renderClassList(currentSchoolId); if (!currentClassId) navDetailsButton.disabled = true; saveAppState(); };
-    const selectClass = (id, forceReload = false) => { if (currentClassId !== id || forceReload) { console.log(`Selecionando Turma: ${id}, Forçar Recarga: ${forceReload}`); if (tempClassroomLayout) { cancelClassroomMapEdit(); } currentClassId = id; const selectedClass = findClassById(id); if (selectedClass) { classDetailsTitle.textContent = `${sanitizeHTML(selectedClass.name)}${selectedClass.year ? ' (' + sanitizeHTML(selectedClass.year) + ')' : ''} - ${sanitizeHTML(selectedClass.subject || 'Sem matéria')}`; renderStudentList(id); renderGradeSets(id); const currentDate = attendanceDateInput.value || getCurrentDateString(); attendanceDateInput.value = currentDate; lessonPlanDateInput.value = currentDate; renderAttendanceTable(id, currentDate); renderLessonPlan(id, currentDate); renderClassroomMap(id); classNotesContent.textContent = sanitizeHTML(selectedClass.notes || 'Nenhuma anotação.'); classNotesTextarea.value = selectedClass.notes || ''; classNotesEdit.classList.add('hidden'); classNotesDisplay.classList.remove('hidden'); if (currentSection === 'classes-section') renderClassList(selectedClass.schoolId); navDetailsButton.disabled = false; classDetailsSection.querySelectorAll('.card').forEach(card => { card.classList.add('collapsed'); const toggleBtn = card.querySelector('.card-toggle-button .icon'); if (toggleBtn) { toggleBtn.classList.remove('icon-chevron-up'); toggleBtn.classList.remove('icon-chevron-down'); toggleBtn.classList.add('icon-more-vert'); if(toggleBtn.parentElement) toggleBtn.parentElement.title = 'Mostrar Opções'; } }); } else { currentClassId = null; classDetailsTitle.textContent = "Erro: Turma não encontrada"; studentListContainer.innerHTML = '<p>Erro</p>'; gradesTableContainer.innerHTML = '<p>Erro</p>'; attendanceTableContainer.innerHTML = '<p>Erro</p>'; lessonPlanTextarea.value = ''; saveLessonPlanButton.classList.add('hidden'); classNotesContent.textContent = 'Erro'; classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro ao carregar mapa.</p>'; navDetailsButton.disabled = true; } saveAppState(); } else { console.log(`Turma ${id} já selecionada.`); } };
+    const selectClass = (id, forceReload = false) => { if (currentClassId !== id || forceReload) { console.log(`Selecionando Turma: ${id}, Forçar Recarga: ${forceReload}`); if (tempClassroomLayout) { cancelClassroomMapEdit(); } currentClassId = id; const selectedClass = findClassById(id); if (selectedClass) { classDetailsTitle.textContent = `${sanitizeHTML(selectedClass.name)}${selectedClass.year ? ' (' + sanitizeHTML(selectedClass.year) + ')' : ''} - ${sanitizeHTML(selectedClass.subject || 'Sem matéria')}`; renderStudentList(id); renderGradeSets(id); const currentDate = attendanceDateInput.value || getCurrentDateString(); attendanceDateInput.value = currentDate; lessonPlanDateInput.value = currentDate; const classNotesDateInput = document.getElementById('class-notes-date'); if(classNotesDateInput) classNotesDateInput.value = currentDate; renderAttendanceTable(id, currentDate); renderLessonPlan(id, currentDate); renderClassNotes(id, currentDate); renderClassroomMap(id); if (currentSection === 'classes-section') renderClassList(selectedClass.schoolId); navDetailsButton.disabled = false; classDetailsSection.querySelectorAll('.card').forEach(card => { card.classList.add('collapsed'); const toggleBtn = card.querySelector('.card-toggle-button .icon'); if (toggleBtn) { toggleBtn.classList.remove('icon-chevron-up'); toggleBtn.classList.remove('icon-chevron-down'); toggleBtn.classList.add('icon-more-vert'); if(toggleBtn.parentElement) toggleBtn.parentElement.title = 'Mostrar Opções'; } }); } else { currentClassId = null; classDetailsTitle.textContent = "Erro: Turma não encontrada"; studentListContainer.innerHTML = '<p>Erro</p>'; gradesTableContainer.innerHTML = '<p>Erro</p>'; attendanceTableContainer.innerHTML = '<p>Erro</p>'; const displayDiv = document.getElementById('lesson-plan-display'); if(displayDiv) displayDiv.innerHTML = ''; const notesDisplayDiv = document.getElementById('class-notes-display'); if(notesDisplayDiv) notesDisplayDiv.innerHTML = ''; classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro ao carregar mapa.</p>'; navDetailsButton.disabled = true; } saveAppState(); } else { console.log(`Turma ${id} já selecionada.`); } };
     const openStudentModal = (studentIdToEdit = null) => {
         if (!currentClassId) return;
         const isEditing = studentIdToEdit !== null;
@@ -1058,7 +1073,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportGradesCSV = () => { const gradeSetId = gradeSetSelect.value; if (!currentClassId || !gradeSetId) { customAlert("Selecione uma turma e um conjunto de notas para exportar."); return; } const currentClass = findClassById(currentClassId); const gradeSet = currentClass?.gradeStructure?.find(gs => gs.id === gradeSetId); const students = getStudentsByClass(currentClassId); if (!gradeSet || students.length === 0) { customAlert("Nenhum dado de nota para exportar."); return; } const className = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const setName = gradeSet.name.replace(/[^a-z0-9]/gi, '_') || 'Conjunto'; let csvContent = "\uFEFF"; let header = [escapeCsvField("Aluno"), escapeCsvField("No.")]; gradeSet.gradeLabels.forEach(label => header.push(escapeCsvField(label))); header.push(escapeCsvField("Soma")); header.push(escapeCsvField("Média")); csvContent += header.join(",") + "\r\n"; students.forEach(student => { const studentGrades = student.grades[gradeSetId] || {}; const calculated = calculateSumAndAverageForData(studentGrades); let row = [escapeCsvField(student.name), escapeCsvField(student.number || '')]; gradeSet.gradeLabels.forEach(label => { const gradeValue = studentGrades[label]; row.push(escapeCsvField(gradeValue)); }); row.push(escapeCsvField(calculated.sum !== null ? calculated.sum.toFixed(1) : '')); row.push(escapeCsvField(calculated.average !== null ? calculated.average.toFixed(1) : '')); csvContent += row.join(",") + "\r\n"; }); const encodedUri = encodeURI(`data:text/csv;charset=utf-8,${csvContent}`); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `notas_${className}_${setName}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
     const exportGradesPDF = async () => { const gradeSetId = gradeSetSelect.value; const button = exportGradesPdfButton; if (!currentClassId || !gradeSetId) { customAlert("Selecione uma turma e um conjunto de notas para exportar para PDF."); return; } const currentClass = findClassById(currentClassId); const gradeSet = currentClass?.gradeStructure?.find(gs => gs.id === gradeSetId); const students = getStudentsByClass(currentClassId); if (!gradeSet || students.length === 0) { customAlert("Nenhum dado de nota para exportar para PDF."); return; } const classNameSanitized = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const setNameSanitized = gradeSet.name.replace(/[^a-z0-9]/gi, '_') || 'Conjunto'; const filename = `notas_${classNameSanitized}_${setNameSanitized}.pdf`; let tableHTML = ` <style> body { font-family: sans-serif; font-size: 9pt; } .pdf-table { border-collapse: collapse; width: 100%; margin-top: 10px; table-layout: fixed; } .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 3px 4px; text-align: left; word-wrap: break-word; overflow-wrap: break-word; } .pdf-table th { background-color: #f2f2f2; font-weight: bold; text-align: center; font-size: 8pt; } .pdf-table td { font-size: 8pt; } .pdf-table tr { page-break-inside: avoid; } .pdf-table td.grade, .pdf-table td.sum, .pdf-table td.avg { text-align: center; } .pdf-table td.student-name { min-width: 100px; white-space: normal; } .pdf-table th.student-col { min-width: 105px; } .pdf-table th.grade-col { min-width: 40px; } .pdf-table th.sum-col, .pdf-table th.avg-col { min-width: 45px; } .pdf-table .number { font-weight: bold; display: inline-block; min-width: 15px; text-align: right; margin-right: 4px;} h4 { text-align: center; margin-bottom: 10px; font-size: 11pt; } </style> <h4>Notas - Turma: ${sanitizeHTML(currentClass.name)} - Conjunto: ${sanitizeHTML(gradeSet.name)}</h4> <table class="pdf-table"> <thead> <tr> <th class="student-col">Aluno</th> `; gradeSet.gradeLabels.forEach(label => { tableHTML += `<th class="grade-col">${sanitizeHTML(label)}</th>`; }); tableHTML += `<th class="sum-col">Soma</th><th class="avg-col">Média</th></tr></thead><tbody>`; students.forEach(student => { const studentGrades = student.grades[gradeSetId] || {}; const calculated = calculateSumAndAverageForData(studentGrades); tableHTML += `<tr><td class="student-name"><span class="number">${student.number || '-.'}</span>${sanitizeHTML(student.name)}</td>`; gradeSet.gradeLabels.forEach(label => { const gradeValue = studentGrades[label]; tableHTML += `<td class="grade">${(gradeValue !== null && gradeValue !== undefined) ? sanitizeHTML(gradeValue) : '-'}</td>`; }); tableHTML += `<td class="sum">${(calculated.sum !== null) ? calculated.sum.toFixed(1) : '-'}</td>`; tableHTML += `<td class="avg">${(calculated.average !== null) ? calculated.average.toFixed(1) : '-'}</td>`; tableHTML += `</tr>`; }); tableHTML += `</tbody></table>`; const opt = { margin: [8, 5, 8, 5], filename: filename, image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true, logging: false, }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } }; const originalButtonText = button.innerHTML; button.disabled = true; button.innerHTML = '<span class="icon icon-hourglass-empty"></span>'; try { console.log("Generating PDF with options:", opt); await html2pdf().set(opt).from(tableHTML).save(); console.log("PDF de notas gerado com sucesso."); } catch (error) { console.error("Erro ao gerar PDF de notas:", error); customAlert("Ocorreu um erro ao gerar o PDF de notas. Verifique o console para detalhes."); } finally { button.disabled = false; button.innerHTML = originalButtonText; } };
     const saveAttendance = () => { const date = attendanceDateInput.value; if (!currentClassId || !date) { console.warn("Cannot save attendance: No class or date selected."); customAlert("Selecione uma turma e uma data."); return; } console.log("Saving all attendance data for", date); saveData(); customAlert(`Presença de ${formatDate(date)} salva!`); };
-    const saveLessonPlan = () => { const date = lessonPlanDateInput.value; if (!currentClassId || !date) { customAlert("Selecione uma turma e uma data para salvar o plano."); return; } const currentClass = findClassById(currentClassId); if (!currentClass) return; const planText = lessonPlanTextarea.value.trim(); currentClass.lessonPlans = currentClass.lessonPlans || {}; if (planText) { currentClass.lessonPlans[date] = planText; console.log(`Lesson plan saved for ${date}:`, planText); } else { delete currentClass.lessonPlans[date]; console.log(`Lesson plan removed for ${date}`); } saveData(); customAlert(`Plano de aula para ${formatDate(date)} salvo!`); };
     const openMonthlyAttendanceModal = () => { if (!currentClassId) { customAlert("Selecione uma turma primeiro."); return; } const currentClass = findClassById(currentClassId); const title = `Frequência Mensal - ${sanitizeHTML(currentClass.name)}`; const today = new Date(); const currentYear = today.getFullYear(); const currentMonth = today.getMonth(); let yearOptions = ''; for (let y = currentYear + 1; y >= currentYear - 5; y--) { yearOptions += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`; } let monthOptions = ''; monthNames.forEach((name, index) => { monthOptions += `<option value="${index}" ${index === currentMonth ? 'selected' : ''}>${name}</option>`; }); const modalContent = ` <div id="monthly-attendance-controls"> <div class="date-selectors"> <label for="monthly-attendance-month">Mês:</label> <select id="monthly-attendance-month">${monthOptions}</select> <label for="monthly-attendance-year">Ano:</label> <select id="monthly-attendance-year">${yearOptions}</select> </div> <div class="export-buttons"> <button type="button" id="export-attendance-csv-button" class="secondary icon-button hidden" title="Exportar CSV"><span class="icon icon-upload"></span></button> <button type="button" id="export-attendance-pdf-button" class="secondary icon-button hidden" title="Exportar PDF"><span class="icon icon-pdf"></span></button> </div> </div> <div id="monthly-attendance-table-wrapper"> <p>Selecione o mês/ano para carregar os dados.</p> </div> <div id="monthly-attendance-chart-container" class="hidden"></div> <div id="monthly-attendance-summary"></div> `; showModal(title, modalContent, '', 'monthly-attendance-modal'); const monthSelect = document.getElementById('monthly-attendance-month'); const yearSelect = document.getElementById('monthly-attendance-year'); const exportCsvButton = document.getElementById('export-attendance-csv-button'); const exportPdfButton = document.getElementById('export-attendance-pdf-button'); const updateMonthlyView = () => { const selectedMonth = parseInt(monthSelect.value); const selectedYear = parseInt(yearSelect.value); renderMonthlyAttendanceData(currentClassId, selectedYear, selectedMonth); }; monthSelect.addEventListener('change', updateMonthlyView); yearSelect.addEventListener('change', updateMonthlyView); exportCsvButton.addEventListener('click', () => { const selectedMonth = parseInt(monthSelect.value); const selectedYear = parseInt(yearSelect.value); exportMonthlyAttendanceCSV(currentClassId, selectedYear, selectedMonth); }); exportPdfButton.addEventListener('click', () => { const selectedMonth = parseInt(monthSelect.value); const selectedYear = parseInt(yearSelect.value); exportMonthlyAttendancePDF(currentClassId, selectedYear, selectedMonth, exportPdfButton); }); updateMonthlyView(); };
     const renderMonthlyAttendanceData = (classId, year, month) => { const students = getStudentsByClass(classId); const currentModal = document.querySelector('#generic-modal.show.monthly-attendance-modal'); if (!currentModal) return; const tableWrapper = currentModal.querySelector('#monthly-attendance-table-wrapper'); const summaryContainer = currentModal.querySelector('#monthly-attendance-summary'); const chartContainer = currentModal.querySelector('#monthly-attendance-chart-container'); const exportCsvBtn = currentModal.querySelector('#export-attendance-csv-button'); const exportPdfBtn = currentModal.querySelector('#export-attendance-pdf-button'); if (!tableWrapper || !summaryContainer || !chartContainer) { console.error("Um ou mais elementos do modal mensal não encontrados."); return; } tableWrapper.innerHTML = ''; summaryContainer.innerHTML = ''; chartContainer.innerHTML = ''; if (students.length === 0) { tableWrapper.innerHTML = '<p style="text-align:center; padding: 1rem;">Nenhum aluno nesta turma.</p>'; if (exportCsvBtn) exportCsvBtn.classList.add('hidden'); if (exportPdfBtn) exportPdfBtn.classList.add('hidden'); chartContainer.classList.add('hidden'); return; } if (exportCsvBtn) exportCsvBtn.classList.remove('hidden'); if (exportPdfBtn) exportPdfBtn.classList.remove('hidden'); chartContainer.classList.remove('hidden'); const daysInMonth = getDaysInMonth(year, month); const table = document.createElement('table'); table.classList.add('monthly-attendance-table'); const thead = table.createTHead(); const tbody = table.createTBody(); const headerRow = thead.insertRow(); headerRow.innerHTML = `<th class="student-col-monthly">Aluno</th>`; for (let day = 1; day <= daysInMonth; day++) { headerRow.innerHTML += `<th>${day}</th>`; } headerRow.innerHTML += `<th class="freq-col-monthly">% Freq.</th>`; let totalClassP = 0; let totalClassPossibleAttendances = 0; const studentFrequencies = []; students.forEach(student => { const row = tbody.insertRow(); row.innerHTML = `<td class="student-col-monthly"><span class="student-number">${student.number || '-'}.</span> ${sanitizeHTML(student.name)}</td>`; let studentP = 0; let studentPossibleDays = 0; for (let day = 1; day <= daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = '-'; let cellClass = ''; if (isWeekend) { cellClass = 'weekend'; cellContent = ''; } else if (status === 'H') { cellClass = 'status-H'; cellContent = 'H'; } else { studentPossibleDays++; totalClassPossibleAttendances++; if (status === 'P') { cellContent = 'P'; cellClass = 'status-P'; studentP++; totalClassP++; } else if (status === 'F') { cellClass = justification ? 'status-FJ' : 'status-F'; cellContent = justification ? 'FJ' : 'F'; } else { cellContent = '-'; } } row.innerHTML += `<td class="${cellClass}">${cellContent}</td>`; } const frequencyPercent = studentPossibleDays > 0 ? Math.round((studentP / studentPossibleDays) * 100) : 0; const frequencyText = studentPossibleDays > 0 ? frequencyPercent + '%' : '--'; row.innerHTML += `<td class="freq-col-monthly">${frequencyText}</td>`; studentFrequencies.push({ name: student.name, number: student.number, freq: frequencyPercent }); }); tableWrapper.appendChild(table); const classFrequency = totalClassPossibleAttendances > 0 ? ((totalClassP / totalClassPossibleAttendances) * 100).toFixed(0) + '%' : '--'; summaryContainer.textContent = `Frequência Média da Turma (dias letivos): ${classFrequency}`; renderMonthlyAttendanceChart(studentFrequencies); };
     const renderMonthlyAttendanceChart = (frequencies) => { const currentModal = document.querySelector('#generic-modal.show.monthly-attendance-modal'); const chartContainer = currentModal?.querySelector('#monthly-attendance-chart-container'); if (!chartContainer) return; chartContainer.innerHTML = ''; if (frequencies.length === 0) { return; } const maxFreq = 100; const chartHeight = 100; frequencies.forEach(item => { const barContainer = document.createElement('div'); barContainer.classList.add('chart-bar-container'); const bar = document.createElement('div'); bar.classList.add('chart-bar'); const barHeightValue = (item.freq / maxFreq) * chartHeight; bar.style.height = `${barHeightValue}px`; bar.style.backgroundColor = item.freq >= 70 ? 'var(--accent-success)' : item.freq >= 50 ? 'var(--accent-warning)' : 'var(--accent-danger)'; bar.dataset.percentage = `${item.freq}%`; const label = document.createElement('div'); label.classList.add('chart-label'); label.textContent = item.number ? `${item.number}.` : ''; label.title = sanitizeHTML(item.name); barContainer.appendChild(bar); barContainer.appendChild(label); chartContainer.appendChild(barContainer); }); };
@@ -1066,8 +1080,91 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportMonthlyAttendancePDF = async (classId, year, month, button) => { const students = getStudentsByClass(classId); if (students.length === 0) { customAlert("Nenhum aluno na turma para exportar para PDF."); return; } const currentClass = findClassById(classId); const classNameSanitized = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const monthName = monthNames[month]; const filename = `frequencia_${classNameSanitized}_${year}_${monthName}.pdf`; const daysInMonth = getDaysInMonth(year, month); let tableHTML = ` <style> body { font-family: sans-serif; font-size: 7pt; } .pdf-table { border-collapse: collapse; width: 100%; margin-top: 8px; table-layout: fixed; } .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 2px 3px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; } .pdf-table th { background-color: #f2f2f2; font-weight: bold; font-size: 7pt; } .pdf-table td { font-size: 7pt; } .pdf-table tr { page-break-inside: avoid; } .pdf-table td.student-col { text-align: left; min-width: 90px; white-space: normal; } .pdf-table th.student-col { min-width: 90px; } .pdf-table th.day-col, .pdf-table td.day-col { min-width: 15px; max-width:16px; } .pdf-table td.weekend { background-color: #eee; } .pdf-table td.status-H { background-color: #e2e3e5; color: #495057; font-style: italic; } .pdf-table th.summary-col, .pdf-table td.summary-col { font-weight: bold; min-width: 20px; max-width: 25px; font-size: 6pt; } .pdf-table .number { font-weight: bold; display: inline-block; min-width: 12px; text-align: right; margin-right: 3px;} h4 { text-align: center; margin-bottom: 6px; font-size: 10pt; } </style> <h4>Frequência Mensal - Turma: ${sanitizeHTML(currentClass.name)} - ${monthName}/${year}</h4> <table class="pdf-table"> <thead> <tr> <th class="student-col">Aluno</th>`; for (let day = 1; day <= daysInMonth; day++) { tableHTML += `<th class="day-col">${day}</th>`; } tableHTML += `<th class="summary-col">P</th><th class="summary-col">F</th><th class="summary-col">FJ</th><th class="summary-col">H</th><th class="summary-col">%</th></tr></thead><tbody>`; students.forEach(student => { tableHTML += `<tr><td class="student-col"><span class="number">${student.number || '-.'}</span>${sanitizeHTML(student.name)}</td>`; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; for (let day = 1; day <=daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = ''; let cellClass = 'day-col'; if (isWeekend) { cellClass += ' weekend'; } else if (status === 'H') { cellContent = 'H'; cellClass += ' status-H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellContent = 'P'; studentP++; } else if (status === 'F') { if (justification) { cellContent = 'FJ'; studentFJ++; } else { cellContent = 'F'; studentF++; } } else { cellContent = '-'; } } tableHTML += `<td class="${cellClass}">${cellContent}</td>`; } const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) : '-'; tableHTML += `<td class="summary-col">${studentP}</td>`; tableHTML += `<td class="summary-col">${studentF}</td>`; tableHTML += `<td class="summary-col">${studentFJ}</td>`; tableHTML += `<td class="summary-col">${studentH}</td>`; tableHTML += `<td class="summary-col">${frequency}${frequency !== '-' ? '%' : ''}</td>`; tableHTML += `</tr>`; }); tableHTML += `</tbody></table>`; const opt = { margin: [5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 0.9 }, html2canvas: { scale: 2, useCORS: true, logging: false, }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } }; const originalButtonText = button.innerHTML; button.disabled = true; button.innerHTML = '<span class="icon icon-hourglass-empty"></span>'; try { console.log("Generating PDF with options:", opt); await html2pdf().set(opt).from(tableHTML).save(); console.log("PDF de frequência gerado com sucesso."); } catch (error) { console.error("Erro ao gerar PDF de frequência:", error); customAlert("Ocorreu um erro ao gerar o PDF de frequência. Verifique o console para detalhes."); } finally { button.disabled = false; button.innerHTML = originalButtonText; } };
     const performSearch = (term) => { term = term.toLowerCase().trim(); if (!term) { hideModal(); return; } const results = { schools: [], classes: [], students: [] }; results.schools = appData.schools.filter(s => s.name.toLowerCase().includes(term)); results.classes = appData.classes.filter(c => c.name.toLowerCase().includes(term) || (c.subject && c.subject.toLowerCase().includes(term))); results.students = appData.students.filter(s => s.name.toLowerCase().includes(term) || (s.number && String(s.number) === term)); renderSearchResults(results, term); };
     const renderSearchResults = (results, term) => { let resultsHtml = `<p>Resultados para: <strong>${sanitizeHTML(term)}</strong></p><div class="item-list mt-1">`; let count = 0; const renderItem = (item, type, details = '') => { count++; const itemSchoolId = type === 'school' ? item.id : (item.schoolId || findClassById(item.classId)?.schoolId); const itemClassId = type === 'student' ? item.classId : (type === 'class' ? item.id : ''); return `<div class="list-item search-result-item" data-type="${type}" data-id="${item.id}" ${itemSchoolId ? `data-school-id="${itemSchoolId}"` : ''} ${itemClassId ? `data-class-id="${itemClassId}"` : ''}> <div class="item-info">${sanitizeHTML(item.name)} ${details ? `<small style='display:block; color: var(--text-secondary);'>${sanitizeHTML(details)}</small>` : ''}</div> <span class="result-type">${type.charAt(0).toUpperCase() + type.slice(1)}</span> </div>`; }; if (results.schools.length > 0) { resultsHtml += `<h5>Escolas</h5>`; results.schools.forEach(s => resultsHtml += renderItem(s, 'school')); } if (results.classes.length > 0) { resultsHtml += `<h5 class="mt-2">Turmas</h5>`; results.classes.forEach(c => { const school = findSchoolById(c.schoolId); resultsHtml += renderItem(c, 'class', `(${c.subject || 'N/A'}) - ${school?.name || '?'}`); }); } if (results.students.length > 0) { resultsHtml += `<h5 class="mt-2">Alunos</h5>`; results.students.forEach(s => { const cls = findClassById(s.classId); const school = findSchoolById(cls?.schoolId); resultsHtml += renderItem(s, 'student', `${s.number || '-'}. ${cls?.name || '?'} / ${school?.name || '?'}`); }); } if (count === 0) { resultsHtml += `<p style="text-align:center; padding: 1rem;">Nenhum resultado encontrado.</p>`; } resultsHtml += `</div>`; showModal(`Resultados da Busca`, resultsHtml, '', 'search-results-modal'); modalBody.querySelectorAll('.search-result-item').forEach(item => { item.addEventListener('click', () => { const type = item.dataset.type; const id = item.dataset.id; const classId = item.dataset.classId; const schoolId = item.dataset.schoolId; hideModal(); searchInput.value = ''; if (type === 'school') { selectSchool(id); showSection('classes-section'); } else if (type === 'class') { if(schoolId) selectSchool(schoolId); selectClass(id); showSection('class-details-section'); } else if (type === 'student') { if(schoolId) selectSchool(schoolId); if(classId) selectClass(classId); showSection('class-details-section'); setTimeout(() => { const studentElement = studentListContainer.querySelector(`.list-item[data-id="${id}"]`); studentElement?.scrollIntoView({ behavior: 'smooth', block: 'center' }); studentElement?.classList.add('active'); setTimeout(() => studentElement?.classList.remove('active'), 2000); }, 300); } }); }); };
-    const toggleClassNotesEdit = (showEdit) => { classNotesDisplay.classList.toggle('hidden', showEdit); classNotesEdit.classList.toggle('hidden', !showEdit); if (showEdit) { const currentClass = findClassById(currentClassId); classNotesTextarea.value = currentClass?.notes || ''; classNotesTextarea.focus(); } };
-    const saveClassNotes = () => { if(!currentClassId) return; const currentClass = findClassById(currentClassId); if(currentClass) { currentClass.notes = classNotesTextarea.value.trim(); classNotesContent.textContent = sanitizeHTML(currentClass.notes || 'Nenhuma anotação.'); saveData(); toggleClassNotesEdit(false); } };
+    // --- Modais de Tela Cheia (Planejamento e Anotações) ---
+    const openLessonPlanModal = () => {
+        if (!currentClassId) return;
+        const date = lessonPlanDateInput.value || getCurrentDateString();
+        const currentClass = findClassById(currentClassId);
+        
+        document.getElementById('lesson-plan-modal-date').value = date;
+        document.getElementById('lesson-plan-modal-textarea').value = currentClass?.lessonPlans?.[date] || '';
+        
+        const modal = document.getElementById('lesson-plan-modal');
+        modal.classList.add('show');
+    };
+
+    const saveLessonPlanModal = () => {
+        if (!currentClassId) return;
+        const currentClass = findClassById(currentClassId);
+        const date = document.getElementById('lesson-plan-modal-date').value;
+        const text = document.getElementById('lesson-plan-modal-textarea').value.trim();
+        
+        if (!date) {
+            customAlert("Selecione uma data.");
+            return;
+        }
+
+        currentClass.lessonPlans = currentClass.lessonPlans || {};
+        if (text) {
+            currentClass.lessonPlans[date] = text;
+        } else {
+            delete currentClass.lessonPlans[date];
+        }
+        
+        saveData();
+        lessonPlanDateInput.value = date;
+        renderLessonPlan(currentClassId, date);
+        
+        document.getElementById('lesson-plan-modal').classList.remove('show');
+        customAlert(`Plano de aula para ${formatDate(date)} salvo!`);
+    };
+
+    const openClassNotesModal = () => {
+        if (!currentClassId) return;
+        const dateInput = document.getElementById('class-notes-date');
+        const date = dateInput ? dateInput.value || getCurrentDateString() : getCurrentDateString();
+        const currentClass = findClassById(currentClassId);
+        
+        document.getElementById('class-notes-modal-date').value = date;
+        document.getElementById('class-notes-modal-textarea').value = currentClass?.classNotes?.[date] || '';
+        
+        const modal = document.getElementById('class-notes-modal');
+        modal.classList.add('show');
+    };
+
+    const saveClassNotesModal = () => {
+        if (!currentClassId) return;
+        const currentClass = findClassById(currentClassId);
+        const date = document.getElementById('class-notes-modal-date').value;
+        const text = document.getElementById('class-notes-modal-textarea').value.trim();
+        
+        if (!date) {
+            customAlert("Selecione uma data.");
+            return;
+        }
+
+        currentClass.classNotes = currentClass.classNotes || {};
+        if (text) {
+            currentClass.classNotes[date] = text;
+        } else {
+            delete currentClass.classNotes[date];
+        }
+        
+        saveData();
+        const dateInput = document.getElementById('class-notes-date');
+        if(dateInput) dateInput.value = date;
+        renderClassNotes(currentClassId, date);
+        
+        document.getElementById('class-notes-modal').classList.remove('show');
+        customAlert(`Anotações para ${formatDate(date)} salvas!`);
+    };
+
+    const toggleClassNotesEdit = (showEdit) => { 
+        // Obsolete, replaced by openClassNotesModal
+    };
+    const saveClassNotes = () => { 
+        // Obsolete, replaced by saveClassNotesModal
+    };
     const exportData = () => { const dataStr = JSON.stringify(appData, null, 2); const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr); const exportFileDefaultName = `super_professor_pro_backup_${new Date().toISOString().slice(0,10)}.json`; const linkElement = document.createElement('a'); linkElement.setAttribute('href', dataUri); linkElement.setAttribute('download', exportFileDefaultName); linkElement.click(); linkElement.remove(); };
     const importData = (event) => {
         const file = event.target.files[0];
@@ -1178,7 +1275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsText(file);
     };
-    const clearAllData = async () => { if (await customConfirm("ATENÇÃO! Apagar TODOS os dados? Isso inclui escolas, turmas, alunos, notas, frequências, horários e configurações.")) { if (await customConfirm("SEGUNDA CONFIRMAÇÃO: Tem certeza ABSOLUTA que deseja apagar TUDO? Esta ação não pode ser desfeita.")) { appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null } }; currentSchoolId = null; currentClassId = null; saveData(); applyTheme(appData.settings.theme); updateNotificationSettingsUI(); updateCustomSoundUI(); restoreAppState(); renderSchoolList(); renderScheduleList(); classListContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione escola.</p>'; studentListContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione turma.</p>'; gradesTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione conjunto.</p>'; attendanceTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione data.</p>'; lessonPlanTextarea.value = ''; saveGradesButton.classList.add('hidden'); saveAttendanceButton.classList.add('hidden'); saveLessonPlanButton.classList.add('hidden'); attendanceActionsContainer.classList.add('hidden'); classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Configure o mapa.</p>'; showSection(currentSection || 'schedule-section'); customAlert("Todos os dados foram apagados."); } } };
+    const clearAllData = async () => { if (await customConfirm("ATENÇÃO! Apagar TODOS os dados? Isso inclui escolas, turmas, alunos, notas, frequências, horários e configurações.")) { if (await customConfirm("SEGUNDA CONFIRMAÇÃO: Tem certeza ABSOLUTA que deseja apagar TUDO? Esta ação não pode ser desfeita.")) { appData = { schools: [], classes: [], students: [], schedule: [], settings: { theme: 'theme-light', globalNotificationsEnabled: true, notificationSoundEnabled: true, customNotificationSound: null } }; currentSchoolId = null; currentClassId = null; saveData(); applyTheme(appData.settings.theme); updateNotificationSettingsUI(); updateCustomSoundUI(); restoreAppState(); renderSchoolList(); renderScheduleList(); classListContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione escola.</p>'; studentListContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione turma.</p>'; gradesTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione conjunto.</p>'; attendanceTableContainer.innerHTML = '<p style="padding: 1rem; text-align: center;">Selecione data.</p>'; const displayDiv = document.getElementById('lesson-plan-display'); if(displayDiv) displayDiv.innerHTML = ''; saveGradesButton.classList.add('hidden'); saveAttendanceButton.classList.add('hidden'); attendanceActionsContainer.classList.add('hidden'); classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Configure o mapa.</p>'; showSection(currentSection || 'schedule-section'); customAlert("Todos os dados foram apagados."); } } };
     const toggleRepresentative = async (studentId) => { const cls = findClassById(currentClassId); if (!cls) return; const studentName = findStudentById(studentId)?.name || 'Aluno(a)'; if (cls.representativeId === studentId) { if (await customConfirm(`Remover ${sanitizeHTML(studentName)} do cargo de Representante?`)) { cls.representativeId = null; console.log(`DEMO: ${studentId} não é mais Rep.`); saveData(); renderStudentList(currentClassId); } } else { const confirmationMessage = `Promover ${sanitizeHTML(studentName)} a Representante?${cls.viceRepresentativeId === studentId ? ' (Ele deixará de ser Vice)' : ''}`; if (await customConfirm(confirmationMessage)) { if (cls.viceRepresentativeId === studentId) cls.viceRepresentativeId = null; cls.representativeId = studentId; console.log(`DEMO: ${studentId} definido como Rep.`); saveData(); renderStudentList(currentClassId); } } };
     const toggleViceRepresentative = async (studentId) => { const cls = findClassById(currentClassId); if (!cls) return; const studentName = findStudentById(studentId)?.name || 'Aluno(a)'; if (cls.viceRepresentativeId === studentId) { if (await customConfirm(`Remover ${sanitizeHTML(studentName)} do cargo de Vice-Representante?`)) { cls.viceRepresentativeId = null; console.log(`DEMO: ${studentId} não é mais Vice.`); saveData(); renderStudentList(currentClassId); } } else { const confirmationMessage = `Promover ${sanitizeHTML(studentName)} a Vice-Representante?${cls.representativeId === studentId ? ' (Ele deixará de ser Rep.)' : ''}`; if (await customConfirm(confirmationMessage)) { if (cls.representativeId === studentId) cls.representativeId = null; cls.viceRepresentativeId = studentId; console.log(`DEMO: ${studentId} definido como Vice.`); saveData(); renderStudentList(currentClassId); } } };
     const toggleActions = (listItemElement) => {
@@ -3263,12 +3360,90 @@ document.addEventListener('DOMContentLoaded', () => {
     markAllPresentButton.addEventListener('click', markAllStudentsPresent);
     markNonSchoolDayButton.addEventListener('click', toggleNonSchoolDay);
     lessonPlanDateInput.addEventListener('change', (e) => { if(currentClassId) { renderLessonPlan(currentClassId, e.target.value); } });
-    saveLessonPlanButton.addEventListener('click', saveLessonPlan);
     saveAttendanceButton.addEventListener('click', saveAttendance);
     viewMonthlyAttendanceButton.addEventListener('click', openMonthlyAttendanceModal);
-    editClassNotesButton.addEventListener('click', () => toggleClassNotesEdit(true));
-    saveClassNotesButton.addEventListener('click', saveClassNotes);
-    cancelClassNotesButton.addEventListener('click', () => toggleClassNotesEdit(false));
+    // Event listeners for Modals
+    const editLessonPlanButton = document.getElementById('edit-lesson-plan-button');
+    if (editLessonPlanButton) {
+        editLessonPlanButton.addEventListener('click', openLessonPlanModal);
+    }
+
+    const saveLessonPlanModalBtn = document.getElementById('lesson-plan-modal-save-btn');
+    if (saveLessonPlanModalBtn) {
+        saveLessonPlanModalBtn.addEventListener('click', saveLessonPlanModal);
+    }
+
+    const closeLessonPlanModalBtn = document.getElementById('lesson-plan-modal-cancel-btn');
+    if (closeLessonPlanModalBtn) {
+        closeLessonPlanModalBtn.addEventListener('click', () => {
+            document.getElementById('lesson-plan-modal').classList.remove('show');
+        });
+    }
+
+    if (editClassNotesButton) {
+        editClassNotesButton.addEventListener('click', openClassNotesModal);
+    }
+
+    const saveClassNotesModalBtn = document.getElementById('class-notes-modal-save-btn');
+    if (saveClassNotesModalBtn) {
+        saveClassNotesModalBtn.addEventListener('click', saveClassNotesModal);
+    }
+
+    const closeClassNotesModalBtn = document.getElementById('class-notes-modal-cancel-btn');
+    if (closeClassNotesModalBtn) {
+        closeClassNotesModalBtn.addEventListener('click', () => {
+            document.getElementById('class-notes-modal').classList.remove('show');
+        });
+    }
+
+    const newClassNoteBtn = document.getElementById('class-notes-modal-add-note-btn');
+    if (newClassNoteBtn) {
+        newClassNoteBtn.addEventListener('click', () => {
+            document.getElementById('class-notes-modal-date').value = getCurrentDateString();
+            document.getElementById('class-notes-modal-textarea').value = '';
+        });
+    }
+
+    const classNotesDateInput = document.getElementById('class-notes-date');
+    if (classNotesDateInput) {
+        classNotesDateInput.addEventListener('change', (e) => {
+            if (currentClassId) renderClassNotes(currentClassId, e.target.value);
+        });
+    }
+
+    const classNotesModalDateInput = document.getElementById('class-notes-modal-date');
+    if (classNotesModalDateInput) {
+        classNotesModalDateInput.addEventListener('change', (e) => {
+            if (currentClassId) {
+                const currentClass = findClassById(currentClassId);
+                document.getElementById('class-notes-modal-textarea').value = currentClass?.classNotes?.[e.target.value] || '';
+            }
+        });
+    }
+
+    const lessonPlanModalDateInput = document.getElementById('lesson-plan-modal-date');
+    if (lessonPlanModalDateInput) {
+        lessonPlanModalDateInput.addEventListener('change', (e) => {
+            if (currentClassId) {
+                const currentClass = findClassById(currentClassId);
+                document.getElementById('lesson-plan-modal-textarea').value = currentClass?.lessonPlans?.[e.target.value] || '';
+            }
+        });
+    }
+
+    const lessonPlanModalAddAiBtn = document.getElementById('lesson-plan-modal-add-ai-btn');
+    if (lessonPlanModalAddAiBtn) {
+        lessonPlanModalAddAiBtn.addEventListener('click', () => {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                showNotification('Configure sua chave de IA na aba de Ajustes.', 'error');
+                return;
+            }
+            openAiModal('lesson-plan');
+        });
+    }
+
+    // End event listeners for Modals
     copyPixButton?.addEventListener('click', () => {
         const pixKey = pixKeyTextElement.textContent;
         
@@ -3379,7 +3554,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Inicialização ---
-    const updateSyncStatusUI = () => {
+    function updateSyncStatusUI() {
         if (!syncStatusText || !lastSyncTimeDisplay) return;
         
         if (!auth.currentUser) {
@@ -3406,9 +3581,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Firebase Auth Logic
-    let isSyncing = false;
+    var isSyncing = false;
     
-    const saveToFirestore = async () => {
+    async function saveToFirestore() {
         if (!auth.currentUser || isSyncing) return;
         if (!navigator.onLine) {
             console.log("Offline: Skipping Firestore save.");
@@ -3428,7 +3603,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log("Data saved to Firestore.");
             } catch (err) {
                 console.error("Error during setDoc:", err);
-                throw handleFirestoreError(err, OperationType.WRITE, path);
+                throw handleFirestoreError(err, 'write', path);
             }
         } catch (error) {
             console.error("Error saving to Firestore:", error);
@@ -3436,15 +3611,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isSyncing = false;
             updateSyncStatusUI();
         }
-    };
-
-    const OperationType = {
-        CREATE: 'create',
-        UPDATE: 'update',
-        DELETE: 'delete',
-        LIST: 'list',
-        GET: 'get',
-        WRITE: 'write',
     };
 
     function handleFirestoreError(error, operationType, path) {
@@ -3493,7 +3659,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.warn("Firestore offline, skipping sync.");
                     return;
                 }
-                throw handleFirestoreError(err, OperationType.GET, 'users/' + user.uid);
+                throw handleFirestoreError(err, 'get', 'users/' + user.uid);
             }
             
             const localHasData = appData.schools.length > 0;
@@ -4116,7 +4282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Instruções adicionais para a IA sobre matemática e geometria
-            const mathAndGeometryInstructions = `\n\nIMPORTANTE (FORMATAÇÃO E MATEMÁTICA):\n1. Use formatação LaTeX para todas as equações matemáticas.\n2. Para equações em linha, use um cifrão (ex: $x = 5$).\n3. Para equações em bloco (passo a passo, fórmulas maiores), use DOIS cifrões (ex: $$y = x^2$$) e SEMPRE pule uma linha antes e depois do bloco $$ para não ficarem coladas no texto.\n4. Quando for mostrar a resolução de um problema passo a passo, NUNCA coloque várias equações na mesma linha. Coloque CADA PASSO em uma linha separada usando blocos $$...$$ ou pulando linha.\n5. Se precisar incluir figuras geométricas (como triângulos, gráficos, etc.), NÃO tente desenhá-las com caracteres de texto. Em vez disso, gere o código SVG correspondente DIRETAMENTE no texto (sem blocos de código markdown), para que seja renderizado como imagem. O SVG deve ter atributos width e height definidos.\n6. Para questões de múltipla escolha, as opções (A, B, C, D, E) DEVEM ser listadas uma abaixo da outra, usando quebra de linha ou uma lista markdown, nunca na mesma linha. Exemplo:\n- A) ...\n- B) ...\n- C) ...`;
+            const mathAndGeometryInstructions = `\n\nINSTRUÇÕES DE FORMATAÇÃO E CONTEÚDO:\n1. Forneça APENAS o material solicitado, mantendo-se estritamente no tema. NÃO adicione cálculos, equações ou figuras geométricas se não forem relevantes para o assunto.\n2. Para questões de múltipla escolha, as opções (A, B, C, D, E) DEVEM ser listadas uma abaixo da outra, usando quebra de linha ou uma lista markdown, nunca na mesma linha. Exemplo:\n- A) ...\n- B) ...\n- C) ...\n3. SE o conteúdo envolver matemática: Use formatação LaTeX ($ para linha, $$ para bloco). Pule linha antes e depois de blocos $$. Coloque cada passo de resolução em uma linha separada.\n4. SE o conteúdo exigir figuras geométricas: gere o código SVG correspondente DIRETAMENTE no texto (sem blocos de código markdown), com atributos width e height definidos.`;
             promptText += mathAndGeometryInstructions;
 
             aiToolGenerateBtn.disabled = true;
@@ -4168,6 +4334,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 aiToolResultContent.dataset.rawText = generatedText;
                 
                 aiToolResultContainer.classList.remove('hidden');
+                
+                const addToLessonPlanBtn = document.getElementById('ai-tool-add-to-lesson-plan-btn');
+                if (addToLessonPlanBtn) {
+                    if (currentAiTool === 'lesson-plan') {
+                        addToLessonPlanBtn.classList.remove('hidden');
+                    } else {
+                        addToLessonPlanBtn.classList.add('hidden');
+                    }
+                }
+                
                 showNotification('Conteúdo gerado com sucesso!', 'success');
 
             } catch (error) {
@@ -4187,6 +4363,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }).catch(() => {
                 showNotification('Erro ao copiar texto.', 'error');
             });
+        });
+    }
+
+    const aiToolAddToLessonPlanBtn = document.getElementById('ai-tool-add-to-lesson-plan-btn');
+    if (aiToolAddToLessonPlanBtn) {
+        aiToolAddToLessonPlanBtn.addEventListener('click', () => {
+            const text = aiToolResultContent.dataset.rawText || aiToolResultContent.innerText;
+            
+            // Close AI modal
+            const aiModal = document.getElementById('ai-tool-modal');
+            if (aiModal) aiModal.classList.remove('show');
+            
+            // Open Lesson Plan modal
+            openLessonPlanModal();
+            
+            // Append text to textarea
+            const textarea = document.getElementById('lesson-plan-modal-textarea');
+            if (textarea) {
+                if (textarea.value) {
+                    textarea.value += '\n\n' + text;
+                } else {
+                    textarea.value = text;
+                }
+            }
+            
+            showNotification('Conteúdo adicionado ao Plano de Aula!', 'success');
         });
     }
 

@@ -128,18 +128,18 @@
                  <div class="card-header"> <h3><span class="icon icon-notas"></span>Notas e Médias</h3> <div class="options"> <select id="grade-set-select" title="Conjunto de Notas"> <option value="">--</option> </select> <button type="button" id="manage-grade-structure-button" class="secondary icon-button" title="Gerenciar Estrutura de Notas"><span class="icon icon-estrutura icon-only"></span></button> <div class="export-buttons"> <button type="button" id="export-grades-csv-button" class="secondary icon-button hidden" title="Exportar Notas (CSV)"><span class="icon icon-upload"></span></button> <button type="button" id="export-grades-pdf-button" class="secondary icon-button hidden" title="Exportar Notas (PDF)"><span class="icon icon-pdf"></span></button> </div> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> <div class="table-scroll-wrapper"> <div id="grades-table-container"><p style="padding: 1rem; text-align: center;">Selecione um conjunto de notas ou configure a estrutura.</p></div> </div> <button type="button" id="save-grades-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Notas</button> </div>
             </div>
              <div class="card collapsed" id="lesson-plan-card">
-                 <div class="card-header"> <h3><span class="icon icon-plano"></span>Planejamento da Aula</h3> <div class="options"> <input type="date" id="lesson-plan-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data do Planejamento"> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> 
+                 <div class="card-header"> <h3><span class="icon icon-plano"></span>Planejamento da Aula</h3> <div class="options"> <input type="date" id="lesson-plan-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data do Planejamento"> <button type="button" id="edit-lesson-plan-button" class="secondary icon-button" title="Editar Plano"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> 
                     <button type="button" id="ai-generate-plan-btn" class="secondary w-full mb-2 ai-tool" style="display: none;">
                         <span class="icon icon-auto-awesome"></span> Gerar Esboço com IA
                     </button>
-                    <textarea id="lesson-plan-textarea" placeholder="Digite o conteúdo/tópico da aula para esta data..."></textarea> <button type="button" id="save-lesson-plan-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Plano</button> </div>
+                    <div id="lesson-plan-display" class="markdown-body" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 5px; min-height: 100px; background: var(--bg-tertiary); max-height: 400px; overflow-y: auto;">Nenhum planejamento para esta data.</div> </div>
             </div>
              <div class="card collapsed" id="class-notes-card">
-                 <div class="card-header"> <h3><span class="icon icon-anotacao"></span>Anotações da Turma</h3> <div class="options"> <button type="button" id="edit-class-notes-button" class="secondary icon-button" title="Editar Anotações"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div id="class-notes-display" class="card-content collapsible-content"> 
+                 <div class="card-header"> <h3><span class="icon icon-anotacao"></span>Anotações da Turma</h3> <div class="options"> <input type="date" id="class-notes-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data da Anotação"> <button type="button" id="edit-class-notes-button" class="secondary icon-button" title="Editar Anotações"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div id="class-notes-display-container" class="card-content collapsible-content"> 
                     <button type="button" id="ai-analyze-class-btn" class="secondary w-full mb-2 ai-tool" style="display: none;">
                         <span class="icon icon-auto-awesome"></span> Analisar Turma com IA
                     </button>
-                    <p id="class-notes-content">Nenhuma anotação para esta turma.</p> </div> <div id="class-notes-edit" class="hidden card-content collapsible-content"> <textarea id="class-notes-textarea" placeholder="Digite suas anotações sobre a turma..."></textarea> <div class="text-right mt-1 mb-1"> <button type="button" id="cancel-class-notes-button" class="secondary">Cancelar</button> <button type="button" id="save-class-notes-button" class="success"><span class="icon icon-salvar"></span> Salvar</button> </div> </div>
+                    <div id="class-notes-display" class="markdown-body" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 5px; min-height: 100px; background: var(--bg-tertiary); max-height: 400px; overflow-y: auto;">Nenhuma anotação para esta data.</div> </div>
             </div>
         </section>
 
@@ -393,6 +393,54 @@
 
     <nav class="app-nav"> <button type="button" class="nav-button" data-section="schedule-section"><span class="icon icon-horario"></span>Horários</button> <button type="button" class="nav-button" data-section="schools-section"><span class="icon icon-escola"></span>Escolas</button> <button type="button" class="nav-button" data-section="classes-section" id="nav-classes-button" disabled><span class="icon icon-turmas"></span>Turmas</button> <button type="button" class="nav-button" data-section="class-details-section" id="nav-details-button" disabled><span class="icon icon-alunos"></span>Detalhes</button> <button type="button" class="nav-button" data-section="tools-section"><span class="icon icon-ferramentas"></span>Ferramentas</button> <button type="button" class="nav-button" data-section="profile-section"><span class="icon icon-perfil"></span>Perfil</button> <button type="button" class="nav-button" data-section="settings-section"><span class="icon icon-config"></span>Ajustes</button> </nav>
 
+    <!-- Modal de Edição de Planejamento de Aula -->
+    <div id="lesson-plan-modal" class="modal full-screen-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Planejamento da Aula</h2>
+                <span class="close-button" data-dismiss="modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="options" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <label for="lesson-plan-modal-date" style="margin: 0;">Data:</label>
+                    <input type="date" id="lesson-plan-modal-date" style="width: auto; padding: 0.3rem 0.5rem; margin: 0;">
+                    <button type="button" id="lesson-plan-modal-add-ai-btn" class="secondary ai-tool" style="margin-left: auto; display: none;">
+                        <span class="icon icon-auto-awesome"></span> Gerar Esboço com IA
+                    </button>
+                </div>
+                <textarea id="lesson-plan-modal-textarea" placeholder="Digite o conteúdo/tópico da aula para esta data..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="lesson-plan-modal-cancel-btn" class="secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" id="lesson-plan-modal-save-btn" class="success"><span class="icon icon-salvar"></span> Salvar Plano</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Anotações da Turma -->
+    <div id="class-notes-modal" class="modal full-screen-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Anotações da Turma</h2>
+                <span class="close-button" data-dismiss="modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="options" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <label for="class-notes-modal-date" style="margin: 0;">Data:</label>
+                    <input type="date" id="class-notes-modal-date" style="width: auto; padding: 0.3rem 0.5rem; margin: 0;">
+                    <button type="button" id="class-notes-modal-add-note-btn" class="secondary" style="margin-left: auto;">
+                        <span class="icon icon-adicionar"></span> Nova Anotação
+                    </button>
+                </div>
+                <textarea id="class-notes-modal-textarea" placeholder="Digite suas anotações sobre a turma para esta data..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="class-notes-modal-cancel-btn" class="secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" id="class-notes-modal-save-btn" class="success"><span class="icon icon-salvar"></span> Salvar Anotações</button>
+            </div>
+        </div>
+    </div>
+
     <div id="generic-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -424,14 +472,19 @@
                     <p>A IA está pensando...</p>
                 </div>
                 <div id="ai-tool-result-container" class="hidden" style="margin-top: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
                         <h3 style="margin: 0;">Resultado:</h3>
-                        <button type="button" id="ai-tool-export-pdf-btn" class="secondary icon-button" title="Exportar PDF">
+                        <button type="button" id="ai-tool-export-pdf-btn" class="secondary" title="Exportar PDF" style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">
                             <span class="icon icon-pdf"></span> Exportar PDF
                         </button>
                     </div>
                     <div id="ai-tool-result-content" class="markdown-body" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; min-height: 100px; font-family: var(--font-primary); overflow-y: auto; max-height: 400px;"></div>
-                    <button type="button" id="ai-tool-copy-btn" class="secondary w-full mt-1">Copiar Texto</button>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <button type="button" id="ai-tool-copy-btn" class="secondary" style="flex: 1;">Copiar Texto</button>
+                        <button type="button" id="ai-tool-add-to-lesson-plan-btn" class="success hidden" style="flex: 1;">
+                            <span class="icon icon-auto-awesome"></span> Adicionar ao Plano de Aula
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

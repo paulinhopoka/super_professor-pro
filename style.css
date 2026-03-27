@@ -362,6 +362,9 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
  .login-modal-class .modal-content { max-width: 400px; padding: 25px; border-radius: 12px; }
  .login-modal-class .modal-header { border-bottom: none; margin-bottom: 5px; padding-bottom: 0; }
  .login-modal-class .modal-header h2 { font-size: 1.4rem; color: var(--accent-primary); text-align: center; width: 100%; justify-content: center; }
+.full-screen-modal .modal-content { max-width: 95vw; width: 95vw; height: 95vh; max-height: 95vh; padding: 20px; }
+.full-screen-modal .modal-body { display: flex; flex-direction: column; gap: 10px; }
+.full-screen-modal .modal-body textarea { flex-grow: 1; min-height: 300px; resize: none; }
  .login-modal-class .close-button { display: none; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; position: relative; }
 .modal-header h2 { margin: 0; font-size: 1.2rem; text-align: left; justify-content: flex-start; gap: 0; }
@@ -600,9 +603,9 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 #current-custom-sound-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: calc(100% - 40px); }
 #remove-custom-sound-button { padding: 0.3rem 0.5rem; font-size: 0.8rem; flex-shrink: 0; }
 
-.classroom-container { display: grid; grid-template-rows: max-content max-content max-content; grid-template-columns: max-content max-content max-content; gap: 10px; padding: 15px; border: 1px solid var(--border-color); border-radius: 5px; margin-top: 1rem; overflow: auto; align-items: center; justify-items: center; align-content: safe center; justify-content: safe center; min-height: 200px; width: fit-content; margin-left: auto; margin-right: auto; max-width: 100%; }
-.classroom-map-grid { grid-area: 2 / 2 / 3 / 3; display: grid; gap: var(--seat-gap); justify-content: center; padding: 5px; width: max-content; }
-.seat { width: var(--seat-width); height: var(--seat-height); border: 2px solid var(--map-seat-border); background-color: var(--map-seat-bg); border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 0.7rem; color: var(--map-seat-text); overflow: hidden; cursor: default; position: relative; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+.classroom-container { display: grid; grid-template-rows: auto minmax(0, auto) auto; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; padding: 15px; border: 1px solid var(--border-color); border-radius: 5px; margin-top: 1rem; overflow: hidden; align-items: center; justify-items: center; align-content: safe center; justify-content: safe center; min-height: 200px; width: 100%; margin-left: auto; margin-right: auto; max-width: 100%; }
+.classroom-map-grid { grid-area: 2 / 2 / 3 / 3; display: grid; gap: var(--seat-gap); justify-content: center; padding: 5px; width: 100%; }
+.seat { width: 100%; height: auto; aspect-ratio: 50 / 35; border: 2px solid var(--map-seat-border); background-color: var(--map-seat-bg); border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 0.7rem; color: var(--map-seat-text); overflow: hidden; cursor: default; position: relative; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
 .seat.occupied { background-color: var(--map-seat-occupied-bg); color: var(--map-seat-occupied-text); font-weight: 500; border-style: solid; }
 .map-edit-area .seat.occupied { cursor: pointer; }
 .map-edit-area .seat.empty { cursor: pointer; }
