@@ -374,7 +374,7 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
  .calculator-modal .modal-body { padding: 0 5px 5px 5px; }
 .modal-body form { margin-bottom: 0; }
 .modal-body textarea:not(#new-observation-text) { min-height: 150px; }
-.modal-footer { border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 15px; text-align: right; flex-shrink: 0; display: flex; justify-content: flex-end; gap: 5px; }
+.modal-footer { border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 15px; text-align: right; flex-shrink: 0; display: flex; justify-content: flex-end; gap: 5px; flex-wrap: wrap; }
 .modal-footer button { margin-left: 0; }
 @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modalSlideIn { from { transform: translateY(-25px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
@@ -647,11 +647,11 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
  .seat.selected-for-assignment { border-color: var(--map-seat-selected-border); box-shadow: 0 0 0 3px color-mix(in srgb, var(--map-seat-selected-border) 40%, transparent); }
 
 .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--tool-card-min-width), 1fr)); gap: 1rem; padding: 0.5rem 0; }
-.tool-card { background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; box-shadow: 0 2px 4px var(--shadow-color); min-height: 100px; }
+.tool-card { background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 5px; padding: 1rem 0.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; box-shadow: 0 2px 4px var(--shadow-color); min-height: 110px; height: 100%; margin: 0; word-break: break-word; }
 .tool-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px color-mix(in srgb, var(--shadow-color) 120%, black); }
 .tool-card:active { transform: scale(0.97); background-color: var(--bg-tertiary-alpha); }
-.tool-card .icon { font-size: 2rem; margin-bottom: 0.6rem; color: var(--accent-primary); }
-.tool-card-title { font-size: 0.9rem; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
+.tool-card .icon { font-size: 2rem; margin-bottom: 0.5rem; color: var(--accent-primary); display: flex; align-items: center; justify-content: center; }
+.tool-card-title { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
 .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.5rem; margin: 0 -1rem 1rem -1rem; position: sticky; top: 0; background-color: var(--bg-details-sticky-alpha); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-bottom: 1px solid var(--border-color); z-index: 999; box-shadow: 0 1px 3px var(--shadow-color); transition: padding 0.2s ease-in-out; gap: 0.5rem; }
 .section-header h2 { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--accent-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: font-size 0.2s ease-in-out; flex-grow: 1; text-align: center; padding: 0 5px; display: flex; align-items: center; justify-content: center; gap: 0.4em; }

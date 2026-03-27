@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
     const profileAvatarInput = document.getElementById('profile-avatar-input');
     const profileNameInput = document.getElementById('profile-name-input');
+    const profileSubjectsInput = document.getElementById('profile-subjects-input');
     const saveProfileButton = document.getElementById('save-profile-button');
     const profileAvatarContainer = document.getElementById('profile-avatar-container');
 
@@ -1071,6 +1072,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <label for="renumber-criteria">Critério:</label>
                 <select id="renumber-criteria">
                     <option value="alphabetical">Ordem Alfabética</option>
+                    <option value="creation_date">Data de Entrada na Turma (Restaurar)</option>
+                    <option value="random">Aleatória</option>
                 </select>
             </div>
             <p class="text-secondary" style="font-size: 0.9em; margin-top: 1rem;">
@@ -1096,13 +1099,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (criteria === 'alphabetical') {
             students.sort((a, b) => a.name.localeCompare(b.name));
-            students.forEach((student, index) => {
-                student.number = index + 1;
-            });
-            saveData();
-            renderStudentList(classId);
             customAlert("Alunos renumerados com sucesso por ordem alfabética!");
+        } else if (criteria === 'creation_date') {
+            students.sort((a, b) => {
+                const timeA = parseInt(a.id.split('_')[1]) || 0;
+                const timeB = parseInt(b.id.split('_')[1]) || 0;
+                return timeA - timeB;
+            });
+            customAlert("Alunos renumerados com sucesso por data de entrada!");
+        } else if (criteria === 'random') {
+            students.sort(() => Math.random() - 0.5);
+            customAlert("Alunos renumerados com sucesso de forma aleatória!");
         }
+
+        students.forEach((student, index) => {
+            student.number = index + 1;
+        });
+        saveData();
+        renderStudentList(classId);
         hideModal();
     };
 
@@ -1122,11 +1136,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportGradesCSV = () => { const gradeSetId = gradeSetSelect.value; if (!currentClassId || !gradeSetId) { customAlert("Selecione uma turma e um conjunto de notas para exportar."); return; } const currentClass = findClassById(currentClassId); const gradeSet = currentClass?.gradeStructure?.find(gs => gs.id === gradeSetId); const students = getStudentsByClass(currentClassId); if (!gradeSet || students.length === 0) { customAlert("Nenhum dado de nota para exportar."); return; } const className = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const setName = gradeSet.name.replace(/[^a-z0-9]/gi, '_') || 'Conjunto'; let csvContent = "\uFEFF"; let header = [escapeCsvField("Aluno"), escapeCsvField("No.")]; gradeSet.gradeLabels.forEach(label => header.push(escapeCsvField(label))); header.push(escapeCsvField("Soma")); header.push(escapeCsvField("Média")); csvContent += header.join(",") + "\r\n"; students.forEach(student => { const studentGrades = student.grades[gradeSetId] || {}; const calculated = calculateSumAndAverageForData(studentGrades); let row = [escapeCsvField(student.name), escapeCsvField(student.number || '')]; gradeSet.gradeLabels.forEach(label => { const gradeValue = studentGrades[label]; row.push(escapeCsvField(gradeValue)); }); row.push(escapeCsvField(calculated.sum !== null ? calculated.sum.toFixed(1) : '')); row.push(escapeCsvField(calculated.average !== null ? calculated.average.toFixed(1) : '')); csvContent += row.join(",") + "\r\n"; }); const encodedUri = encodeURI(`data:text/csv;charset=utf-8,${csvContent}`); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `notas_${className}_${setName}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
     const exportGradesPDF = async () => { const gradeSetId = gradeSetSelect.value; const button = exportGradesPdfButton; if (!currentClassId || !gradeSetId) { customAlert("Selecione uma turma e um conjunto de notas para exportar para PDF."); return; } const currentClass = findClassById(currentClassId); const gradeSet = currentClass?.gradeStructure?.find(gs => gs.id === gradeSetId); const students = getStudentsByClass(currentClassId); if (!gradeSet || students.length === 0) { customAlert("Nenhum dado de nota para exportar para PDF."); return; } const classNameSanitized = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const setNameSanitized = gradeSet.name.replace(/[^a-z0-9]/gi, '_') || 'Conjunto'; const filename = `notas_${classNameSanitized}_${setNameSanitized}.pdf`; let tableHTML = ` <style> body { font-family: sans-serif; font-size: 9pt; } .pdf-table { border-collapse: collapse; width: 100%; margin-top: 10px; table-layout: fixed; } .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 3px 4px; text-align: left; word-wrap: break-word; overflow-wrap: break-word; } .pdf-table th { background-color: #f2f2f2; font-weight: bold; text-align: center; font-size: 8pt; } .pdf-table td { font-size: 8pt; } .pdf-table tr { page-break-inside: avoid; } .pdf-table td.grade, .pdf-table td.sum, .pdf-table td.avg { text-align: center; } .pdf-table td.student-name { min-width: 100px; white-space: normal; } .pdf-table th.student-col { min-width: 105px; } .pdf-table th.grade-col { min-width: 40px; } .pdf-table th.sum-col, .pdf-table th.avg-col { min-width: 45px; } .pdf-table .number { font-weight: bold; display: inline-block; min-width: 15px; text-align: right; margin-right: 4px;} h4 { text-align: center; margin-bottom: 10px; font-size: 11pt; } </style> <h4>Notas - Turma: ${sanitizeHTML(currentClass.name)} - Conjunto: ${sanitizeHTML(gradeSet.name)}</h4> <table class="pdf-table"> <thead> <tr> <th class="student-col">Aluno</th> `; gradeSet.gradeLabels.forEach(label => { tableHTML += `<th class="grade-col">${sanitizeHTML(label)}</th>`; }); tableHTML += `<th class="sum-col">Soma</th><th class="avg-col">Média</th></tr></thead><tbody>`; students.forEach(student => { const studentGrades = student.grades[gradeSetId] || {}; const calculated = calculateSumAndAverageForData(studentGrades); tableHTML += `<tr><td class="student-name"><span class="number">${student.number || '-.'}</span>${sanitizeHTML(student.name)}</td>`; gradeSet.gradeLabels.forEach(label => { const gradeValue = studentGrades[label]; tableHTML += `<td class="grade">${(gradeValue !== null && gradeValue !== undefined) ? sanitizeHTML(gradeValue) : '-'}</td>`; }); tableHTML += `<td class="sum">${(calculated.sum !== null) ? calculated.sum.toFixed(1) : '-'}</td>`; tableHTML += `<td class="avg">${(calculated.average !== null) ? calculated.average.toFixed(1) : '-'}</td>`; tableHTML += `</tr>`; }); tableHTML += `</tbody></table>`; const opt = { margin: [8, 5, 8, 5], filename: filename, image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true, logging: false, }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } }; const originalButtonText = button.innerHTML; button.disabled = true; button.innerHTML = '<span class="icon icon-hourglass-empty"></span>'; try { console.log("Generating PDF with options:", opt); await html2pdf().set(opt).from(tableHTML).save(); console.log("PDF de notas gerado com sucesso."); } catch (error) { console.error("Erro ao gerar PDF de notas:", error); customAlert("Ocorreu um erro ao gerar o PDF de notas. Verifique o console para detalhes."); } finally { button.disabled = false; button.innerHTML = originalButtonText; } };
     const saveAttendance = () => { const date = attendanceDateInput.value; if (!currentClassId || !date) { console.warn("Cannot save attendance: No class or date selected."); customAlert("Selecione uma turma e uma data."); return; } console.log("Saving all attendance data for", date); saveData(); customAlert(`Presença de ${formatDate(date)} salva!`); };
-    const openMonthlyAttendanceModal = () => { if (!currentClassId) { customAlert("Selecione uma turma primeiro."); return; } const currentClass = findClassById(currentClassId); const title = `Frequência Mensal - ${sanitizeHTML(currentClass.name)}`; const today = new Date(); const currentYear = today.getFullYear(); const currentMonth = today.getMonth(); let yearOptions = ''; for (let y = currentYear + 1; y >= currentYear - 5; y--) { yearOptions += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`; } let monthOptions = ''; monthNames.forEach((name, index) => { monthOptions += `<option value="${index}" ${index === currentMonth ? 'selected' : ''}>${name}</option>`; }); const modalContent = ` <div id="monthly-attendance-controls"> <div class="date-selectors"> <label for="monthly-attendance-month">Mês:</label> <select id="monthly-attendance-month">${monthOptions}</select> <label for="monthly-attendance-year">Ano:</label> <select id="monthly-attendance-year">${yearOptions}</select> </div> <div class="export-buttons"> <button type="button" id="export-attendance-csv-button" class="secondary icon-button hidden" title="Exportar CSV"><span class="icon icon-upload"></span></button> <button type="button" id="export-attendance-pdf-button" class="secondary icon-button hidden" title="Exportar PDF"><span class="icon icon-pdf"></span></button> </div> </div> <div id="monthly-attendance-table-wrapper"> <p>Selecione o mês/ano para carregar os dados.</p> </div> <div id="monthly-attendance-chart-container" class="hidden"></div> <div id="monthly-attendance-summary"></div> `; showModal(title, modalContent, '', 'monthly-attendance-modal'); const monthSelect = document.getElementById('monthly-attendance-month'); const yearSelect = document.getElementById('monthly-attendance-year'); const exportCsvButton = document.getElementById('export-attendance-csv-button'); const exportPdfButton = document.getElementById('export-attendance-pdf-button'); const updateMonthlyView = () => { const selectedMonth = parseInt(monthSelect.value); const selectedYear = parseInt(yearSelect.value); renderMonthlyAttendanceData(currentClassId, selectedYear, selectedMonth); }; monthSelect.addEventListener('change', updateMonthlyView); yearSelect.addEventListener('change', updateMonthlyView); exportCsvButton.addEventListener('click', () => { const selectedMonth = parseInt(monthSelect.value); const selectedYear = parseInt(yearSelect.value); exportMonthlyAttendanceCSV(currentClassId, selectedYear, selectedMonth); }); exportPdfButton.addEventListener('click', () => { const selectedMonth = parseInt(monthSelect.value); const selectedYear = parseInt(yearSelect.value); exportMonthlyAttendancePDF(currentClassId, selectedYear, selectedMonth, exportPdfButton); }); updateMonthlyView(); };
-    const renderMonthlyAttendanceData = (classId, year, month) => { const students = getStudentsByClass(classId); const currentModal = document.querySelector('#generic-modal.show.monthly-attendance-modal'); if (!currentModal) return; const tableWrapper = currentModal.querySelector('#monthly-attendance-table-wrapper'); const summaryContainer = currentModal.querySelector('#monthly-attendance-summary'); const chartContainer = currentModal.querySelector('#monthly-attendance-chart-container'); const exportCsvBtn = currentModal.querySelector('#export-attendance-csv-button'); const exportPdfBtn = currentModal.querySelector('#export-attendance-pdf-button'); if (!tableWrapper || !summaryContainer || !chartContainer) { console.error("Um ou mais elementos do modal mensal não encontrados."); return; } tableWrapper.innerHTML = ''; summaryContainer.innerHTML = ''; chartContainer.innerHTML = ''; if (students.length === 0) { tableWrapper.innerHTML = '<p style="text-align:center; padding: 1rem;">Nenhum aluno nesta turma.</p>'; if (exportCsvBtn) exportCsvBtn.classList.add('hidden'); if (exportPdfBtn) exportPdfBtn.classList.add('hidden'); chartContainer.classList.add('hidden'); return; } if (exportCsvBtn) exportCsvBtn.classList.remove('hidden'); if (exportPdfBtn) exportPdfBtn.classList.remove('hidden'); chartContainer.classList.remove('hidden'); const daysInMonth = getDaysInMonth(year, month); const table = document.createElement('table'); table.classList.add('monthly-attendance-table'); const thead = table.createTHead(); const tbody = table.createTBody(); const headerRow = thead.insertRow(); headerRow.innerHTML = `<th class="student-col-monthly">Aluno</th>`; for (let day = 1; day <= daysInMonth; day++) { headerRow.innerHTML += `<th>${day}</th>`; } headerRow.innerHTML += `<th class="freq-col-monthly">% Freq.</th>`; let totalClassP = 0; let totalClassPossibleAttendances = 0; const studentFrequencies = []; students.forEach(student => { const row = tbody.insertRow(); row.innerHTML = `<td class="student-col-monthly"><span class="student-number">${student.number || '-'}.</span> ${sanitizeHTML(student.name)}</td>`; let studentP = 0; let studentPossibleDays = 0; for (let day = 1; day <= daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = '-'; let cellClass = ''; if (isWeekend) { cellClass = 'weekend'; cellContent = ''; } else if (status === 'H') { cellClass = 'status-H'; cellContent = 'H'; } else { studentPossibleDays++; totalClassPossibleAttendances++; if (status === 'P') { cellContent = 'P'; cellClass = 'status-P'; studentP++; totalClassP++; } else if (status === 'F') { cellClass = justification ? 'status-FJ' : 'status-F'; cellContent = justification ? 'FJ' : 'F'; } else { cellContent = '-'; } } row.innerHTML += `<td class="${cellClass}">${cellContent}</td>`; } const frequencyPercent = studentPossibleDays > 0 ? Math.round((studentP / studentPossibleDays) * 100) : 0; const frequencyText = studentPossibleDays > 0 ? frequencyPercent + '%' : '--'; row.innerHTML += `<td class="freq-col-monthly">${frequencyText}</td>`; studentFrequencies.push({ name: student.name, number: student.number, freq: frequencyPercent }); }); tableWrapper.appendChild(table); const classFrequency = totalClassPossibleAttendances > 0 ? ((totalClassP / totalClassPossibleAttendances) * 100).toFixed(0) + '%' : '--'; summaryContainer.textContent = `Frequência Média da Turma (dias letivos): ${classFrequency}`; renderMonthlyAttendanceChart(studentFrequencies); };
+    const openAttendanceReportModal = () => { if (!currentClassId) { customAlert("Selecione uma turma primeiro."); return; } const currentClass = findClassById(currentClassId); const title = `Relatório de Frequência - ${sanitizeHTML(currentClass.name)}`; const today = new Date(); const currentYear = today.getFullYear(); const currentMonth = today.getMonth(); const modalContent = ` <div id="monthly-attendance-controls"> <div class="form-group mb-2"> <label for="report-period-preset">Período Rápido:</label> <select id="report-period-preset"> <option value="custom">Personalizado</option> <option value="current_month" selected>Mês Atual</option> <option value="bimester_1">1º Bimestre</option> <option value="bimester_2">2º Bimestre</option> <option value="bimester_3">3º Bimestre</option> <option value="bimester_4">4º Bimestre</option> <option value="semester_1">1º Semestre</option> <option value="semester_2">2º Semestre</option> <option value="full_year">Ano Todo (${currentYear})</option> </select> </div> <div class="date-selectors" style="display: flex; gap: 10px; flex-wrap: wrap;"> <div style="flex: 1; min-width: 120px;"> <label for="report-start-date">Data Inicial:</label> <input type="date" id="report-start-date"> </div> <div style="flex: 1; min-width: 120px;"> <label for="report-end-date">Data Final:</label> <input type="date" id="report-end-date"> </div> </div> <div class="export-buttons mt-2"> <button type="button" id="export-attendance-csv-button" class="secondary icon-button hidden" title="Exportar CSV"><span class="icon icon-upload"></span></button> <button type="button" id="export-attendance-pdf-button" class="secondary icon-button hidden" title="Exportar PDF"><span class="icon icon-pdf"></span></button> </div> </div> <div id="monthly-attendance-table-wrapper" style="overflow-x: auto; margin-top: 1rem;"> <p>Selecione o período para carregar os dados.</p> </div> <div id="monthly-attendance-chart-container" class="hidden" style="margin-top: 1rem;"></div> <div id="monthly-attendance-summary" style="margin-top: 1rem; font-weight: bold;"></div> `; showModal(title, modalContent, '', 'monthly-attendance-modal'); const presetSelect = document.getElementById('report-period-preset'); const startDateInput = document.getElementById('report-start-date'); const endDateInput = document.getElementById('report-end-date'); const exportCsvButton = document.getElementById('export-attendance-csv-button'); const exportPdfButton = document.getElementById('export-attendance-pdf-button'); const updateDatesFromPreset = () => { const preset = presetSelect.value; const year = currentYear; let start = ''; let end = ''; if (preset === 'current_month') { const month = today.getMonth(); start = `${year}-${String(month + 1).padStart(2, '0')}-01`; end = `${year}-${String(month + 1).padStart(2, '0')}-${String(getDaysInMonth(year, month)).padStart(2, '0')}`; } else if (preset === 'bimester_1') { start = `${year}-02-01`; end = `${year}-04-30`; } else if (preset === 'bimester_2') { start = `${year}-05-01`; end = `${year}-07-15`; } else if (preset === 'bimester_3') { start = `${year}-08-01`; end = `${year}-09-30`; } else if (preset === 'bimester_4') { start = `${year}-10-01`; end = `${year}-12-20`; } else if (preset === 'semester_1') { start = `${year}-02-01`; end = `${year}-07-15`; } else if (preset === 'semester_2') { start = `${year}-08-01`; end = `${year}-12-20`; } else if (preset === 'full_year') { start = `${year}-01-01`; end = `${year}-12-31`; } if (start && end) { startDateInput.value = start; endDateInput.value = end; updateReportView(); } }; const updateReportView = () => { const start = startDateInput.value; const end = endDateInput.value; if (start && end && start <= end) { renderAttendanceReportData(currentClassId, start, end); } }; presetSelect.addEventListener('change', () => { if (presetSelect.value !== 'custom') { updateDatesFromPreset(); } }); startDateInput.addEventListener('change', () => { presetSelect.value = 'custom'; updateReportView(); }); endDateInput.addEventListener('change', () => { presetSelect.value = 'custom'; updateReportView(); }); exportCsvButton.addEventListener('click', () => { exportAttendanceReportCSV(currentClassId, startDateInput.value, endDateInput.value); }); exportPdfButton.addEventListener('click', () => { exportAttendanceReportPDF(currentClassId, startDateInput.value, endDateInput.value, exportPdfButton); }); updateDatesFromPreset(); };
+    const renderAttendanceReportData = (classId, startDateStr, endDateStr) => { const students = getStudentsByClass(classId); const currentModal = document.querySelector('#generic-modal.show.monthly-attendance-modal'); if (!currentModal) return; const tableWrapper = currentModal.querySelector('#monthly-attendance-table-wrapper'); const summaryContainer = currentModal.querySelector('#monthly-attendance-summary'); const chartContainer = currentModal.querySelector('#monthly-attendance-chart-container'); const exportCsvBtn = currentModal.querySelector('#export-attendance-csv-button'); const exportPdfBtn = currentModal.querySelector('#export-attendance-pdf-button'); if (!tableWrapper || !summaryContainer || !chartContainer) return; tableWrapper.innerHTML = ''; summaryContainer.innerHTML = ''; chartContainer.innerHTML = ''; if (students.length === 0) { tableWrapper.innerHTML = '<p style="text-align:center; padding: 1rem;">Nenhum aluno nesta turma.</p>'; if (exportCsvBtn) exportCsvBtn.classList.add('hidden'); if (exportPdfBtn) exportPdfBtn.classList.add('hidden'); chartContainer.classList.add('hidden'); return; } if (exportCsvBtn) exportCsvBtn.classList.remove('hidden'); if (exportPdfBtn) exportPdfBtn.classList.remove('hidden'); chartContainer.classList.remove('hidden'); const startDate = new Date(startDateStr + 'T00:00:00'); const endDate = new Date(endDateStr + 'T00:00:00'); const diffTime = Math.abs(endDate - startDate); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; const showDailyColumns = diffDays <= 31; const table = document.createElement('table'); table.classList.add('monthly-attendance-table'); const thead = table.createTHead(); const tbody = table.createTBody(); const headerRow = thead.insertRow(); headerRow.innerHTML = `<th class="student-col-monthly">Aluno</th>`; const dates = []; for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) { dates.push(new Date(d)); } if (showDailyColumns) { dates.forEach(d => { headerRow.innerHTML += `<th>${d.getDate()}</th>`; }); } headerRow.innerHTML += `<th class="summary-col">P</th><th class="summary-col">F</th><th class="summary-col">FJ</th><th class="summary-col">H</th><th class="freq-col-monthly">% Freq.</th>`; let totalClassP = 0; let totalClassPossibleAttendances = 0; const studentFrequencies = []; students.forEach(student => { const row = tbody.insertRow(); row.innerHTML = `<td class="student-col-monthly"><span class="student-number">${student.number || '-'}.</span> ${sanitizeHTML(student.name)}</td>`; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; dates.forEach(d => { const year = d.getFullYear(); const month = d.getMonth() + 1; const day = d.getDate(); const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = d.getDay(); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = '-'; let cellClass = ''; if (isWeekend) { cellClass = 'weekend'; cellContent = ''; } else if (status === 'H') { cellClass = 'status-H'; cellContent = 'H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellContent = 'P'; cellClass = 'status-P'; studentP++; } else if (status === 'F') { cellClass = justification ? 'status-FJ' : 'status-F'; cellContent = justification ? 'FJ' : 'F'; if (justification) studentFJ++; else studentF++; } else { cellContent = '-'; } } if (showDailyColumns) { row.innerHTML += `<td class="${cellClass}">${cellContent}</td>`; } }); totalClassP += studentP; totalClassPossibleAttendances += studentPossibleDays; const frequencyPercent = studentPossibleDays > 0 ? Math.round((studentP / studentPossibleDays) * 100) : 0; const frequencyText = studentPossibleDays > 0 ? frequencyPercent + '%' : '--'; row.innerHTML += `<td class="summary-col">${studentP}</td><td class="summary-col">${studentF}</td><td class="summary-col">${studentFJ}</td><td class="summary-col">${studentH}</td><td class="freq-col-monthly">${frequencyText}</td>`; studentFrequencies.push({ name: student.name, number: student.number, freq: frequencyPercent }); }); tableWrapper.appendChild(table); const classFrequency = totalClassPossibleAttendances > 0 ? ((totalClassP / totalClassPossibleAttendances) * 100).toFixed(0) + '%' : '--'; summaryContainer.textContent = `Frequência Média da Turma (dias letivos): ${classFrequency}`; renderMonthlyAttendanceChart(studentFrequencies); };
     const renderMonthlyAttendanceChart = (frequencies) => { const currentModal = document.querySelector('#generic-modal.show.monthly-attendance-modal'); const chartContainer = currentModal?.querySelector('#monthly-attendance-chart-container'); if (!chartContainer) return; chartContainer.innerHTML = ''; if (frequencies.length === 0) { return; } const maxFreq = 100; const chartHeight = 100; frequencies.forEach(item => { const barContainer = document.createElement('div'); barContainer.classList.add('chart-bar-container'); const bar = document.createElement('div'); bar.classList.add('chart-bar'); const barHeightValue = (item.freq / maxFreq) * chartHeight; bar.style.height = `${barHeightValue}px`; bar.style.backgroundColor = item.freq >= 70 ? 'var(--accent-success)' : item.freq >= 50 ? 'var(--accent-warning)' : 'var(--accent-danger)'; bar.dataset.percentage = `${item.freq}%`; const label = document.createElement('div'); label.classList.add('chart-label'); label.textContent = item.number ? `${item.number}.` : ''; label.title = sanitizeHTML(item.name); barContainer.appendChild(bar); barContainer.appendChild(label); chartContainer.appendChild(barContainer); }); };
-    const exportMonthlyAttendanceCSV = (classId, year, month) => { const students = getStudentsByClass(classId); if (students.length === 0) { customAlert("Nenhum aluno na turma para exportar."); return; } const currentClass = findClassById(classId); const className = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const monthName = monthNames[month]; const daysInMonth = getDaysInMonth(year, month); let csvContent = "\uFEFF"; let header = [escapeCsvField("Aluno"), escapeCsvField("No.")]; for (let day = 1; day <= daysInMonth; day++) { header.push(escapeCsvField(String(day))); } header.push(escapeCsvField("Presente")); header.push(escapeCsvField("Falta")); header.push(escapeCsvField("Falta Just.")); header.push(escapeCsvField("Dias Não Letivos")); header.push(escapeCsvField("% Freq.")); csvContent += header.join(",") + "\r\n"; students.forEach(student => { let row = [escapeCsvField(student.name), escapeCsvField(student.number || '')]; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; for (let day = 1; day <= daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellValue = ''; if (isWeekend) { cellValue = ''; } else if (status === 'H') { cellValue = 'H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellValue = 'P'; studentP++; } else if (status === 'F') { if (justification) { cellValue = 'FJ'; studentFJ++; } else { cellValue = 'F'; studentF++; } } else { cellValue = '-'; } } row.push(escapeCsvField(cellValue)); } const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) + '%' : ''; row.push(escapeCsvField(studentP)); row.push(escapeCsvField(studentF)); row.push(escapeCsvField(studentFJ)); row.push(escapeCsvField(studentH)); row.push(escapeCsvField(frequency)); csvContent += row.join(",") + "\r\n"; }); const encodedUri = encodeURI(`data:text/csv;charset=utf-8,${csvContent}`); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `frequencia_${className}_${year}_${monthName}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
-    const exportMonthlyAttendancePDF = async (classId, year, month, button) => { const students = getStudentsByClass(classId); if (students.length === 0) { customAlert("Nenhum aluno na turma para exportar para PDF."); return; } const currentClass = findClassById(classId); const classNameSanitized = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const monthName = monthNames[month]; const filename = `frequencia_${classNameSanitized}_${year}_${monthName}.pdf`; const daysInMonth = getDaysInMonth(year, month); let tableHTML = ` <style> body { font-family: sans-serif; font-size: 7pt; } .pdf-table { border-collapse: collapse; width: 100%; margin-top: 8px; table-layout: fixed; } .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 2px 3px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; } .pdf-table th { background-color: #f2f2f2; font-weight: bold; font-size: 7pt; } .pdf-table td { font-size: 7pt; } .pdf-table tr { page-break-inside: avoid; } .pdf-table td.student-col { text-align: left; min-width: 90px; white-space: normal; } .pdf-table th.student-col { min-width: 90px; } .pdf-table th.day-col, .pdf-table td.day-col { min-width: 15px; max-width:16px; } .pdf-table td.weekend { background-color: #eee; } .pdf-table td.status-H { background-color: #e2e3e5; color: #495057; font-style: italic; } .pdf-table th.summary-col, .pdf-table td.summary-col { font-weight: bold; min-width: 20px; max-width: 25px; font-size: 6pt; } .pdf-table .number { font-weight: bold; display: inline-block; min-width: 12px; text-align: right; margin-right: 3px;} h4 { text-align: center; margin-bottom: 6px; font-size: 10pt; } </style> <h4>Frequência Mensal - Turma: ${sanitizeHTML(currentClass.name)} - ${monthName}/${year}</h4> <table class="pdf-table"> <thead> <tr> <th class="student-col">Aluno</th>`; for (let day = 1; day <= daysInMonth; day++) { tableHTML += `<th class="day-col">${day}</th>`; } tableHTML += `<th class="summary-col">P</th><th class="summary-col">F</th><th class="summary-col">FJ</th><th class="summary-col">H</th><th class="summary-col">%</th></tr></thead><tbody>`; students.forEach(student => { tableHTML += `<tr><td class="student-col"><span class="number">${student.number || '-.'}</span>${sanitizeHTML(student.name)}</td>`; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; for (let day = 1; day <=daysInMonth; day++) { const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = getDayOfWeek(year, month, day); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = ''; let cellClass = 'day-col'; if (isWeekend) { cellClass += ' weekend'; } else if (status === 'H') { cellContent = 'H'; cellClass += ' status-H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellContent = 'P'; studentP++; } else if (status === 'F') { if (justification) { cellContent = 'FJ'; studentFJ++; } else { cellContent = 'F'; studentF++; } } else { cellContent = '-'; } } tableHTML += `<td class="${cellClass}">${cellContent}</td>`; } const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) : '-'; tableHTML += `<td class="summary-col">${studentP}</td>`; tableHTML += `<td class="summary-col">${studentF}</td>`; tableHTML += `<td class="summary-col">${studentFJ}</td>`; tableHTML += `<td class="summary-col">${studentH}</td>`; tableHTML += `<td class="summary-col">${frequency}${frequency !== '-' ? '%' : ''}</td>`; tableHTML += `</tr>`; }); tableHTML += `</tbody></table>`; const opt = { margin: [5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 0.9 }, html2canvas: { scale: 2, useCORS: true, logging: false, }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } }; const originalButtonText = button.innerHTML; button.disabled = true; button.innerHTML = '<span class="icon icon-hourglass-empty"></span>'; try { console.log("Generating PDF with options:", opt); await html2pdf().set(opt).from(tableHTML).save(); console.log("PDF de frequência gerado com sucesso."); } catch (error) { console.error("Erro ao gerar PDF de frequência:", error); customAlert("Ocorreu um erro ao gerar o PDF de frequência. Verifique o console para detalhes."); } finally { button.disabled = false; button.innerHTML = originalButtonText; } };
+    const exportAttendanceReportCSV = (classId, startDateStr, endDateStr) => { const students = getStudentsByClass(classId); if (students.length === 0) { customAlert("Nenhum aluno na turma para exportar."); return; } const currentClass = findClassById(classId); const className = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const startDate = new Date(startDateStr + 'T00:00:00'); const endDate = new Date(endDateStr + 'T00:00:00'); const diffTime = Math.abs(endDate - startDate); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; const showDailyColumns = diffDays <= 31; let csvContent = "\uFEFF"; let header = [escapeCsvField("Aluno"), escapeCsvField("No.")]; const dates = []; for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) { dates.push(new Date(d)); } if (showDailyColumns) { dates.forEach(d => { header.push(escapeCsvField(String(d.getDate()))); }); } header.push(escapeCsvField("Presente")); header.push(escapeCsvField("Falta")); header.push(escapeCsvField("Falta Just.")); header.push(escapeCsvField("Dias Não Letivos")); header.push(escapeCsvField("% Freq.")); csvContent += header.join(",") + "\r\n"; students.forEach(student => { let row = [escapeCsvField(student.name), escapeCsvField(student.number || '')]; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; dates.forEach(d => { const year = d.getFullYear(); const month = d.getMonth() + 1; const day = d.getDate(); const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = d.getDay(); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellValue = ''; if (isWeekend) { cellValue = ''; } else if (status === 'H') { cellValue = 'H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellValue = 'P'; studentP++; } else if (status === 'F') { if (justification) { cellValue = 'FJ'; studentFJ++; } else { cellValue = 'F'; studentF++; } } else { cellValue = '-'; } } if (showDailyColumns) { row.push(escapeCsvField(cellValue)); } }); const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) + '%' : ''; row.push(escapeCsvField(studentP)); row.push(escapeCsvField(studentF)); row.push(escapeCsvField(studentFJ)); row.push(escapeCsvField(studentH)); row.push(escapeCsvField(frequency)); csvContent += row.join(",") + "\r\n"; }); const encodedUri = encodeURI(`data:text/csv;charset=utf-8,${csvContent}`); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `frequencia_${className}_${startDateStr}_a_${endDateStr}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
+    const exportAttendanceReportPDF = async (classId, startDateStr, endDateStr, button) => { const students = getStudentsByClass(classId); if (students.length === 0) { customAlert("Nenhum aluno na turma para exportar para PDF."); return; } const currentClass = findClassById(classId); const classNameSanitized = currentClass?.name.replace(/[^a-z0-9]/gi, '_') || 'Turma'; const filename = `frequencia_${classNameSanitized}_${startDateStr}_a_${endDateStr}.pdf`; const startDate = new Date(startDateStr + 'T00:00:00'); const endDate = new Date(endDateStr + 'T00:00:00'); const diffTime = Math.abs(endDate - startDate); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; const showDailyColumns = diffDays <= 31; const dates = []; for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) { dates.push(new Date(d)); } let tableHTML = ` <style> body { font-family: sans-serif; font-size: 7pt; } .pdf-table { border-collapse: collapse; width: 100%; margin-top: 8px; table-layout: fixed; } .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 2px 3px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; } .pdf-table th { background-color: #f2f2f2; font-weight: bold; font-size: 7pt; } .pdf-table td { font-size: 7pt; } .pdf-table tr { page-break-inside: avoid; } .pdf-table td.student-col { text-align: left; min-width: 90px; white-space: normal; } .pdf-table th.student-col { min-width: 90px; } .pdf-table th.day-col, .pdf-table td.day-col { min-width: 15px; max-width:16px; } .pdf-table td.weekend { background-color: #eee; } .pdf-table td.status-H { background-color: #e2e3e5; color: #495057; font-style: italic; } .pdf-table th.summary-col, .pdf-table td.summary-col { font-weight: bold; min-width: 20px; max-width: 25px; font-size: 6pt; } .pdf-table .number { font-weight: bold; display: inline-block; min-width: 12px; text-align: right; margin-right: 3px;} h4 { text-align: center; margin-bottom: 6px; font-size: 10pt; } </style> <h4>Relatório de Frequência - Turma: ${sanitizeHTML(currentClass.name)} - ${startDateStr} a ${endDateStr}</h4> <table class="pdf-table"> <thead> <tr> <th class="student-col">Aluno</th>`; if (showDailyColumns) { dates.forEach(d => { tableHTML += `<th class="day-col">${d.getDate()}</th>`; }); } tableHTML += `<th class="summary-col">P</th><th class="summary-col">F</th><th class="summary-col">FJ</th><th class="summary-col">H</th><th class="summary-col">%</th></tr></thead><tbody>`; students.forEach(student => { tableHTML += `<tr><td class="student-col"><span class="number">${student.number || '-.'}</span>${sanitizeHTML(student.name)}</td>`; let studentP = 0, studentF = 0, studentFJ = 0, studentH = 0, studentPossibleDays = 0; dates.forEach(d => { const year = d.getFullYear(); const month = d.getMonth() + 1; const day = d.getDate(); const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const attendanceRecord = student.attendance[dateStr]; const status = attendanceRecord?.status; const justification = attendanceRecord?.justification || ''; const dayOfWeek = d.getDay(); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; let cellContent = ''; let cellClass = 'day-col'; if (isWeekend) { cellClass += ' weekend'; } else if (status === 'H') { cellContent = 'H'; cellClass += ' status-H'; studentH++; } else { studentPossibleDays++; if (status === 'P') { cellContent = 'P'; studentP++; } else if (status === 'F') { if (justification) { cellContent = 'FJ'; studentFJ++; } else { cellContent = 'F'; studentF++; } } else { cellContent = '-'; } } if (showDailyColumns) { tableHTML += `<td class="${cellClass}">${cellContent}</td>`; } }); const frequency = studentPossibleDays > 0 ? ((studentP / studentPossibleDays) * 100).toFixed(0) : '-'; tableHTML += `<td class="summary-col">${studentP}</td>`; tableHTML += `<td class="summary-col">${studentF}</td>`; tableHTML += `<td class="summary-col">${studentFJ}</td>`; tableHTML += `<td class="summary-col">${studentH}</td>`; tableHTML += `<td class="summary-col">${frequency}${frequency !== '-' ? '%' : ''}</td>`; tableHTML += `</tr>`; }); tableHTML += `</tbody></table>`; const opt = { margin: [5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 0.9 }, html2canvas: { scale: 2, useCORS: true, logging: false, }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } }; const originalButtonText = button.innerHTML; button.disabled = true; button.innerHTML = '<span class="icon icon-hourglass-empty"></span>'; try { console.log("Generating PDF with options:", opt); await html2pdf().set(opt).from(tableHTML).save(); console.log("PDF de frequência gerado com sucesso."); } catch (error) { console.error("Erro ao gerar PDF de frequência:", error); customAlert("Ocorreu um erro ao gerar o PDF de frequência. Verifique o console para detalhes."); } finally { button.disabled = false; button.innerHTML = originalButtonText; } };
     const performSearch = (term) => { term = term.toLowerCase().trim(); if (!term) { hideModal(); return; } const results = { schools: [], classes: [], students: [] }; results.schools = appData.schools.filter(s => s.name.toLowerCase().includes(term)); results.classes = appData.classes.filter(c => c.name.toLowerCase().includes(term) || (c.subject && c.subject.toLowerCase().includes(term))); results.students = appData.students.filter(s => s.name.toLowerCase().includes(term) || (s.number && String(s.number) === term)); renderSearchResults(results, term); };
     const renderSearchResults = (results, term) => { let resultsHtml = `<p>Resultados para: <strong>${sanitizeHTML(term)}</strong></p><div class="item-list mt-1">`; let count = 0; const renderItem = (item, type, details = '') => { count++; const itemSchoolId = type === 'school' ? item.id : (item.schoolId || findClassById(item.classId)?.schoolId); const itemClassId = type === 'student' ? item.classId : (type === 'class' ? item.id : ''); return `<div class="list-item search-result-item" data-type="${type}" data-id="${item.id}" ${itemSchoolId ? `data-school-id="${itemSchoolId}"` : ''} ${itemClassId ? `data-class-id="${itemClassId}"` : ''}> <div class="item-info">${sanitizeHTML(item.name)} ${details ? `<small style='display:block; color: var(--text-secondary);'>${sanitizeHTML(details)}</small>` : ''}</div> <span class="result-type">${type.charAt(0).toUpperCase() + type.slice(1)}</span> </div>`; }; if (results.schools.length > 0) { resultsHtml += `<h5>Escolas</h5>`; results.schools.forEach(s => resultsHtml += renderItem(s, 'school')); } if (results.classes.length > 0) { resultsHtml += `<h5 class="mt-2">Turmas</h5>`; results.classes.forEach(c => { const school = findSchoolById(c.schoolId); resultsHtml += renderItem(c, 'class', `(${c.subject || 'N/A'}) - ${school?.name || '?'}`); }); } if (results.students.length > 0) { resultsHtml += `<h5 class="mt-2">Alunos</h5>`; results.students.forEach(s => { const cls = findClassById(s.classId); const school = findSchoolById(cls?.schoolId); resultsHtml += renderItem(s, 'student', `${s.number || '-'}. ${cls?.name || '?'} / ${school?.name || '?'}`); }); } if (count === 0) { resultsHtml += `<p style="text-align:center; padding: 1rem;">Nenhum resultado encontrado.</p>`; } resultsHtml += `</div>`; showModal(`Resultados da Busca`, resultsHtml, '', 'search-results-modal'); modalBody.querySelectorAll('.search-result-item').forEach(item => { item.addEventListener('click', () => { const type = item.dataset.type; const id = item.dataset.id; const classId = item.dataset.classId; const schoolId = item.dataset.schoolId; hideModal(); searchInput.value = ''; if (type === 'school') { selectSchool(id); showSection('classes-section'); } else if (type === 'class') { if(schoolId) selectSchool(schoolId); selectClass(id); showSection('class-details-section'); } else if (type === 'student') { if(schoolId) selectSchool(schoolId); if(classId) selectClass(classId); showSection('class-details-section'); setTimeout(() => { const studentElement = studentListContainer.querySelector(`.list-item[data-id="${id}"]`); studentElement?.scrollIntoView({ behavior: 'smooth', block: 'center' }); studentElement?.classList.add('active'); setTimeout(() => studentElement?.classList.remove('active'), 2000); }, 300); } }); }); };
     // --- Modais de Tela Cheia (Planejamento e Anotações) ---
@@ -1366,8 +1380,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeCustomSound = async () => { if (await customConfirm("Remover o som de notificação personalizado?")) { appData.settings.customNotificationSound = null; localStorage.removeItem('superProfessorPro_customSoundName'); saveData(); updateCustomSoundUI(); customAlert("Som personalizado removido."); } };
     
     const updateProfileUI = () => {
-        if (!appData.userProfile) appData.userProfile = { name: '', avatar: '' };
+        if (!appData.userProfile) appData.userProfile = { name: '', avatar: '', subjects: '' };
         if (profileNameInput) profileNameInput.value = appData.userProfile.name || '';
+        if (profileSubjectsInput) profileSubjectsInput.value = appData.userProfile.subjects || '';
         
         const sideMenuName = document.getElementById('side-menu-name');
         if (sideMenuName) sideMenuName.textContent = appData.userProfile.name || 'Professor';
@@ -1430,9 +1445,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const saveProfile = () => {
-        if (!appData.userProfile) appData.userProfile = { name: '', avatar: '' };
+        if (!appData.userProfile) appData.userProfile = { name: '', avatar: '', subjects: '' };
         if (profileNameInput) {
             appData.userProfile.name = profileNameInput.value.trim();
+        }
+        if (profileSubjectsInput) {
+            appData.userProfile.subjects = profileSubjectsInput.value.trim();
         }
         saveData();
         updateProfileUI();
@@ -2026,12 +2044,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="audio-status" style="font-size: 1.2rem; font-weight: bold; color: var(--text-secondary);">Pronto para gravar</div>
                 <div id="audio-timer" style="font-size: 2rem; font-family: monospace;">00:00</div>
                 
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" id="start-record-btn" class="success" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                        <span class="icon icon-mic" style="font-size: 24px;"></span>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button type="button" id="start-record-btn" class="success">
+                        <span class="icon icon-mic"></span> Iniciar Gravação
                     </button>
-                    <button type="button" id="stop-record-btn" class="danger hidden" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                        <span class="icon icon-stop" style="font-size: 24px;"></span>
+                    <button type="button" id="stop-record-btn" class="danger hidden">
+                        <span class="icon icon-stop"></span> Parar Gravação
                     </button>
                 </div>
                 
@@ -2619,22 +2637,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = "Pomodoro Timer";
         const content = `
             <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0;">
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <button type="button" id="pomo-mode-work" class="button primary" style="border-radius: 20px;">Foco (25m)</button>
-                    <button type="button" id="pomo-mode-break" class="button secondary" style="border-radius: 20px;">Pausa (5m)</button>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button type="button" id="pomo-mode-work" class="button primary">Foco (25m)</button>
+                    <button type="button" id="pomo-mode-break" class="button secondary">Pausa (5m)</button>
                 </div>
                 
                 <div id="pomo-display" style="font-size: 4rem; font-family: monospace; font-weight: bold; color: var(--accent-primary);">25:00</div>
                 
-                <div style="display: flex; gap: 15px;">
-                    <button type="button" id="pomo-start" class="success" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                        <span class="icon icon-play-arrow" style="font-size: 24px;"></span>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button type="button" id="pomo-start" class="success">
+                        <span class="icon icon-play-arrow"></span> Iniciar
                     </button>
-                    <button type="button" id="pomo-pause" class="warning hidden" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                        <span class="icon icon-pause" style="font-size: 24px;"></span>
+                    <button type="button" id="pomo-pause" class="warning hidden">
+                        <span class="icon icon-pause"></span> Pausar
                     </button>
-                    <button type="button" id="pomo-reset" class="secondary" style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                        <span class="icon icon-sync" style="font-size: 24px;"></span>
+                    <button type="button" id="pomo-reset" class="secondary">
+                        <span class="icon icon-sync"></span> Zerar
                     </button>
                 </div>
             </div>
@@ -2892,8 +2910,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="display: flex; gap: 8px; margin-bottom: 15px;">
                     <input type="text" id="fc-front" placeholder="Frente (Pergunta)" style="flex: 1; margin-bottom: 0;">
                     <input type="text" id="fc-back" placeholder="Verso (Resposta)" style="flex: 1; margin-bottom: 0;">
-                    <button type="button" id="fc-add-btn" class="primary icon-button"><span class="icon icon-adicionar icon-only"></span></button>
+                    <button type="button" id="fc-add-btn" class="primary icon-button" title="Adicionar Manualmente"><span class="icon icon-adicionar icon-only"></span></button>
                 </div>
+                
+                <div style="background: var(--bg-tertiary-alpha); padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px dashed var(--border-color);">
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);"><span class="icon icon-auto-awesome"></span> Gerar com IA</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" id="fc-ai-theme" placeholder="Tema/Assunto" style="flex: 2; min-width: 120px; margin-bottom: 0;">
+                        <input type="number" id="fc-ai-count" placeholder="Qtd" value="5" min="1" max="20" style="flex: 1; min-width: 60px; margin-bottom: 0;">
+                        <button type="button" id="fc-ai-generate-btn" class="success" style="flex: 1; min-width: 100px; padding: 0.4rem; margin: 0;"><span class="icon icon-auto-awesome"></span> Gerar</button>
+                    </div>
+                </div>
+
                 <div id="fc-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
                     <p class="text-secondary" style="text-align: center; margin-top: 20px;">Nenhum cartão criado ainda.</p>
                 </div>
@@ -2928,6 +2956,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const backInput = document.getElementById('fc-back');
         const addBtn = document.getElementById('fc-add-btn');
         const listContainer = document.getElementById('fc-list');
+        const aiGenerateBtn = document.getElementById('fc-ai-generate-btn');
+        const aiThemeInput = document.getElementById('fc-ai-theme');
+        const aiCountInput = document.getElementById('fc-ai-count');
         
         const cardElement = document.getElementById('fc-card');
         const displayFront = document.getElementById('fc-display-front');
@@ -2962,6 +2993,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 backInput.value = '';
                 frontInput.focus();
                 renderList();
+            }
+        });
+        
+        aiGenerateBtn.addEventListener('click', async () => {
+            const theme = aiThemeInput.value.trim();
+            const count = parseInt(aiCountInput.value) || 5;
+            
+            if (!theme) {
+                showNotification("Por favor, insira um tema para gerar os flashcards.");
+                return;
+            }
+            
+            if (!appData.settings.geminiApiKey) {
+                showModal("Aviso", "<p>Você precisa configurar a Chave de API do Gemini na aba Ajustes para usar esta funcionalidade.</p>");
+                return;
+            }
+            
+            const originalText = aiGenerateBtn.innerHTML;
+            aiGenerateBtn.innerHTML = '<span class="icon icon-sync spinner"></span> Gerando...';
+            aiGenerateBtn.disabled = true;
+            
+            try {
+                const prompt = `Crie ${count} flashcards sobre o tema: "${theme}".
+Retorne APENAS um array JSON válido, onde cada objeto tem as propriedades "front" (a pergunta ou conceito) e "back" (a resposta ou definição).
+Exemplo de formato esperado:
+[
+  {"front": "Pergunta 1", "back": "Resposta 1"},
+  {"front": "Pergunta 2", "back": "Resposta 2"}
+]`;
+                
+                const responseText = await generateAIContent(prompt);
+                const jsonMatch = responseText.match(/\\[[\\s\\S]*\\]/);
+                
+                if (jsonMatch) {
+                    const generatedCards = JSON.parse(jsonMatch[0]);
+                    if (Array.isArray(generatedCards) && generatedCards.length > 0) {
+                        cards = [...cards, ...generatedCards];
+                        renderList();
+                        showNotification(`${generatedCards.length} flashcards gerados com sucesso!`);
+                        aiThemeInput.value = '';
+                    } else {
+                        throw new Error("Formato JSON inválido retornado pela IA.");
+                    }
+                } else {
+                    throw new Error("Não foi possível extrair o JSON da resposta da IA.");
+                }
+            } catch (error) {
+                console.error("Erro ao gerar flashcards:", error);
+                showNotification("Erro ao gerar flashcards. Tente novamente ou ajuste o tema.");
+            } finally {
+                aiGenerateBtn.innerHTML = originalText;
+                aiGenerateBtn.disabled = false;
             }
         });
         
@@ -3027,25 +3110,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openEventOrganizerModal = () => {
-        const classesOptions = appData.classes.map(c => `<option value="${c.id}">${sanitizeHTML(c.name)}</option>`).join('');
+        const schools = [...new Set(appData.classes.map(c => findSchoolById(c.schoolId)?.name).filter(Boolean))];
+        
         const content = `
             <div class="form-group">
-                <label>Selecione a Turma:</label>
-                <select id="event-class-select">
+                <label>Selecione a Escola:</label>
+                <select id="event-school-select" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);">
                     <option value="">-- Selecione --</option>
-                    ${classesOptions}
+                    ${schools.map(s => `<option value="${s}">${s}</option>`).join('')}
                 </select>
+            </div>
+            <div class="form-group hidden" id="event-shift-group">
+                <label>Selecione o(s) Turno(s):</label>
+                <div id="event-shift-checkboxes" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; padding: 10px; background: var(--bg-secondary); border-radius: 6px;"></div>
+            </div>
+            <div class="form-group hidden" id="event-class-group">
+                <label>Selecione a(s) Turma(s):</label>
+                <div id="event-class-checkboxes" style="display: flex; gap: 15px; flex-wrap: wrap; max-height: 120px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; background: var(--bg-secondary);"></div>
             </div>
             <div class="form-group">
                 <label>Nome do Evento/Excursão:</label>
                 <input type="text" id="event-name" placeholder="Ex: Museu de Arte">
             </div>
             <div id="event-summary" style="margin-bottom: 15px; font-weight: bold; color: var(--accent-primary);"></div>
-            <div id="event-students-list" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+            <div id="event-students-list" style="max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
         `;
         showModal("Organizador de Excursões", content, '<button type="button" id="print-event-btn" class="primary hidden"><span class="icon icon-pdf"></span> Imprimir Lista</button>', 'event-organizer-modal');
 
-        const classSelect = document.getElementById('event-class-select');
+        const schoolSelect = document.getElementById('event-school-select');
+        const shiftGroup = document.getElementById('event-shift-group');
+        const shiftCheckboxesContainer = document.getElementById('event-shift-checkboxes');
+        const classGroup = document.getElementById('event-class-group');
+        const classCheckboxesContainer = document.getElementById('event-class-checkboxes');
         const studentsList = document.getElementById('event-students-list');
         const summary = document.getElementById('event-summary');
         const printBtn = document.getElementById('print-event-btn');
@@ -3064,9 +3160,10 @@ document.addEventListener('DOMContentLoaded', () => {
             summary.innerHTML = `Total: ${total} alunos | Autorizados: ${authCount} | Pagos: ${paidCount}`;
         };
 
-        classSelect.addEventListener('change', () => {
-            const classId = classSelect.value;
-            if (!classId) {
+        const renderStudents = () => {
+            const selectedClassIds = Array.from(classCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            
+            if (selectedClassIds.length === 0) {
                 studentsList.innerHTML = '';
                 currentStudents = [];
                 eventState = {};
@@ -3075,25 +3172,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            currentStudents = getStudentsByClass(classId);
-            eventState = {};
-            currentStudents.forEach(s => { eventState[s.id] = { auth: false, paid: false }; });
+            currentStudents = appData.students.filter(s => selectedClassIds.includes(s.classId));
+            
+            // Preserve existing state
+            const newState = {};
+            currentStudents.forEach(s => { 
+                newState[s.id] = eventState[s.id] || { auth: false, paid: false }; 
+            });
+            eventState = newState;
             
             printBtn.classList.remove('hidden');
             
-            studentsList.innerHTML = currentStudents.map(s => `
+            studentsList.innerHTML = currentStudents.map(s => {
+                const cls = findClassById(s.classId);
+                return `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px;">
-                    <div style="flex: 1; font-weight: 500;">${s.number ? s.number + '. ' : ''}${sanitizeHTML(s.name)}</div>
+                    <div style="flex: 1; font-weight: 500;">
+                        \${s.number ? s.number + '. ' : ''}\${sanitizeHTML(s.name)} 
+                        <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: normal;">(\${sanitizeHTML(cls?.name || '')})</span>
+                    </div>
                     <div style="display: flex; gap: 15px; align-items: center;">
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin: 0;">
-                            <input type="checkbox" class="event-auth-cb" data-id="${s.id}"> Aut.
+                            <input type="checkbox" class="event-auth-cb" data-id="\${s.id}" \${eventState[s.id].auth ? 'checked' : ''}> Aut.
                         </label>
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin: 0;">
-                            <input type="checkbox" class="event-paid-cb" data-id="${s.id}"> Pago
+                            <input type="checkbox" class="event-paid-cb" data-id="\${s.id}" \${eventState[s.id].paid ? 'checked' : ''}> Pago
                         </label>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
             
             studentsList.querySelectorAll('.event-auth-cb').forEach(cb => {
                 cb.addEventListener('change', (e) => {
@@ -3109,11 +3216,78 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             updateSummary();
-        });
+        };
+
+        const updateClasses = () => {
+            const school = schoolSelect.value;
+            const selectedShifts = Array.from(shiftCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            
+            if (!school || selectedShifts.length === 0) {
+                classGroup.classList.add('hidden');
+                classCheckboxesContainer.innerHTML = '';
+                renderStudents();
+                return;
+            }
+            
+            const availableClasses = appData.classes.filter(c => 
+                findSchoolById(c.schoolId)?.name === school && 
+                selectedShifts.includes(c.shift)
+            );
+            
+            if (availableClasses.length > 0) {
+                classGroup.classList.remove('hidden');
+                classCheckboxesContainer.innerHTML = availableClasses.map(c => `
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" class="event-class-cb" value="${c.id}"> ${sanitizeHTML(c.name)}
+                    </label>
+                `).join('');
+                
+                classCheckboxesContainer.querySelectorAll('.event-class-cb').forEach(cb => {
+                    cb.addEventListener('change', renderStudents);
+                });
+            } else {
+                classGroup.classList.add('hidden');
+                classCheckboxesContainer.innerHTML = '';
+            }
+            renderStudents();
+        };
+
+        const updateShifts = () => {
+            const school = schoolSelect.value;
+            if (!school) {
+                shiftGroup.classList.add('hidden');
+                shiftCheckboxesContainer.innerHTML = '';
+                updateClasses();
+                return;
+            }
+            
+            const shiftsInSchool = [...new Set(appData.classes.filter(c => findSchoolById(c.schoolId)?.name === school).map(c => c.shift).filter(Boolean))];
+            
+            if (shiftsInSchool.length > 0) {
+                shiftGroup.classList.remove('hidden');
+                shiftCheckboxesContainer.innerHTML = shiftsInSchool.map(shift => `
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" class="event-shift-cb" value="${shift}"> ${shift}
+                    </label>
+                `).join('');
+                
+                shiftCheckboxesContainer.querySelectorAll('.event-shift-cb').forEach(cb => {
+                    cb.addEventListener('change', updateClasses);
+                });
+            } else {
+                shiftGroup.classList.add('hidden');
+                shiftCheckboxesContainer.innerHTML = '';
+            }
+            updateClasses();
+        };
+
+        schoolSelect.addEventListener('change', updateShifts);
         
         printBtn.addEventListener('click', () => {
             const eventName = document.getElementById('event-name').value || 'Excursão';
-            const cls = findClassById(classSelect.value);
+            const selectedClassIds = Array.from(classCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            const classNames = selectedClassIds.map(id => findClassById(id)?.name).filter(Boolean).join(', ');
+            
             let printWindow = window.open('', '_blank');
             let html = `
                 <html><head><title>Lista - ${eventName}</title>
@@ -3125,17 +3299,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     .center { text-align: center; }
                 </style>
                 </head><body>
-                <h2>${sanitizeHTML(eventName)} - Turma: ${sanitizeHTML(cls.name)}</h2>
-                <p>${summary.textContent}</p>
+                <h2>\${sanitizeHTML(eventName)} - Turmas: \${sanitizeHTML(classNames)}</h2>
+                <p>\${summary.textContent}</p>
                 <table>
-                    <thead><tr><th>Nº</th><th>Aluno</th><th>Autorização</th><th>Pagamento</th></tr></thead>
+                    <thead><tr><th>Nº</th><th>Aluno</th><th>Turma</th><th>Autorização</th><th>Pagamento</th></tr></thead>
                     <tbody>
             `;
             currentStudents.forEach(s => {
+                const cls = findClassById(s.classId);
                 const state = eventState[s.id];
                 html += `<tr>
                     <td width="30">${s.number || ''}</td>
                     <td>${sanitizeHTML(s.name)}</td>
+                    <td>${sanitizeHTML(cls?.name || '')}</td>
                     <td class="center" width="100">${state.auth ? 'X' : ' '}</td>
                     <td class="center" width="100">${state.paid ? 'X' : ' '}</td>
                 </tr>`;
@@ -3411,7 +3587,7 @@ document.addEventListener('DOMContentLoaded', () => {
     markNonSchoolDayButton.addEventListener('click', toggleNonSchoolDay);
     lessonPlanDateInput.addEventListener('change', (e) => { if(currentClassId) { renderLessonPlan(currentClassId, e.target.value); } });
     saveAttendanceButton.addEventListener('click', saveAttendance);
-    viewMonthlyAttendanceButton.addEventListener('click', openMonthlyAttendanceModal);
+    viewMonthlyAttendanceButton.addEventListener('click', openAttendanceReportModal);
     // Event listeners for Modals
     const editLessonPlanButton = document.getElementById('edit-lesson-plan-button');
     if (editLessonPlanButton) {
@@ -4216,11 +4392,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         <option value="bimestral">Bimestral</option>
                         <option value="trimestral">Trimestral</option>
                         <option value="semestral">Semestral</option>
+                        <option value="personalizado">Período Personalizado</option>
                     </select>
                 </div>
                 <div class="form-group hidden" id="ai-input-data-container">
                     <label>Data Específica:</label>
                     <input type="date" id="ai-input-data" class="w-full">
+                </div>
+                <div class="form-group hidden" id="ai-input-data-personalizada-container">
+                    <label>Data de Início:</label>
+                    <input type="date" id="ai-input-data-inicio" class="w-full mb-2">
+                    <label>Data de Fim:</label>
+                    <input type="date" id="ai-input-data-fim" class="w-full">
                 </div>
             `;
 
@@ -4230,14 +4413,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const periodoSelect = document.getElementById('ai-input-periodo');
                 const dataContainer = document.getElementById('ai-input-data-container');
                 const dataInput = document.getElementById('ai-input-data');
+                const dataPersonalizadaContainer = document.getElementById('ai-input-data-personalizada-container');
                 
                 if (periodoSelect && dataContainer && dataInput) {
                     periodoSelect.addEventListener('change', () => {
                         if (periodoSelect.value === 'dia') {
                             dataContainer.classList.remove('hidden');
                             dataInput.value = getCurrentDateString();
+                            if (dataPersonalizadaContainer) dataPersonalizadaContainer.classList.add('hidden');
+                        } else if (periodoSelect.value === 'personalizado') {
+                            dataContainer.classList.add('hidden');
+                            if (dataPersonalizadaContainer) dataPersonalizadaContainer.classList.remove('hidden');
                         } else {
                             dataContainer.classList.add('hidden');
+                            if (dataPersonalizadaContainer) dataPersonalizadaContainer.classList.add('hidden');
                         }
                     });
                 }
@@ -4318,6 +4507,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!apiKey) return;
 
             let promptText = "";
+            
+            const teacherProfileContext = appData.userProfile?.subjects ? `\n\nContexto do Professor: Você é um professor com formação/leciona na(s) seguinte(s) matéria(s): ${appData.userProfile.subjects}. Use isso para guiar o tom e a profundidade do conteúdo gerado, se aplicável.` : '';
 
             if (currentAiTool === 'lesson-plan') {
                 const instrucoes = document.getElementById('ai-input-instrucoes').value.trim();
@@ -4355,9 +4546,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const turmaId = document.getElementById('ai-input-turma').value;
                 const periodo = document.getElementById('ai-input-periodo').value;
                 const dataEspecifica = document.getElementById('ai-input-data')?.value;
+                const dataInicio = document.getElementById('ai-input-data-inicio')?.value;
+                const dataFim = document.getElementById('ai-input-data-fim')?.value;
                 
                 if (!turmaId) return showNotification('Selecione uma turma.', 'error');
                 if (periodo === 'dia' && !dataEspecifica) return showNotification('Selecione uma data.', 'error');
+                if (periodo === 'personalizado' && (!dataInicio || !dataFim)) return showNotification('Selecione a data de início e fim.', 'error');
+                if (periodo === 'personalizado' && (new Date(dataInicio) > new Date(dataFim))) return showNotification('A data de início não pode ser maior que a data de fim.', 'error');
                 
                 const selectedClass = findClassById(turmaId);
                 const students = getStudentsByClass(turmaId);
@@ -4391,6 +4586,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const lastSemester = new Date(today);
                     lastSemester.setMonth(today.getMonth() - 6);
                     filteredDates = sortedDates.filter(d => new Date(d) >= lastSemester);
+                } else if (periodo === 'personalizado') {
+                    filteredDates = sortedDates.filter(d => {
+                        const date = new Date(d);
+                        return date >= new Date(dataInicio) && date <= new Date(dataFim);
+                    });
                 } else {
                     filteredDates = sortedDates; // geral
                 }
@@ -4432,13 +4632,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 let contextText = `Turma: ${selectedClass.name}\n`;
                 if (selectedClass.year) contextText += `Ano/Série: ${selectedClass.year}\n`;
                 if (selectedClass.subject) contextText += `Disciplina: ${selectedClass.subject}\n`;
-                contextText += `Período de Análise: ${periodo === 'dia' ? dataEspecifica : periodo}\n`;
+                let periodoStr = periodo;
+                if (periodo === 'dia') periodoStr = dataEspecifica;
+                else if (periodo === 'personalizado') periodoStr = `de ${dataInicio} até ${dataFim}`;
+                contextText += `Período de Análise: ${periodoStr}\n`;
                 contextText += `Total de alunos: ${students.length}\n`;
                 contextText += `Taxa de Frequência Média no período: ${attendanceRate}\n`;
                 contextText += `Resumo de Notas:\n${gradesSummary}\n`;
                 
                 promptText = `Aja como um coordenador pedagógico e analista de dados educacionais. Baseado nos dados reais da turma abaixo:\n\n${contextText}\n\nGere um relatório completo e bem organizado sobre o perfil da turma. Inclua estatísticas baseadas nos dados reais fornecidos (frequência e notas), pontos fortes, áreas de atenção e recomendações pedagógicas. Use tabelas Markdown para visualizar as estatísticas. O relatório deve ser profissional e pronto para ser exportado em PDF.`;
             }
+
+            promptText += teacherProfileContext;
 
             // Instruções adicionais para a IA sobre matemática e geometria
             const mathAndGeometryInstructions = `\n\nINSTRUÇÕES DE FORMATAÇÃO E CONTEÚDO:\n1. Forneça APENAS o material solicitado, mantendo-se estritamente no tema. NÃO adicione cálculos, equações ou figuras geométricas se não forem relevantes para o assunto.\n2. Para questões de múltipla escolha, as opções (A, B, C, D, E) DEVEM ser listadas uma abaixo da outra, usando quebra de linha ou uma lista markdown, nunca na mesma linha. Exemplo:\n- A) ...\n- B) ...\n- C) ...\n3. SE o conteúdo envolver matemática: Use formatação LaTeX ($ para linha, $$ para bloco). Pule linha antes e depois de blocos $$. Coloque cada passo de resolução em uma linha separada.\n4. SE o conteúdo exigir figuras geométricas: gere o código SVG correspondente DIRETAMENTE no texto (sem blocos de código markdown), com atributos width e height definidos.`;
