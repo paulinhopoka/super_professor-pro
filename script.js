@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addSchoolButton = document.getElementById('add-school-button');
     const addClassButton = document.getElementById('add-class-button');
     const addStudentButton = document.getElementById('add-student-button');
+    const renumberStudentsButton = document.getElementById('renumber-students-button');
     const copyPixButton = document.getElementById('copy-pix-button');
     const pixKeyTextElement = document.getElementById('pix-key-text');
     const notificationBanner = document.getElementById('notification-banner');
@@ -647,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const updateNotificationIcon = (indicatorElement, isEnabled) => { if (!indicatorElement) return; indicatorElement.classList.remove('icon-notificacao-on', 'icon-notificacao-off'); if (isEnabled) { indicatorElement.classList.add('icon-notificacao-on'); indicatorElement.parentElement.title = "Notificações Ativadas (Clique para desativar)"; } else { indicatorElement.classList.add('icon-notificacao-off'); indicatorElement.parentElement.title = "Notificações Desativadas (Clique para ativar)"; } };
     const renderSchoolList = () => { schoolListContainer.innerHTML = ''; if (appData.schools.length === 0) { schoolListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p>'; return; } const template = document.getElementById('school-item-template'); const today = getCurrentDateString(); appData.schools.sort((a, b) => a.name.localeCompare(b.name)).forEach(school => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = school.id; item.querySelector('.school-name').textContent = sanitizeHTML(school.name); item.querySelector('.view-classes-button').addEventListener('click', (e) => { e.stopPropagation(); selectSchool(school.id); showSection('classes-section'); }); item.querySelector('.edit-school-button').addEventListener('click', (e) => { e.stopPropagation(); openSchoolModal(school.id); }); const quorumContainer = item.querySelector('.school-quorum-info'); const quorumDateInput = quorumContainer.querySelector('.quorum-date-input'); const quorumShiftSelect = quorumContainer.querySelector('.quorum-shift-select'); const quorumDisplay = quorumContainer.querySelector('.quorum-display'); const quorumDateLabel = quorumContainer.querySelector('label[for="quorum-date-input-ID_ESCOLA"]'); const uniqueId = `quorum-date-input-${school.id}`; if (quorumDateLabel) quorumDateLabel.setAttribute('for', uniqueId); if (quorumDateInput) { quorumDateInput.id = uniqueId; quorumDateInput.value = today; quorumDateInput.addEventListener('click', (e) => e.stopPropagation()); } if (quorumShiftSelect) { quorumShiftSelect.addEventListener('click', (e) => e.stopPropagation()); } const updateQuorumDisplay = () => { const selectedDate = quorumDateInput.value; const selectedShift = quorumShiftSelect.value; if (!selectedDate) { quorumDisplay.textContent = 'Data inválida'; quorumDisplay.classList.add('no-data'); quorumDisplay.title = 'Selecione uma data válida'; return; } const quorumData = calculateSchoolQuorum(school.id, selectedDate, selectedShift); quorumDisplay.classList.remove('no-data'); if (quorumData.message) { quorumDisplay.textContent = `(${quorumData.message})`; quorumDisplay.classList.add('no-data'); if (quorumData.message.includes('Sem turmas')) { quorumDisplay.title = `Não há turmas cadastradas para calcular o quórum (${selectedShift}) em ${formatDate(selectedDate)}`; } else if (quorumData.message.includes('Sem alunos')) { quorumDisplay.title = `Não há alunos cadastrados nas turmas para calcular o quórum (${selectedShift}) em ${formatDate(selectedDate)}`; } else { quorumDisplay.title = quorumData.message; } } else { quorumDisplay.textContent = `${quorumData.present}/${quorumData.total} (${quorumData.percentage}%)`; quorumDisplay.title = `${quorumData.present} de ${quorumData.total} alunos presentes (${selectedShift}) em ${formatDate(selectedDate)}`; } }; quorumDateInput.addEventListener('change', updateQuorumDisplay); quorumShiftSelect.addEventListener('change', updateQuorumDisplay); updateQuorumDisplay(); item.addEventListener('click', (e) => { if (!e.target.closest('.school-quorum-info, .list-item-actions')) { selectSchool(school.id); showSection('classes-section'); } }); schoolListContainer.appendChild(clone); }); };
-    const renderClassList = (schoolId) => { classListContainer.innerHTML = ''; const school = findSchoolById(schoolId); classesSchoolName.textContent = school ? sanitizeHTML(school.name) : 'Selecione Escola'; if (!school) { classListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Escola não encontrada.</p>'; return; } const classesInSchool = appData.classes.filter(c => c.schoolId === schoolId); if (classesInSchool.length === 0) { classListContainer.innerHTML = `<p style="text-align: center; padding: 1rem;">Nenhuma turma cadastrada para ${sanitizeHTML(school.name)}.</p>`; return; } const template = document.getElementById('class-item-template'); classesInSchool.sort((a, b) => a.name.localeCompare(b.name)).forEach(cls => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = cls.id; const itemInfo = item.querySelector('.item-info'); itemInfo.querySelector('.class-name').textContent = `${sanitizeHTML(cls.name)}${cls.year ? ' (' + sanitizeHTML(cls.year) + ')' : ''}`; itemInfo.querySelector('.class-details').textContent = `${sanitizeHTML(cls.subject || 'Sem matéria')} - ${sanitizeHTML(cls.shift || 'Sem turno')} - ${sanitizeHTML(cls.schedule || 'Sem horário')}`; if(cls.id === currentClassId) item.classList.add('active'); const actions = item.querySelector('.list-item-actions'); actions.querySelector('.view-details-button').addEventListener('click', (e) => { e.stopPropagation(); selectClass(cls.id); showSection('class-details-section'); }); actions.querySelector('.edit-class-button').addEventListener('click', (e) => { e.stopPropagation(); openClassModal(cls.id); }); item.addEventListener('click', () => { selectClass(cls.id); showSection('class-details-section'); }); classListContainer.appendChild(clone); }); };
+    const renderClassList = (schoolId) => { classListContainer.innerHTML = ''; const school = findSchoolById(schoolId); classesSchoolName.textContent = school ? sanitizeHTML(school.name) : 'Selecione Escola'; if (!school) { classListContainer.innerHTML = '<p style="text-align: center; padding: 1rem;">Escola não encontrada.</p>'; return; } const classesInSchool = appData.classes.filter(c => c.schoolId === schoolId); if (classesInSchool.length === 0) { classListContainer.innerHTML = `<p style="text-align: center; padding: 1rem;">Nenhuma turma cadastrada para ${sanitizeHTML(school.name)}.</p>`; return; } const template = document.getElementById('class-item-template'); classesInSchool.sort((a, b) => a.name.localeCompare(b.name)).forEach(cls => { const clone = template.content.cloneNode(true); const item = clone.querySelector('.list-item'); item.dataset.id = cls.id; const itemInfo = item.querySelector('.item-info'); itemInfo.querySelector('.class-name').textContent = `${sanitizeHTML(cls.name)}${cls.year ? ' (' + sanitizeHTML(cls.year) + ')' : ''}`; let scheduleText = sanitizeHTML(cls.schedule || 'Sem horário'); if (cls.scheduleEnd) scheduleText += ` às ${sanitizeHTML(cls.scheduleEnd)}`; itemInfo.querySelector('.class-details').textContent = `${sanitizeHTML(cls.subject || 'Sem matéria')} - ${sanitizeHTML(cls.shift || 'Sem turno')} - ${scheduleText}`; if(cls.id === currentClassId) item.classList.add('active'); const actions = item.querySelector('.list-item-actions'); actions.querySelector('.view-details-button').addEventListener('click', (e) => { e.stopPropagation(); selectClass(cls.id); showSection('class-details-section'); }); actions.querySelector('.edit-class-button').addEventListener('click', (e) => { e.stopPropagation(); openClassModal(cls.id); }); item.addEventListener('click', () => { selectClass(cls.id); showSection('class-details-section'); }); classListContainer.appendChild(clone); }); };
     const renderStudentList = (classId) => {
         studentListContainer.innerHTML = '';
         const studentsInClass = getStudentsByClass(classId);
@@ -954,8 +955,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveSchool = () => { const form = document.getElementById('school-form'); if (!form || !form.checkValidity()) { customAlert('Preencha o nome da escola.'); form?.reportValidity(); return; } const id = document.getElementById('school-id').value; const newSchoolData = { id: id || generateId('sch'), name: document.getElementById('school-name').value.trim() }; if (id) { const index = appData.schools.findIndex(s => s.id === id); if (index > -1) appData.schools[index] = newSchoolData; } else { appData.schools.push(newSchoolData); } saveData(); renderSchoolList(); if(currentSection === 'schedule-section') renderScheduleList(); hideModal(); };
     const deleteSchool = (id) => { const classesToDelete = appData.classes.filter(c => c.schoolId === id).map(c => c.id); appData.schools = appData.schools.filter(s => s.id !== id); appData.classes = appData.classes.filter(c => c.schoolId !== id); appData.students = appData.students.filter(s => !classesToDelete.includes(s.classId)); appData.schedule = appData.schedule.filter(sch => sch.schoolId !== id); if (currentSchoolId === id) { currentSchoolId = null; currentClassId = null; showSection('schools-section'); } saveData(); renderSchoolList(); if (currentSection === 'schedule-section') renderScheduleList(); if (currentSection === 'classes-section' && !currentSchoolId) { showSection('schools-section'); } else if (currentSection === 'classes-section') { renderClassList(currentSchoolId); } saveAppState(); };
     const selectSchool = (id) => { currentSchoolId = id; currentClassId = null; renderClassList(id); navClassesButton.disabled = false; navDetailsButton.disabled = true; saveAppState(); };
-    const openClassModal = (classIdToEdit = null) => { if (!currentSchoolId) return; const isEditing = classIdToEdit !== null; const classData = isEditing ? findClassById(classIdToEdit) : {}; const title = isEditing ? 'Editar Turma' : 'Nova Turma'; const schoolName = findSchoolById(currentSchoolId)?.name || '?'; const modalContent = `<form id="class-form"><input type="hidden" id="class-id" value="${isEditing ? classIdToEdit : ''}"><p class="mb-1"><strong>Escola:</strong> ${sanitizeHTML(schoolName)}</p><div class="form-group"><label for="class-name">Nome Turma:</label><input type="text" id="class-name" required value="${sanitizeHTML(classData.name || '')}"></div><div class="form-group"><label for="class-year">Ano/Série (Opcional):</label><input type="text" id="class-year" placeholder="Ex: 6º ano do fundamental" value="${sanitizeHTML(classData.year || '')}"></div><div class="form-group"><label for="class-subject">Matéria:</label><input type="text" id="class-subject" value="${sanitizeHTML(classData.subject || '')}"></div><div class="form-group d-flex"><div style="flex: 1; margin-right: 5px;"><label for="class-schedule">Horário:</label><input type="time" id="class-schedule" value="${classData.schedule || ''}"></div><div style="flex: 1; margin-left: 5px;"><label for="class-shift">Turno:</label><select id="class-shift"><option value="">--</option><option value="Manhã" ${classData.shift === 'Manhã' ? 'selected' : ''}>Manhã</option><option value="Tarde" ${classData.shift === 'Tarde' ? 'selected' : ''}>Tarde</option><option value="Noite" ${classData.shift === 'Noite' ? 'selected' : ''}>Noite</option><option value="Integral" ${classData.shift === 'Integral' ? 'selected' : ''}>Integral</option></select></div></div></form>`; let footerButtons = `<button type="button" id="save-class-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; if (isEditing) { footerButtons = `<button type="button" id="delete-class-btn-modal" class="danger"><span class="icon icon-excluir"></span> Excluir</button>` + footerButtons; } showModal(title, modalContent, footerButtons); document.getElementById('save-class-button').addEventListener('click', saveClass); if (isEditing) { document.getElementById('delete-class-btn-modal').addEventListener('click', async () => { if (await customConfirm(`Excluir turma "${sanitizeHTML(classData.name)}" e TODOS os dados associados?`)) { deleteClass(classIdToEdit); hideModal(); } }); } };
-    const saveClass = () => { const form = document.getElementById('class-form'); if (!form || !form.checkValidity() || !currentSchoolId) { customAlert('Preencha nome da turma e verifique escola.'); form?.reportValidity(); return; } const id = document.getElementById('class-id').value; const isEditing = !!id; const existingData = isEditing ? findClassById(id) : {}; const newClassData = { id: id || generateId('cls'), schoolId: currentSchoolId, name: document.getElementById('class-name').value.trim(), year: document.getElementById('class-year').value.trim(), subject: document.getElementById('class-subject').value.trim(), schedule: document.getElementById('class-schedule').value, shift: document.getElementById('class-shift').value, notes: existingData?.notes || '', gradeStructure: existingData?.gradeStructure || [], lessonPlans: existingData?.lessonPlans || {}, classroomLayout: existingData?.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }, representativeId: existingData?.representativeId || null, viceRepresentativeId: existingData?.viceRepresentativeId || null }; if (isEditing) { const index = appData.classes.findIndex(c => c.id === id); if (index > -1) appData.classes[index] = newClassData; } else { appData.classes.push(newClassData); } saveData(); renderClassList(currentSchoolId); if (id && id === currentClassId && currentSection === 'class-details-section') { selectClass(id, true); } hideModal(); };
+    const openClassModal = (classIdToEdit = null) => { if (!currentSchoolId) return; const isEditing = classIdToEdit !== null; const classData = isEditing ? findClassById(classIdToEdit) : {}; const title = isEditing ? 'Editar Turma' : 'Nova Turma'; const schoolName = findSchoolById(currentSchoolId)?.name || '?'; const modalContent = `<form id="class-form"><input type="hidden" id="class-id" value="${isEditing ? classIdToEdit : ''}"><p class="mb-1"><strong>Escola:</strong> ${sanitizeHTML(schoolName)}</p><div class="form-group"><label for="class-name">Nome Turma:</label><input type="text" id="class-name" required value="${sanitizeHTML(classData.name || '')}"></div><div class="form-group"><label for="class-year">Ano/Série:</label><input type="text" id="class-year" list="years-list" placeholder="Ex: 6º Ano do Fundamental" value="${sanitizeHTML(classData.year || '')}"><datalist id="years-list"><option value="Educação Infantil"><option value="1º Ano do Fundamental"><option value="2º Ano do Fundamental"><option value="3º Ano do Fundamental"><option value="4º Ano do Fundamental"><option value="5º Ano do Fundamental"><option value="6º Ano do Fundamental"><option value="7º Ano do Fundamental"><option value="8º Ano do Fundamental"><option value="9º Ano do Fundamental"><option value="1º Ano do Ensino Médio"><option value="2º Ano do Ensino Médio"><option value="3º Ano do Ensino Médio"><option value="EJA"></datalist></div><div class="form-group"><label for="class-subject">Matéria:</label><input type="text" id="class-subject" list="subjects-list" placeholder="Ex: Matemática" value="${sanitizeHTML(classData.subject || '')}"><datalist id="subjects-list"><option value="Português"><option value="Matemática"><option value="História"><option value="Geografia"><option value="Ciências"><option value="Física"><option value="Química"><option value="Biologia"><option value="Inglês"><option value="Espanhol"><option value="Artes"><option value="Educação Física"><option value="Filosofia"><option value="Sociologia"><option value="Ensino Religioso"></datalist></div><div class="form-group d-flex"><div style="flex: 1; margin-right: 5px;"><label for="class-schedule">Horário Início:</label><input type="time" id="class-schedule" value="${classData.schedule || ''}"></div><div style="flex: 1; margin-left: 5px; margin-right: 5px;"><label for="class-schedule-end">Horário Término:</label><input type="time" id="class-schedule-end" value="${classData.scheduleEnd || ''}"></div><div style="flex: 1; margin-left: 5px;"><label for="class-shift">Turno:</label><input type="text" id="class-shift" list="shifts-list" placeholder="Ex: Manhã" value="${sanitizeHTML(classData.shift || '')}"><datalist id="shifts-list"><option value="Manhã"><option value="Tarde"><option value="Noite"><option value="Integral"></datalist></div></div></form>`; let footerButtons = `<button type="button" id="save-class-button" class="success"><span class="icon icon-salvar"></span> Salvar</button>`; if (isEditing) { footerButtons = `<button type="button" id="delete-class-btn-modal" class="danger"><span class="icon icon-excluir"></span> Excluir</button>` + footerButtons; } showModal(title, modalContent, footerButtons); document.getElementById('save-class-button').addEventListener('click', saveClass); if (isEditing) { document.getElementById('delete-class-btn-modal').addEventListener('click', async () => { if (await customConfirm(`Excluir turma "${sanitizeHTML(classData.name)}" e TODOS os dados associados?`)) { deleteClass(classIdToEdit); hideModal(); } }); } };
+    const saveClass = () => { const form = document.getElementById('class-form'); if (!form || !form.checkValidity() || !currentSchoolId) { customAlert('Preencha nome da turma e verifique escola.'); form?.reportValidity(); return; } const id = document.getElementById('class-id').value; const isEditing = !!id; const existingData = isEditing ? findClassById(id) : {}; const newClassData = { id: id || generateId('cls'), schoolId: currentSchoolId, name: document.getElementById('class-name').value.trim(), year: document.getElementById('class-year').value.trim(), subject: document.getElementById('class-subject').value.trim(), schedule: document.getElementById('class-schedule').value, scheduleEnd: document.getElementById('class-schedule-end').value, shift: document.getElementById('class-shift').value.trim(), notes: existingData?.notes || '', gradeStructure: existingData?.gradeStructure || [], lessonPlans: existingData?.lessonPlans || {}, classroomLayout: existingData?.classroomLayout || { rows: 5, cols: 6, teacherDeskPosition: 'top-center', seats: [] }, representativeId: existingData?.representativeId || null, viceRepresentativeId: existingData?.viceRepresentativeId || null }; if (isEditing) { const index = appData.classes.findIndex(c => c.id === id); if (index > -1) appData.classes[index] = newClassData; } else { appData.classes.push(newClassData); } saveData(); renderClassList(currentSchoolId); if (id && id === currentClassId && currentSection === 'class-details-section') { selectClass(id, true); } hideModal(); };
     const deleteClass = (id) => { appData.classes = appData.classes.filter(c => c.id !== id); appData.students = appData.students.filter(s => s.classId !== id); if (currentClassId === id) { currentClassId = null; showSection('classes-section'); } saveData(); renderClassList(currentSchoolId); if (!currentClassId) navDetailsButton.disabled = true; saveAppState(); };
     const selectClass = (id, forceReload = false) => { if (currentClassId !== id || forceReload) { console.log(`Selecionando Turma: ${id}, Forçar Recarga: ${forceReload}`); if (tempClassroomLayout) { cancelClassroomMapEdit(); } currentClassId = id; const selectedClass = findClassById(id); if (selectedClass) { classDetailsTitle.textContent = `${sanitizeHTML(selectedClass.name)}${selectedClass.year ? ' (' + sanitizeHTML(selectedClass.year) + ')' : ''} - ${sanitizeHTML(selectedClass.subject || 'Sem matéria')}`; renderStudentList(id); renderGradeSets(id); const currentDate = attendanceDateInput.value || getCurrentDateString(); attendanceDateInput.value = currentDate; lessonPlanDateInput.value = currentDate; const classNotesDateInput = document.getElementById('class-notes-date'); if(classNotesDateInput) classNotesDateInput.value = currentDate; renderAttendanceTable(id, currentDate); renderLessonPlan(id, currentDate); renderClassNotes(id, currentDate); renderClassroomMap(id); if (currentSection === 'classes-section') renderClassList(selectedClass.schoolId); navDetailsButton.disabled = false; classDetailsSection.querySelectorAll('.card').forEach(card => { card.classList.add('collapsed'); const toggleBtn = card.querySelector('.card-toggle-button .icon'); if (toggleBtn) { toggleBtn.classList.remove('icon-chevron-up'); toggleBtn.classList.remove('icon-chevron-down'); toggleBtn.classList.add('icon-more-vert'); if(toggleBtn.parentElement) toggleBtn.parentElement.title = 'Mostrar Opções'; } }); } else { currentClassId = null; classDetailsTitle.textContent = "Erro: Turma não encontrada"; studentListContainer.innerHTML = '<p>Erro</p>'; gradesTableContainer.innerHTML = '<p>Erro</p>'; attendanceTableContainer.innerHTML = '<p>Erro</p>'; const displayDiv = document.getElementById('lesson-plan-display'); if(displayDiv) displayDiv.innerHTML = ''; const notesDisplayDiv = document.getElementById('class-notes-display'); if(notesDisplayDiv) notesDisplayDiv.innerHTML = ''; classroomContainerDisplay.innerHTML = '<p style="padding: 1rem; text-align: center; grid-column: 1 / -1; grid-row: 1 / -1;">Erro ao carregar mapa.</p>'; navDetailsButton.disabled = true; } saveAppState(); } else { console.log(`Turma ${id} já selecionada.`); } };
     const openStudentModal = (studentIdToEdit = null) => {
@@ -1057,6 +1058,54 @@ document.addEventListener('DOMContentLoaded', () => {
         hideModal();
     };
     const deleteStudent = (id) => { if (currentClassId) { const cls = findClassById(currentClassId); if (cls?.classroomLayout?.seats) { cls.classroomLayout.seats.forEach(seat => { if (seat.studentId === id) { seat.studentId = null; } }); } if(cls?.representativeId === id) cls.representativeId = null; if(cls?.viceRepresentativeId === id) cls.viceRepresentativeId = null; } appData.students = appData.students.filter(s => s.id !== id); saveData(); renderStudentList(currentClassId); if (gradeSetSelect.value) renderGradesTable(currentClassId, gradeSetSelect.value); if (attendanceDateInput.value) renderAttendanceTable(currentClassId, attendanceDateInput.value); renderClassroomMap(currentClassId); };
+
+    const openRenumberStudentsModal = () => {
+        if (!currentClassId) return;
+        const currentClass = findClassById(currentClassId);
+        if (!currentClass) return;
+
+        const title = 'Renumerar Alunos';
+        const modalContent = `
+            <p>Escolha o critério para renumerar automaticamente os alunos da turma <strong>${sanitizeHTML(currentClass.name)}</strong>:</p>
+            <div class="form-group">
+                <label for="renumber-criteria">Critério:</label>
+                <select id="renumber-criteria">
+                    <option value="alphabetical">Ordem Alfabética</option>
+                </select>
+            </div>
+            <p class="text-secondary" style="font-size: 0.9em; margin-top: 1rem;">
+                <strong>Atenção:</strong> Esta ação irá sobrescrever os números de chamada atuais de todos os alunos desta turma. Você ainda poderá editá-los manualmente depois.
+            </p>
+        `;
+        const footerButtons = `<button type="button" id="confirm-renumber-button" class="success"><span class="icon icon-sorteio"></span> Confirmar</button>`;
+        showModal(title, modalContent, footerButtons);
+
+        document.getElementById('confirm-renumber-button').addEventListener('click', () => {
+            const criteria = document.getElementById('renumber-criteria').value;
+            renumberStudents(currentClassId, criteria);
+        });
+    };
+
+    const renumberStudents = (classId, criteria) => {
+        const students = getStudentsByClass(classId);
+        if (students.length === 0) {
+            customAlert("Não há alunos nesta turma para renumerar.");
+            hideModal();
+            return;
+        }
+
+        if (criteria === 'alphabetical') {
+            students.sort((a, b) => a.name.localeCompare(b.name));
+            students.forEach((student, index) => {
+                student.number = index + 1;
+            });
+            saveData();
+            renderStudentList(classId);
+            customAlert("Alunos renumerados com sucesso por ordem alfabética!");
+        }
+        hideModal();
+    };
+
     const openStudentNotesModal = (studentId, noteIndexToHighlight = -1) => { const student = findStudentById(studentId); if (!student) return; currentStudentObservations = JSON.parse(JSON.stringify(student.notes || [])); const title = `Observações - ${student.number || '-'}. ${sanitizeHTML(student.name)}`; const modalContent = ` <div id="student-observations-list"></div> <hr style="margin: 1rem 0 0.8rem 0; border-color: var(--border-color);"> <div id="add-observation-section"> <form id="add-observation-form"> <div class="form-group"> <label for="new-observation-category">Categoria:</label> <select id="new-observation-category"> <option value="Anotação">Anotação</option> <option value="Observação" selected>Observação</option> <option value="Ocorrência">Ocorrência</option> <option value="Advertência">Advertência</option> <option value="Suspensão">Suspensão</option> </select> </div> <div id="suspension-fields" class="form-group hidden" style="display: flex; gap: 10px;"> <div style="flex: 1;"> <label for="new-suspension-start-date">Início Suspensão:</label> <input type="date" id="new-suspension-start-date"> </div> <div style="flex: 1;"> <label for="new-suspension-end-date">Fim Suspensão:</label> <input type="date" id="new-suspension-end-date"> </div> </div> <div class="form-group"> <label for="new-observation-text">Descrição:</label> <textarea id="new-observation-text" required></textarea> </div> <button type="button" id="add-observation-button" class="success"><span class="icon icon-adicionar"></span> Adicionar à Lista</button> </form> </div>`; const footerButtons = `<button type="button" id="save-observations-button" class="success"><span class="icon icon-salvar"></span> Salvar Observações</button>`; showModal(title, modalContent, footerButtons, 'student-notes-modal'); renderStudentObservations(studentId, noteIndexToHighlight, true); const categorySelect = document.getElementById('new-observation-category'); const suspensionFields = document.getElementById('suspension-fields'); const startDateInput = document.getElementById('new-suspension-start-date'); const endDateInput = document.getElementById('new-suspension-end-date'); const descriptionTextarea = document.getElementById('new-observation-text'); const saveButton = document.getElementById('save-observations-button'); const addToListButton = document.getElementById('add-observation-button'); const observationsListContainer = document.getElementById('student-observations-list'); const placeholderMap = { 'Anotação': 'Digite uma anotação rápida...', 'Observação': 'Descreva a observação comportamental, acadêmica, etc.', 'Ocorrência': 'Detalhe a ocorrência (briga, desrespeito, etc.).', 'Advertência': 'Descreva o motivo da advertência formal.', 'Suspensão': 'Descreva o motivo grave e o período da suspensão.' }; const updateDynamicFields = () => { const cat = categorySelect.value || 'Observação'; descriptionTextarea.placeholder = placeholderMap[cat] || 'Digite a descrição...'; const pluralSuffix = cat.endsWith('o') || cat.endsWith('a') ? 's' : (cat.endsWith('m') ? 'ns' : 's'); saveButton.innerHTML = `<span class="icon icon-salvar"></span> Salvar ${cat}${pluralSuffix}`; const showSusp = cat === 'Suspensão'; suspensionFields.classList.toggle('hidden', !showSusp); startDateInput.required = showSusp; endDateInput.required = showSusp; if (!showSusp) { startDateInput.value = ''; endDateInput.value = ''; } }; categorySelect.addEventListener('change', updateDynamicFields); updateDynamicFields(); addToListButton?.addEventListener('click', () => { const form = document.getElementById('add-observation-form'); if (!form.checkValidity()) { form.reportValidity(); return; } const category = categorySelect.value; const text = descriptionTextarea.value.trim(); let startDate = null, endDate = null; if (category === 'Suspensão') { startDate = startDateInput.value; endDate = endDateInput.value; if (!startDate || !endDate) { customAlert("Para Suspensão, as datas de início e fim são obrigatórias."); return; } if (startDate > endDate) { customAlert("A data de início da suspensão não pode ser posterior à data de fim."); return; } } if (text) { const newObservation = { date: getCurrentDateString(), category: category, text: text, suspensionStartDate: startDate, suspensionEndDate: endDate }; currentStudentObservations.push(newObservation); renderStudentObservations(studentId, -1, true); descriptionTextarea.value = ''; categorySelect.value = 'Observação'; startDateInput.value = ''; endDateInput.value = ''; updateDynamicFields(); descriptionTextarea.focus(); } else { customAlert("A descrição não pode estar vazia."); descriptionTextarea.focus(); } }); saveButton?.addEventListener('click', () => saveStudentObservations(studentId)); observationsListContainer?.addEventListener('click', async (e) => { const deleteButton = e.target.closest('.delete-observation-button'); if (deleteButton) { const itemElement = deleteButton.closest('.observation-item'); const index = parseInt(itemElement?.dataset.index, 10); if (!isNaN(index) && await customConfirm("Excluir esta observação permanentemente?")) { const removed = currentStudentObservations.splice(index, 1); if (removed.length > 0) { console.log("Observação removida (localmente):", removed[0]); renderStudentObservations(studentId, -1, true); } else { console.warn("Tentativa de excluir observação com índice inválido:", index); } } } }); };
     const saveStudentObservations = (studentId) => { const student = findStudentById(studentId); if (!student) { console.error("Erro: Aluno não encontrado ao salvar observações:", studentId); customAlert("Erro ao salvar: Aluno não encontrado."); return; } student.notes = JSON.parse(JSON.stringify(currentStudentObservations)); saveData(); hideModal(); renderAttendanceTable(currentClassId, attendanceDateInput.value || getCurrentDateString()); customAlert(`Observações de ${sanitizeHTML(student.name)} salvas com sucesso!`); console.log("Observações salvas:", student.notes); };
     const updateAttendanceStatus = (studentId, date, newStatus) => { const student = findStudentById(studentId); if (!student) { console.warn(`Aluno ${studentId} não encontrado para atualizar presença.`); return; } if (!date) { console.warn("Data inválida para atualizar presença."); return; } if (!student.attendance[date]) { student.attendance[date] = { status: null, justification: '' }; } const currentStatus = student.attendance[date].status; if (currentStatus === newStatus) { student.attendance[date].status = null; student.attendance[date].justification = ''; } else { student.attendance[date].status = newStatus; if (newStatus === 'P') { student.attendance[date].justification = ''; } } console.log(`Status de presença atualizado para ${studentId} em ${date}:`, student.attendance[date]); renderAttendanceTable(currentClassId, date); };
@@ -3351,6 +3400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiToolModalEl = document.getElementById('ai-tool-modal');
     if (aiToolModalEl) aiToolModalEl.addEventListener('click', combinedModalCloseHandler);
     addStudentButton?.addEventListener('click', () => { if(currentClassId) openStudentModal(); else customAlert("Selecione uma turma primeiro!"); });
+    renumberStudentsButton?.addEventListener('click', () => { if(currentClassId) openRenumberStudentsModal(); else customAlert("Selecione uma turma primeiro!"); });
     gradeSetSelect.addEventListener('change', (e) => { if(currentClassId) { renderGradesTable(currentClassId, e.target.value); } });
     manageGradeStructureButton.addEventListener('click', openGradeStructureModal);
     saveGradesButton.addEventListener('click', saveGrades);
@@ -4054,39 +4104,25 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (toolType === 'lesson-plan') {
             aiToolTitle.textContent = 'Gerar Esboço de Aula';
+            
+            let contextText = "Nenhuma turma selecionada.";
+            if (currentClassId) {
+                const selectedClass = findClassById(currentClassId);
+                contextText = `Turma: ${selectedClass.name}\n`;
+                if (selectedClass.year) contextText += `Ano/Série: ${selectedClass.year}\n`;
+                if (selectedClass.subject) contextText += `Disciplina: ${selectedClass.subject}\n`;
+            }
+
             aiToolInputsContainer.innerHTML = `
                 <div class="form-group">
-                    <label>Turma (Opcional):</label>
-                    <select id="ai-input-turma" class="w-full">
-                        ${classSelectOptions}
-                    </select>
+                    <label>Contexto da Turma:</label>
+                    <textarea id="ai-input-contexto" rows="3" class="w-full" readonly>${contextText}</textarea>
                 </div>
                 <div class="form-group">
-                    <label>Tema da Aula:</label>
-                    <input type="text" id="ai-input-tema" placeholder="Ex: Revolução Francesa" class="w-full">
-                </div>
-                <div class="form-group">
-                    <label>Ano Escolar (Preenchido automaticamente se turma selecionada):</label>
-                    <input type="text" id="ai-input-nivel" placeholder="Ex: 8º ano do Ensino Fundamental" class="w-full">
+                    <label>Instruções para a IA:</label>
+                    <textarea id="ai-input-instrucoes" placeholder="Ex: Crie um plano de aula sobre Revolução Francesa focado em causas e consequências..." class="w-full" rows="4"></textarea>
                 </div>
             `;
-            
-            setTimeout(() => {
-                const turmaSelect = document.getElementById('ai-input-turma');
-                if (turmaSelect) {
-                    const updateNivel = () => {
-                        const classId = turmaSelect.value;
-                        if (classId) {
-                            const selectedClass = findClassById(classId);
-                            if (selectedClass && selectedClass.year) {
-                                document.getElementById('ai-input-nivel').value = selectedClass.year;
-                            }
-                        }
-                    };
-                    turmaSelect.addEventListener('change', updateNivel);
-                    updateNivel(); // Call initially
-                }
-            }, 0);
         } else if (toolType === 'exam-assistant') {
             aiToolTitle.textContent = 'Assistente de Provas';
             aiToolInputsContainer.innerHTML = `
@@ -4151,30 +4187,79 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (toolType === 'analyze-class') {
             aiToolTitle.textContent = 'Analisar Turma';
             
-            // Pega os dados da turma atual
-            let contextText = "Nenhuma turma selecionada.";
-            
-            if (currentClassId) {
-                const selectedClass = findClassById(currentClassId);
-                const students = getStudentsByClass(currentClassId);
-                const classNotes = document.getElementById('class-notes-content').textContent;
-                contextText = `Turma: ${selectedClass.name}\n`;
-                if (selectedClass.year) contextText += `Ano/Série: ${selectedClass.year}\n`;
-                if (selectedClass.subject) contextText += `Disciplina: ${selectedClass.subject}\n`;
-                contextText += `Total de alunos: ${students.length}\n`;
-                contextText += `Anotações atuais: ${classNotes}`;
-            }
-            
+            let schoolOptions = '<option value="">Selecione uma escola...</option>';
+            const schools = appData.schools;
+            schools.forEach(s => {
+                schoolOptions += `<option value="${s.id}">${sanitizeHTML(s.name)}</option>`;
+            });
+
             aiToolInputsContainer.innerHTML = `
                 <div class="form-group">
-                    <label>Contexto da Turma:</label>
-                    <textarea id="ai-input-contexto" rows="5" class="w-full" readonly>${contextText}</textarea>
+                    <label>Escola:</label>
+                    <select id="ai-input-escola" class="w-full">
+                        ${schoolOptions}
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>O que você deseja analisar?</label>
-                    <input type="text" id="ai-input-pergunta" placeholder="Ex: Sugira estratégias para melhorar o engajamento" class="w-full">
+                    <label>Turma:</label>
+                    <select id="ai-input-turma" class="w-full" disabled>
+                        <option value="">Selecione uma escola primeiro...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Período de Análise:</label>
+                    <select id="ai-input-periodo" class="w-full">
+                        <option value="geral">Geral (Todo o período)</option>
+                        <option value="dia">Dia Específico</option>
+                        <option value="semanal">Semanal (Últimos 7 dias)</option>
+                        <option value="mensal">Mensal (Últimos 30 dias)</option>
+                        <option value="bimestral">Bimestral</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="semestral">Semestral</option>
+                    </select>
+                </div>
+                <div class="form-group hidden" id="ai-input-data-container">
+                    <label>Data Específica:</label>
+                    <input type="date" id="ai-input-data" class="w-full">
                 </div>
             `;
+
+            setTimeout(() => {
+                const escolaSelect = document.getElementById('ai-input-escola');
+                const turmaSelect = document.getElementById('ai-input-turma');
+                const periodoSelect = document.getElementById('ai-input-periodo');
+                const dataContainer = document.getElementById('ai-input-data-container');
+                const dataInput = document.getElementById('ai-input-data');
+                
+                if (periodoSelect && dataContainer && dataInput) {
+                    periodoSelect.addEventListener('change', () => {
+                        if (periodoSelect.value === 'dia') {
+                            dataContainer.classList.remove('hidden');
+                            dataInput.value = getCurrentDateString();
+                        } else {
+                            dataContainer.classList.add('hidden');
+                        }
+                    });
+                }
+                
+                if (escolaSelect && turmaSelect) {
+                    escolaSelect.addEventListener('change', () => {
+                        const schoolId = escolaSelect.value;
+                        if (schoolId) {
+                            const classes = appData.classes.filter(c => c.schoolId === schoolId);
+                            let classOpts = '<option value="">Selecione uma turma...</option>';
+                            classes.forEach(c => {
+                                classOpts += `<option value="${c.id}">${sanitizeHTML(c.name)} ${c.year ? '(' + sanitizeHTML(c.year) + ')' : ''} - ${sanitizeHTML(c.subject || 'Sem Matéria')}</option>`;
+                            });
+                            turmaSelect.innerHTML = classOpts;
+                            turmaSelect.disabled = false;
+                        } else {
+                            turmaSelect.innerHTML = '<option value="">Selecione uma escola primeiro...</option>';
+                            turmaSelect.disabled = true;
+                        }
+                    });
+                }
+            }, 0);
         }
         
         aiToolModal.classList.add('show');
@@ -4215,9 +4300,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const aiAnalyzeClassBtn = document.getElementById('ai-analyze-class-btn');
-    if (aiAnalyzeClassBtn) {
-        aiAnalyzeClassBtn.addEventListener('click', () => {
+    const toolClassAnalyzerBtn = document.getElementById('tool-class-analyzer');
+    if (toolClassAnalyzerBtn) {
+        toolClassAnalyzerBtn.addEventListener('click', () => {
             const apiKey = localStorage.getItem('gemini_api_key');
             if (!apiKey) {
                 showNotification('Configure sua chave de IA na aba de Ajustes.', 'error');
@@ -4235,18 +4320,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let promptText = "";
 
             if (currentAiTool === 'lesson-plan') {
-                const tema = document.getElementById('ai-input-tema').value.trim();
-                const nivel = document.getElementById('ai-input-nivel').value.trim();
-                const turmaId = document.getElementById('ai-input-turma')?.value;
-                let context = '';
-                if (turmaId) {
-                    const selectedClass = findClassById(turmaId);
-                    if (selectedClass) {
-                        context = `A aula é para a turma "${selectedClass.name}"${selectedClass.year ? ' do ano/série "' + selectedClass.year + '"' : ''}${selectedClass.subject ? ' da disciplina de "' + selectedClass.subject + '"' : ''}. Adapte a linguagem e a complexidade para este público específico. `;
-                    }
-                }
-                if (!tema || !nivel) return showNotification('Preencha o tema e o ano escolar.', 'error');
-                promptText = `Aja como um professor experiente. ${context}Crie um esboço de plano de aula sobre: "${tema}" para alunos do "${nivel}". Inclua: 1. Objetivos, 2. Introdução, 3. Desenvolvimento, 4. Conclusão/Atividade. Seja direto e prático. Formate em Markdown.`;
+                const instrucoes = document.getElementById('ai-input-instrucoes').value.trim();
+                const contexto = document.getElementById('ai-input-contexto').value;
+                if (!instrucoes) return showNotification('Preencha as instruções.', 'error');
+                promptText = `Aja como um professor experiente. Baseado no seguinte contexto da turma:\n${contexto}\n\nCrie um esboço de plano de aula seguindo estas instruções: "${instrucoes}". Inclua: 1. Objetivos, 2. Introdução, 3. Desenvolvimento, 4. Conclusão/Atividade. Seja direto e prático. Formate em Markdown.`;
             } else if (currentAiTool === 'exam-assistant') {
                 const assunto = document.getElementById('ai-input-assunto').value.trim();
                 const nivel = document.getElementById('ai-input-nivel').value.trim();
@@ -4275,10 +4352,92 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!topico) return showNotification('Preencha o tópico.', 'error');
                 promptText = `Aja como um professor. ${context}Crie 1 questão do tipo "${tipo}" sobre o tópico "${topico}". Inclua a resposta correta e uma breve explicação. Formate em Markdown.`;
             } else if (currentAiTool === 'analyze-class') {
-                const contexto = document.getElementById('ai-input-contexto').value;
-                const pergunta = document.getElementById('ai-input-pergunta').value.trim();
-                if (!pergunta) return showNotification('Preencha o que deseja analisar.', 'error');
-                promptText = `Aja como um coordenador pedagógico experiente. Baseado no seguinte contexto da turma: "${contexto}", responda à seguinte solicitação do professor: "${pergunta}". Seja prático e ofereça estratégias acionáveis. Formate em Markdown.`;
+                const turmaId = document.getElementById('ai-input-turma').value;
+                const periodo = document.getElementById('ai-input-periodo').value;
+                const dataEspecifica = document.getElementById('ai-input-data')?.value;
+                
+                if (!turmaId) return showNotification('Selecione uma turma.', 'error');
+                if (periodo === 'dia' && !dataEspecifica) return showNotification('Selecione uma data.', 'error');
+                
+                const selectedClass = findClassById(turmaId);
+                const students = getStudentsByClass(turmaId);
+                
+                let filteredDates = [];
+                const allDates = new Set();
+                students.forEach(s => Object.keys(s.attendance || {}).forEach(d => allDates.add(d)));
+                
+                const today = new Date();
+                const sortedDates = Array.from(allDates).sort();
+                
+                if (periodo === 'dia') {
+                    filteredDates = [dataEspecifica];
+                } else if (periodo === 'semanal') {
+                    const lastWeek = new Date(today);
+                    lastWeek.setDate(today.getDate() - 7);
+                    filteredDates = sortedDates.filter(d => new Date(d) >= lastWeek);
+                } else if (periodo === 'mensal') {
+                    const lastMonth = new Date(today);
+                    lastMonth.setMonth(today.getMonth() - 1);
+                    filteredDates = sortedDates.filter(d => new Date(d) >= lastMonth);
+                } else if (periodo === 'bimestral') {
+                    const lastBimonth = new Date(today);
+                    lastBimonth.setMonth(today.getMonth() - 2);
+                    filteredDates = sortedDates.filter(d => new Date(d) >= lastBimonth);
+                } else if (periodo === 'trimestral') {
+                    const lastTrimonth = new Date(today);
+                    lastTrimonth.setMonth(today.getMonth() - 3);
+                    filteredDates = sortedDates.filter(d => new Date(d) >= lastTrimonth);
+                } else if (periodo === 'semestral') {
+                    const lastSemester = new Date(today);
+                    lastSemester.setMonth(today.getMonth() - 6);
+                    filteredDates = sortedDates.filter(d => new Date(d) >= lastSemester);
+                } else {
+                    filteredDates = sortedDates; // geral
+                }
+                
+                let totalPossibleDays = 0;
+                let totalPresentDays = 0;
+                
+                students.forEach(student => {
+                    filteredDates.forEach(date => {
+                        const record = student.attendance?.[date];
+                        if (record && record.status !== 'H') {
+                            totalPossibleDays++;
+                            if (record.status === 'P') totalPresentDays++;
+                        }
+                    });
+                });
+                
+                const attendanceRate = totalPossibleDays > 0 ? Math.round((totalPresentDays / totalPossibleDays) * 100) + '%' : 'N/A';
+                
+                let gradesSummary = '';
+                if (selectedClass.gradeStructure && selectedClass.gradeStructure.length > 0) {
+                    selectedClass.gradeStructure.forEach(gs => {
+                        let totalSum = 0;
+                        let count = 0;
+                        students.forEach(student => {
+                            const studentGrades = student.grades[gs.id];
+                            if (studentGrades && studentGrades.average !== null && studentGrades.average !== undefined) {
+                                totalSum += studentGrades.average;
+                                count++;
+                            }
+                        });
+                        const avg = count > 0 ? (totalSum / count).toFixed(1) : 'N/A';
+                        gradesSummary += `- Conjunto "${gs.name}": Média da turma = ${avg}\n`;
+                    });
+                } else {
+                    gradesSummary = 'Nenhuma nota registrada.';
+                }
+                
+                let contextText = `Turma: ${selectedClass.name}\n`;
+                if (selectedClass.year) contextText += `Ano/Série: ${selectedClass.year}\n`;
+                if (selectedClass.subject) contextText += `Disciplina: ${selectedClass.subject}\n`;
+                contextText += `Período de Análise: ${periodo === 'dia' ? dataEspecifica : periodo}\n`;
+                contextText += `Total de alunos: ${students.length}\n`;
+                contextText += `Taxa de Frequência Média no período: ${attendanceRate}\n`;
+                contextText += `Resumo de Notas:\n${gradesSummary}\n`;
+                
+                promptText = `Aja como um coordenador pedagógico e analista de dados educacionais. Baseado nos dados reais da turma abaixo:\n\n${contextText}\n\nGere um relatório completo e bem organizado sobre o perfil da turma. Inclua estatísticas baseadas nos dados reais fornecidos (frequência e notas), pontos fortes, áreas de atenção e recomendações pedagógicas. Use tabelas Markdown para visualizar as estatísticas. O relatório deve ser profissional e pronto para ser exportado em PDF.`;
             }
 
             // Instruções adicionais para a IA sobre matemática e geometria

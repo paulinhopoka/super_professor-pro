@@ -95,6 +95,7 @@
                 <div class="card-header">
                     <h3><span class="icon icon-alunos"></span>Alunos</h3>
                     <div class="options">
+                        <button type="button" id="renumber-students-button" class="secondary" title="Renumerar Alunos"><span class="icon icon-sorteio"></span> Renumerar</button>
                         <button type="button" id="add-student-button" class="success"><span class="icon icon-adicionar"></span> Novo Aluno</button>
                         <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button>
                     </div>
@@ -136,9 +137,6 @@
             </div>
              <div class="card collapsed" id="class-notes-card">
                  <div class="card-header"> <h3><span class="icon icon-anotacao"></span>Anotações da Turma</h3> <div class="options"> <input type="date" id="class-notes-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data da Anotação"> <button type="button" id="edit-class-notes-button" class="secondary icon-button" title="Editar Anotações"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div id="class-notes-display-container" class="card-content collapsible-content"> 
-                    <button type="button" id="ai-analyze-class-btn" class="secondary w-full mb-2 ai-tool" style="display: none;">
-                        <span class="icon icon-auto-awesome"></span> Analisar Turma com IA
-                    </button>
                     <div id="class-notes-display" class="markdown-body" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 5px; min-height: 100px; background: var(--bg-tertiary); max-height: 400px; overflow-y: auto;">Nenhuma anotação para esta data.</div> </div>
             </div>
         </section>
@@ -170,7 +168,7 @@
                 <button type="button" class="tool-card" data-tool="grade-converter"> <span class="icon icon-sync-alt"></span> <span class="tool-card-title">Conversor de Notas</span> </button>
                 <button type="button" class="tool-card" data-tool="pomodoro-timer"> <span class="icon icon-alarm"></span> <span class="tool-card-title">Pomodoro Timer</span> </button>
                 <button type="button" class="tool-card ai-tool" id="tool-rubric-generator" style="display: none;" data-tool="rubric-generator"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Gerador de Rubricas</span> </button>
-                <button type="button" class="tool-card ai-tool" id="tool-lesson-planner" style="display: none;" data-tool="lesson-planner"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Planejador de Aulas</span> </button>
+                <button type="button" class="tool-card ai-tool" id="tool-class-analyzer" style="display: none;" data-tool="class-analyzer"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Analisar Turma</span> </button>
                 <button type="button" class="tool-card ai-tool" id="tool-exam-assistant" style="display: none;"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Assistente de Provas</span> </button>
                 <button type="button" class="tool-card ai-tool" id="tool-question-generator" style="display: none;"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Gerador de Questões</span> </button>
             </div> <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p> </section>
@@ -398,7 +396,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Editar Planejamento da Aula</h2>
-                <span class="close-button" data-dismiss="modal">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="options" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
@@ -422,7 +419,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Editar Anotações da Turma</h2>
-                <span class="close-button" data-dismiss="modal">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="options" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
@@ -458,7 +454,6 @@
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
                 <h2 id="ai-tool-title">Assistente de IA</h2>
-                <span class="close-button" data-dismiss="modal">&times;</span>
             </div>
             <div class="modal-body">
                 <div id="ai-tool-inputs-container" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem;">
@@ -486,6 +481,9 @@
                         </button>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer" style="padding: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+                <button type="button" class="secondary" data-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
