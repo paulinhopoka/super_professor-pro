@@ -3025,21 +3025,36 @@ Exemplo de formato esperado:
   {"front": "Pergunta 2", "back": "Resposta 2"}
 ]`;
                 
-                const responseText = await generateAIContent(prompt);
-                const jsonMatch = responseText.match(/\\[[\\s\\S]*\\]/);
-                
-                if (jsonMatch) {
-                    const generatedCards = JSON.parse(jsonMatch[0]);
-                    if (Array.isArray(generatedCards) && generatedCards.length > 0) {
-                        cards = [...cards, ...generatedCards];
-                        renderList();
-                        showNotification(`${generatedCards.length} flashcards gerados com sucesso!`);
-                        aiThemeInput.value = '';
-                    } else {
-                        throw new Error("Formato JSON inválido retornado pela IA.");
+                const apiKey = localStorage.getItem('gemini_api_key');
+                const ai = new GoogleGenAI({ apiKey: apiKey });
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3-flash-preview',
+                    contents: prompt,
+                    config: {
+                        responseMimeType: "application/json"
                     }
+                });
+                const responseText = response.text;
+                
+                let generatedCards;
+                try {
+                    generatedCards = JSON.parse(responseText.trim());
+                } catch (e) {
+                    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+                    if (jsonMatch) {
+                        generatedCards = JSON.parse(jsonMatch[0]);
+                    } else {
+                        throw new Error("Não foi possível extrair o JSON da resposta da IA.");
+                    }
+                }
+                
+                if (Array.isArray(generatedCards) && generatedCards.length > 0) {
+                    cards = [...cards, ...generatedCards];
+                    renderList();
+                    showNotification(`${generatedCards.length} flashcards gerados com sucesso!`);
+                    aiThemeInput.value = '';
                 } else {
-                    throw new Error("Não foi possível extrair o JSON da resposta da IA.");
+                    throw new Error("Formato JSON inválido retornado pela IA.");
                 }
             } catch (error) {
                 console.error("Erro ao gerar flashcards:", error);
@@ -4418,16 +4433,23 @@ Exemplo de formato esperado:
                 </div>
             `;
         } else if (toolType === 'exam-corrector') {
-            aiToolTitle.textContent = 'Corretor de Provas';
+            aiToolTitle.textContent = 'Corretor de Provas (com Câmera)';
             aiToolInputsContainer.innerHTML = `
                 <div class="form-group">
-                    <label>Imagem da Prova:</label>
-                    <input type="file" id="ai-input-prova-img" accept="image/*" capture="environment" class="w-full">
+                    <label>Gabarito / Respostas Esperadas:</label>
+                    <textarea id="ai-input-gabarito" rows="4" placeholder="Ex: 1-A, 2-B, 3-A fotossíntese é o processo..." class="w-full"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Foto da Prova do Aluno:</label>
+                    <label for="ai-input-prova-img" class="btn btn-secondary w-full text-center cursor-pointer" style="display: block; background-color: #6c757d; color: white; border-radius: 4px; padding: 10px; font-weight: bold;">
+                        Tirar Foto / Escolher Imagem
+                    </label>
+                    <input type="file" id="ai-input-prova-img" accept="image/*" capture="environment" class="hidden" style="display: none;">
                     <img id="ai-preview-prova-img" style="display: none; max-width: 100%; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border-color);" />
                 </div>
                 <div class="form-group">
-                    <label>Gabarito / Respostas Esperadas (Opcional):</label>
-                    <textarea id="ai-input-gabarito" rows="4" placeholder="Ex: 1-A, 2-B, 3-C..." class="w-full"></textarea>
+                    <label>Critérios de Correção (Opcional):</label>
+                    <input type="text" id="ai-input-criterios" placeholder="Ex: Seja rigoroso com a ortografia" class="w-full">
                 </div>
             `;
             setTimeout(() => {
@@ -4650,6 +4672,7 @@ Exemplo de formato esperado:
                 promptText = `Aja como um professor. ${context}Crie 1 questão do tipo "${tipo}" sobre o tópico "${topico}". Inclua a resposta correta e uma breve explicação. Formate em Markdown.`;
             } else if (currentAiTool === 'exam-corrector') {
                 const gabarito = document.getElementById('ai-input-gabarito').value.trim();
+                const criterios = document.getElementById('ai-input-criterios').value.trim();
                 const imgPreview = document.getElementById('ai-preview-prova-img');
                 
                 if (!imgPreview.src || imgPreview.src === '' || imgPreview.style.display === 'none') {
@@ -4660,7 +4683,10 @@ Exemplo de formato esperado:
                 
                 let context = '';
                 if (gabarito) {
-                    context = `Utilize o seguinte gabarito/respostas corretas como base para a correção: "\n${gabarito}\n".\n`;
+                    context += `Utilize o seguinte gabarito/respostas corretas como base para a correção: "\n${gabarito}\n".\n`;
+                }
+                if (criterios) {
+                    context += `Considere os seguintes critérios de correção: "${criterios}".\n`;
                 }
                 
                 promptText = `Aja como um professor corrigindo uma prova. ${context}Analise a imagem da prova do aluno fornecida. Identifique as questões, as respostas do aluno e avalie se estão corretas, incorretas ou parcialmente corretas. Forneça um feedback construtivo e, se possível, uma nota estimada. Formate a saída em Markdown, destacando os acertos e erros.`;
@@ -4785,7 +4811,7 @@ Exemplo de formato esperado:
                     const mimeType = imgPreview.src.split(';')[0].split(':')[1];
                     
                     response = await ai.models.generateContent({
-                        model: 'gemini-3.1-flash-image-preview',
+                        model: 'gemini-3.1-pro-preview',
                         contents: {
                             parts: [
                                 {
