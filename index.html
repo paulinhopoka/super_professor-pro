@@ -91,23 +91,23 @@
                      <span class="icon icon-ajuda icon-only"></span>
                  </button>
             </div>
-            <div class="card" id="students-card">
+            <div class="card collapsed" id="students-card">
                 <div class="card-header">
                     <h3><span class="icon icon-alunos"></span>Alunos</h3>
                     <div class="options">
                         <button type="button" id="add-student-button" class="success"><span class="icon icon-adicionar"></span> Novo Aluno</button>
-                        <button type="button" class="card-toggle-button" title="Esconder Alunos"><span class="icon icon-chevron-up"></span></button>
+                        <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button>
                     </div>
                 </div>
                 <div id="student-list-container" class="card-content"><p style="text-align: center; padding: 1rem;">Nenhum aluno nesta turma.</p></div>
             </div>
-            <div class="card" id="attendance-card">
+            <div class="card collapsed" id="attendance-card">
                 <div class="card-header">
                     <h3><span class="icon icon-presenca"></span>Presença</h3>
                     <div class="options">
                         <input type="date" id="attendance-date" style="width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0; font-size: 0.85rem;" title="Data da Presença">
                         <button type="button" id="view-monthly-attendance-button" class="secondary icon-button ml-1" title="Ver Frequência Mensal"><span class="icon icon-calendario icon-only"></span></button>
-                        <button type="button" class="card-toggle-button" title="Esconder Presença"><span class="icon icon-chevron-up"></span></button>
+                        <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button>
                     </div>
                 </div>
                 <div class="card-content">
@@ -121,21 +121,21 @@
                     <button type="button" id="save-attendance-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Presença</button>
                 </div>
             </div>
-            <div class="card" id="map-card">
-                 <div class="card-header"> <h3><span class="icon icon-mapa"></span>Mapa da Sala</h3> <div class="options"> <button type="button" id="edit-map-button" class="secondary icon-button" title="Editar Mapa"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Esconder Mapa"><span class="icon icon-chevron-up"></span></button> </div> </div> <div class="card-content collapsible-content"> <div id="classroom-map-edit-controls" class="classroom-map-edit-controls hidden"> <div class="form-group"> <label for="map-rows-input">Fileiras:</label> <input type="number" id="map-rows-input" min="1" max="20" value="5"> </div> <div class="form-group"> <label for="map-cols-input">Colunas:</label> <input type="number" id="map-cols-input" min="1" max="20" value="6"> </div> <div class="form-group"> <label for="teacher-desk-position-select">Mesa Prof.:</label> <select id="teacher-desk-position-select"> <option value="top-center">Topo (Centro)</option> <option value="top-left">Topo (Esquerda)</option> <option value="top-right">Topo (Direita)</option> <option value="bottom-center">Fundo (Centro)</option> <option value="bottom-left">Fundo (Esquerda)</option> <option value="bottom-right">Fundo (Direita)</option> <option value="left-center">Esquerda (Centro)</option> <option value="left-top">Esquerda (Topo)</option> <option value="left-bottom">Esquerda (Fundo)</option> <option value="right-center">Direita (Centro)</option> <option value="right-top">Direita (Topo)</option> <option value="right-bottom">Direita (Fundo)</option> </select> </div> <div class="form-group" style="margin-left: auto;"> <button type="button" id="randomize-map-button" class="secondary" title="Distribuir alunos aleatoriamente"><span class="icon icon-sorteio"></span> Aleatório</button> <button type="button" id="cancel-map-edit-button" class="secondary">Cancelar</button> <button type="button" id="save-map-button" class="success"><span class="icon icon-salvar"></span> Salvar Mapa</button> </div> </div> <div id="map-edit-area" class="map-edit-area hidden"> <div id="unassigned-students-container" class="unassigned-students-list" droppable="true"> <h5>Alunos sem lugar (Clique aqui após selecionar mesa vazia)</h5> </div> <div id="classroom-container-edit" class="classroom-container"> </div> </div> <div id="classroom-container-display" class="classroom-container"> <div class="teacher-desk"><span class="icon icon-escola"></span></div> <div class="classroom-map-grid"> <p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p> </div> </div> </div>
+            <div class="card collapsed" id="map-card">
+                 <div class="card-header"> <h3><span class="icon icon-mapa"></span>Mapa da Sala</h3> <div class="options"> <button type="button" id="edit-map-button" class="secondary icon-button" title="Editar Mapa"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> <div id="classroom-map-edit-controls" class="classroom-map-edit-controls hidden"> <div class="form-group"> <label for="map-rows-input">Fileiras:</label> <input type="number" id="map-rows-input" min="1" max="20" value="5"> </div> <div class="form-group"> <label for="map-cols-input">Colunas:</label> <input type="number" id="map-cols-input" min="1" max="20" value="6"> </div> <div class="form-group"> <label for="teacher-desk-position-select">Mesa Prof.:</label> <select id="teacher-desk-position-select"> <option value="top-center">Topo (Centro)</option> <option value="top-left">Topo (Esquerda)</option> <option value="top-right">Topo (Direita)</option> <option value="bottom-center">Fundo (Centro)</option> <option value="bottom-left">Fundo (Esquerda)</option> <option value="bottom-right">Fundo (Direita)</option> <option value="left-center">Esquerda (Centro)</option> <option value="left-top">Esquerda (Topo)</option> <option value="left-bottom">Esquerda (Fundo)</option> <option value="right-center">Direita (Centro)</option> <option value="right-top">Direita (Topo)</option> <option value="right-bottom">Direita (Fundo)</option> </select> </div> <div class="form-group" style="margin-left: auto;"> <button type="button" id="randomize-map-button" class="secondary" title="Distribuir alunos aleatoriamente"><span class="icon icon-sorteio"></span> Aleatório</button> <button type="button" id="cancel-map-edit-button" class="secondary">Cancelar</button> <button type="button" id="save-map-button" class="success"><span class="icon icon-salvar"></span> Salvar Mapa</button> </div> </div> <div id="map-edit-area" class="map-edit-area hidden"> <div id="unassigned-students-container" class="unassigned-students-list" droppable="true"> <h5>Alunos sem lugar (Clique aqui após selecionar mesa vazia)</h5> </div> <div id="classroom-container-edit" class="classroom-container"> </div> </div> <div id="classroom-container-display" class="classroom-container"> <div class="teacher-desk"><span class="icon icon-escola"></span></div> <div class="classroom-map-grid"> <p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p> </div> </div> </div>
             </div>
-            <div class="card" id="grades-card">
-                 <div class="card-header"> <h3><span class="icon icon-notas"></span>Notas e Médias</h3> <div class="options"> <select id="grade-set-select" title="Conjunto de Notas"> <option value="">--</option> </select> <button type="button" id="manage-grade-structure-button" class="secondary icon-button" title="Gerenciar Estrutura de Notas"><span class="icon icon-estrutura icon-only"></span></button> <div class="export-buttons"> <button type="button" id="export-grades-csv-button" class="secondary icon-button hidden" title="Exportar Notas (CSV)"><span class="icon icon-upload"></span></button> <button type="button" id="export-grades-pdf-button" class="secondary icon-button hidden" title="Exportar Notas (PDF)"><span class="icon icon-pdf"></span></button> </div> <button type="button" class="card-toggle-button" title="Esconder Notas"><span class="icon icon-chevron-up"></span></button> </div> </div> <div class="card-content collapsible-content"> <div class="table-scroll-wrapper"> <div id="grades-table-container"><p style="padding: 1rem; text-align: center;">Selecione um conjunto de notas ou configure a estrutura.</p></div> </div> <button type="button" id="save-grades-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Notas</button> </div>
+            <div class="card collapsed" id="grades-card">
+                 <div class="card-header"> <h3><span class="icon icon-notas"></span>Notas e Médias</h3> <div class="options"> <select id="grade-set-select" title="Conjunto de Notas"> <option value="">--</option> </select> <button type="button" id="manage-grade-structure-button" class="secondary icon-button" title="Gerenciar Estrutura de Notas"><span class="icon icon-estrutura icon-only"></span></button> <div class="export-buttons"> <button type="button" id="export-grades-csv-button" class="secondary icon-button hidden" title="Exportar Notas (CSV)"><span class="icon icon-upload"></span></button> <button type="button" id="export-grades-pdf-button" class="secondary icon-button hidden" title="Exportar Notas (PDF)"><span class="icon icon-pdf"></span></button> </div> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> <div class="table-scroll-wrapper"> <div id="grades-table-container"><p style="padding: 1rem; text-align: center;">Selecione um conjunto de notas ou configure a estrutura.</p></div> </div> <button type="button" id="save-grades-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Notas</button> </div>
             </div>
-             <div class="card" id="lesson-plan-card">
-                 <div class="card-header"> <h3><span class="icon icon-plano"></span>Planejamento da Aula</h3> <div class="options"> <input type="date" id="lesson-plan-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data do Planejamento"> <button type="button" class="card-toggle-button" title="Esconder Planejamento"><span class="icon icon-chevron-up"></span></button> </div> </div> <div class="card-content collapsible-content"> 
+             <div class="card collapsed" id="lesson-plan-card">
+                 <div class="card-header"> <h3><span class="icon icon-plano"></span>Planejamento da Aula</h3> <div class="options"> <input type="date" id="lesson-plan-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data do Planejamento"> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> 
                     <button type="button" id="ai-generate-plan-btn" class="secondary w-full mb-2 ai-tool" style="display: none;">
                         <span class="icon icon-auto-awesome"></span> Gerar Esboço com IA
                     </button>
                     <textarea id="lesson-plan-textarea" placeholder="Digite o conteúdo/tópico da aula para esta data..."></textarea> <button type="button" id="save-lesson-plan-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Plano</button> </div>
             </div>
-             <div class="card" id="class-notes-card">
-                 <div class="card-header"> <h3><span class="icon icon-anotacao"></span>Anotações da Turma</h3> <div class="options"> <button type="button" id="edit-class-notes-button" class="secondary icon-button" title="Editar Anotações"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Esconder Anotações"><span class="icon icon-chevron-up"></span></button> </div> </div> <div id="class-notes-display" class="card-content collapsible-content"> 
+             <div class="card collapsed" id="class-notes-card">
+                 <div class="card-header"> <h3><span class="icon icon-anotacao"></span>Anotações da Turma</h3> <div class="options"> <button type="button" id="edit-class-notes-button" class="secondary icon-button" title="Editar Anotações"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div id="class-notes-display" class="card-content collapsible-content"> 
                     <button type="button" id="ai-analyze-class-btn" class="secondary w-full mb-2 ai-tool" style="display: none;">
                         <span class="icon icon-auto-awesome"></span> Analisar Turma com IA
                     </button>
@@ -529,16 +529,20 @@
                 </div>
             </div>
             <div class="school-quorum-info">
-                <label class="text-sm" for="quorum-date-input-ID_ESCOLA">Quórum:</label>
-                <input type="date" class="quorum-date-input" id="quorum-date-input-ID_ESCOLA">
-                <select class="quorum-shift-select">
-                    <option value="Geral">Geral</option>
-                    <option value="Manhã">Manhã</option>
-                    <option value="Tarde">Tarde</option>
-                    <option value="Noite">Noite</option>
-                    <option value="Integral">Integral</option>
-                </select>
-                <span class="quorum-display">--/-- (--%)</span>
+                <div class="quorum-label-row">
+                    <label class="text-sm" for="quorum-date-input-ID_ESCOLA">Quórum:</label>
+                </div>
+                <div class="quorum-inputs-row">
+                    <input type="date" class="quorum-date-input" id="quorum-date-input-ID_ESCOLA">
+                    <select class="quorum-shift-select">
+                        <option value="Geral">Geral</option>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Noite">Noite</option>
+                        <option value="Integral">Integral</option>
+                    </select>
+                    <span class="quorum-display">--/-- (--%)</span>
+                </div>
             </div>
         </div>
     </template>
@@ -562,7 +566,7 @@
                     <span class="student-number"></span>
                     <span class="student-programs-indicator"></span> <!-- NOVO: Contêiner para os badges -->
                     <span class="student-name"></span>
-                    <button type="button" class="expand-actions-button" title="Mais Ações"><span class="icon icon-chevron-down icon-only"></span></button>
+                    <button type="button" class="expand-actions-button" title="Mais Ações"><span class="icon icon-more-vert icon-only"></span></button>
                 </div>
                 <div class="list-item-hidden-actions">
                     <button type="button" class="action-button set-representative-button" title="Promover a Rep."><span class="icon icon-representante icon-only"></span></button>
@@ -607,8 +611,8 @@
             
             <!-- Actions -->
             <div class="schedule-actions" style="position: relative; z-index: 1; margin-left: 10px;">
-                <button type="button" class="edit-schedule-button secondary icon-button" title="Editar Horário" style="background: transparent; border: none; font-weight: bold; font-size: 1.2em; padding: 5px; color: var(--text-secondary);">
-                    ...
+                <button type="button" class="edit-schedule-button secondary icon-button" title="Editar Horário">
+                    <span class="icon icon-more-vert icon-only"></span>
                 </button>
             </div>
         </div>

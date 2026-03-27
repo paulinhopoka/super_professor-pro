@@ -196,10 +196,44 @@ button.secondary, .button-like.secondary { background-color: var(--accent-second
 button.danger, .button-like.danger { background-color: var(--accent-danger); color: #fff; }
 button.success, .button-like.success { background-color: var(--accent-success); color: #fff; }
 button.warning, .button-like.warning { background-color: var(--accent-warning); color: var(--text-primary); }
-button.icon-button, .button-like.icon-button { padding: 0.4rem; font-size: 1.1rem; line-height: 1; background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 5px; margin: 0 2px; }
-button.icon-button:hover, .button-like.icon-button:hover { color: var(--accent-primary); background-color: var(--bg-tertiary-alpha); border-color: var(--accent-primary); }
-button.icon-button:active, .button-like.icon-button:active { transform: scale(0.92); opacity: 1; background-color: color-mix(in srgb, var(--bg-tertiary-alpha) 80%, black); }
-button.icon-button:disabled { background-color: transparent; border-color: var(--border-color); color: var(--text-secondary); opacity: 0.5; }
+button.icon-button, .button-like.icon-button,
+.card-toggle-button, #class-details-section .card-toggle-button,
+#student-list-container .expand-actions-button {
+    padding: 0 !important;
+    font-size: 1.1rem !important;
+    line-height: 1 !important;
+    background-color: transparent !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid transparent !important;
+    border-radius: 5px !important;
+    margin: 0 2px;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.1s !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+button.icon-button:hover, .button-like.icon-button:hover,
+.card-toggle-button:hover, #class-details-section .card-toggle-button:hover,
+#student-list-container .expand-actions-button:hover {
+    color: var(--accent-primary) !important;
+    background-color: transparent !important;
+    border-color: var(--border-color) !important;
+}
+
+button.icon-button:active, .button-like.icon-button:active,
+.card-toggle-button:active, #class-details-section .card-toggle-button:active,
+#student-list-container .expand-actions-button:active {
+    transform: scale(0.92) !important;
+    opacity: 1 !important;
+    background-color: color-mix(in srgb, var(--bg-tertiary-alpha) 80%, black) !important;
+    border-color: var(--border-color) !important;
+}
+button.icon-button:disabled, .card-toggle-button:disabled, #student-list-container .expand-actions-button:disabled { background-color: transparent !important; border-color: transparent !important; color: var(--text-secondary) !important; opacity: 0.5 !important; }
 
 input[type="text"], input[type="time"], input[type="number"], input[type="date"], select, textarea, input[type="search"], input[type="color"] { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid var(--input-border); border-radius: 5px; background-color: var(--input-bg); color: var(--text-primary); font-size: 1rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 input[type="color"] { padding: 0.2rem; height: 40px; width: 50px; vertical-align: middle; cursor: pointer;}
@@ -258,11 +292,11 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .card-header .options { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; flex-shrink: 0; }
 .card-actions button, .card-actions .button-like { margin-left: 0.3rem; padding: 0.3rem 0.6rem; font-size: 0.85rem; }
 .card-content { padding-top: 0.5rem; transition: opacity 0.3s ease, max-height 0.4s ease-out; max-height: 10000px; overflow: hidden; opacity: 1; }
-.card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background-color: var(--bg-tertiary) !important; border: 1px solid var(--border-color) !important; border-radius: 4px; color: var(--text-secondary); cursor: pointer; margin-left: auto; order: 99; margin-top: 0.1rem; transition: background-color 0.2s, color 0.2s; }
-.card-toggle-button:hover { background-color: var(--bg-tertiary-alpha) !important; color: var(--accent-primary); }
+/* .card-toggle-button styles unified above */
 .card.collapsed { padding-bottom: 0.5rem; }
 .card.collapsed .card-content { max-height: 0; opacity: 0; padding-top: 0; margin-top: -1px; border-top: none; visibility: hidden; }
 .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; }
+.card.collapsed .options > *:not(.card-toggle-button) { display: none !important; }
 .item-list { list-style: none; padding: 0; }
 
 .list-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 0.75rem 1rem; background-color: var(--bg-secondary-alpha); border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 0.5rem; cursor: pointer; transition: background-color 0.25s ease, transform 0.15s ease; flex-direction: row; }
@@ -274,19 +308,21 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .list-item-actions { flex-shrink: 0; display: flex; gap: 3px; align-self: flex-start; }
 .list-item-actions button, .list-item-actions .button-like { margin-left: 0; padding: 0.3rem; font-size: 1rem; }
 
-.list-item.school-item { display: flex; flex-direction: column; align-items: stretch; padding-bottom: 0.5rem; gap: 0.75rem; }
-.school-item-main-row { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+.list-item.school-item { display: flex; flex-direction: column; align-items: stretch; padding: 0.8rem 1rem; gap: 0.6rem; border-radius: 8px; background-color: var(--bg-primary); border: 1px solid var(--border-color); }
+.school-item-main-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .school-item .item-info { flex-grow: 1; margin-right: 10px; overflow: hidden; }
-.school-item .item-info h4 { margin-bottom: 0; white-space: normal; word-break: break-word; }
-.school-item .list-item-actions { flex-shrink: 0; display: flex; gap: 5px; align-self: flex-start; }
-.school-item .list-item-actions .button-like { padding: 0.5rem 0.8rem; font-size: 0.9rem; }
-.school-item .list-item-actions .icon-button { padding: 0.4rem; font-size: 1rem; }
-.school-quorum-info { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); margin-top: 0; width: 100%; }
+.school-item .item-info h4 { margin-bottom: 0; white-space: normal; word-break: break-word; font-weight: 700; font-size: 1.05rem; color: var(--text-primary); }
+.school-item .list-item-actions { flex-shrink: 0; display: flex; gap: 6px; align-items: center; }
+.school-item .list-item-actions .button-like.primary { padding: 0.4rem 0.7rem; font-size: 0.85rem; border-radius: 6px; font-weight: 500; }
+.school-item .list-item-actions .icon-button { padding: 0.35rem 0.2rem !important; font-size: 1.1rem !important; border-radius: 6px !important; border: 1px solid var(--border-color) !important; }
+.school-quorum-info { display: flex; flex-direction: column; gap: 4px; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); margin-top: 0.2rem; width: 100%; }
+.school-quorum-info .quorum-label-row { display: flex; width: 100%; }
+.school-quorum-info .quorum-inputs-row { display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: nowrap; }
 .school-quorum-info label { margin-bottom: 0; font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; margin-right: 1px; }
-.school-quorum-info input[type="date"], .school-quorum-info select { padding: 0.15rem 0.3rem; font-size: 0.75rem; margin-bottom: 0; width: auto; flex-grow: 0; flex-shrink: 1; border-radius: 3px; border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-primary); cursor: pointer; height: auto; line-height: 1.1; vertical-align: middle; }
-.school-quorum-info input[type="date"] { max-width: 110px; }
-.school-quorum-info select { max-width: 85px; }
-.school-quorum-info .quorum-display { font-weight: bold; font-size: 0.8rem; color: var(--accent-success); margin-left: auto; padding-left: 6px; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.25em; }
+.school-quorum-info input[type="date"], .school-quorum-info select { padding: 0.25rem 0.4rem; font-size: 0.8rem; margin-bottom: 0; width: auto; flex-grow: 0; flex-shrink: 1; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--bg-primary); color: var(--text-primary); cursor: pointer; height: auto; line-height: 1.2; vertical-align: middle; min-width: 0; }
+.school-quorum-info input[type="date"] { max-width: 115px; }
+.school-quorum-info select { max-width: 90px; }
+.school-quorum-info .quorum-display { font-weight: 600; font-size: 0.85rem; color: var(--accent-success); margin-left: auto; padding-left: 4px; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.25em; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; }
 .school-quorum-info .quorum-display::before { content: "bar_chart"; font-family: 'Material Symbols Outlined'; font-size: 1.1em; display: inline-block; margin-right: 4px; vertical-align: middle; }
 .quorum-display.no-data { color: var(--accent-danger); opacity: 0.8; }
 .quorum-display.no-data::before { opacity: 0.6; }
@@ -634,19 +670,18 @@ body.theme-alchemist .schedule-item.current .progress-bar { background-color: va
 #class-details-section .card.collapsed { padding-top: 0.8rem; padding-bottom: 0.8rem; margin-bottom: 1rem; }
 #class-details-section .card.collapsed .card-header { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 #class-details-section .card.collapsed .card-content { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; overflow: hidden; visibility: hidden; }
-#class-details-section .card-toggle-button { padding: 0.3rem !important; font-size: 0.9rem !important; line-height: 1; background-color: var(--bg-tertiary) !important; border: 1px solid var(--border-color) !important; border-radius: 4px; color: var(--text-secondary); cursor: pointer; margin-left: auto; transition: background-color 0.2s, color 0.2s; }
-#class-details-section .card-toggle-button:hover { background-color: var(--bg-tertiary-alpha) !important; color: var(--accent-primary); }
+/* #class-details-section .card-toggle-button styles unified above */
 
 #student-list-container .list-item { background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 0.5rem; transition: border-color 0.2s ease; position: relative; overflow: hidden; display: block; padding: 0; cursor: default; align-items: stretch; flex-direction: column; }
 #student-list-container .list-item:hover { border-color: var(--accent-primary); background-color: var(--bg-primary); }
 #student-list-container .list-item:active { transform: none; background-color: var(--bg-primary); }
 #student-list-container .list-item-content-wrapper { padding: 0.65rem 0.9rem; position: relative; z-index: 1; display: flex; flex-direction: column; }
 #student-list-container .list-item-main-row { display: flex; align-items: center; width: 100%; }
-#student-list-container .list-item .student-number { font-weight: 600; margin-right: 6px; min-width: 25px; text-align: right; color: var(--text-secondary); font-size: 0.8em; }
-#student-list-container .list-item .student-name { white-space: normal; word-break: break-word; flex-grow: 1; margin-right: 6px; font-weight: 500; color: var(--text-primary); }
-#student-list-container .expand-actions-button { flex-shrink: 0; margin-left: 5px; padding: 0.3rem 0.6rem; font-size: 0.8rem; background-color: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 4px; }
-#student-list-container .expand-actions-button .icon { transition: transform 0.3s ease; margin: 0; }
-#student-list-container .list-item.expanded .expand-actions-button .icon { transform: rotate(180deg); }
+#student-list-container .list-item .student-number { font-weight: 600; margin-right: 6px; min-width: 25px; text-align: right; color: var(--text-secondary); font-size: 0.8em; flex-shrink: 0; }
+#student-list-container .list-item .student-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; margin-right: 6px; font-weight: 500; color: var(--text-primary); }
+/* #student-list-container .expand-actions-button styles unified above */
+#student-list-container .expand-actions-button { margin-left: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+#student-list-container .expand-actions-button .icon { margin: 0; display: inline-block; text-align: center; }
 #student-list-container .list-item-hidden-actions { max-height: 0; opacity: 0; overflow: hidden; padding: 0 0.2rem; margin-top: 0; visibility: hidden; transition: max-height 0.3s ease-out, opacity 0.2s ease-out, padding 0.3s ease-out, margin-top 0.3s ease-out, visibility 0.3s, border-color 0.3s ease-out 0.1s; border-top: 1px dashed transparent; display: flex; flex-wrap: wrap; gap: 5px; justify-content: space-around; }
 #student-list-container .list-item.expanded .list-item-hidden-actions { max-height: 100px; opacity: 1; padding: 0.6rem 0.2rem 0.3rem 0.2rem; margin-top: 0.6rem; visibility: visible; border-top-color: var(--border-color); }
 #student-list-container .list-item-hidden-actions .action-button { padding: 0.35rem; font-size: 0.95rem; line-height: 1; min-width: 36px; flex-grow: 1; max-width: 48px; background-color: transparent; border: 1px solid transparent; color: var(--text-secondary); border-radius: 4px; }
