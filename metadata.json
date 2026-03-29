@@ -1,5 +1,5 @@
 {
-  "name": "Super Professor Pro",
-  "description": "App para profissionais da educação com ferramentas de gestão, IA e planejamento.",
-  "requestFramePermissions": ["microphone"]
+  "name": "",
+  "description": "",
+  "requestFramePermissions": []
 }

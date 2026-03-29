@@ -150,28 +150,70 @@
                     <span class="icon icon-ajuda icon-only"></span>
                 </button>
             </div>
-            <div class="tools-grid"> 
-                <button type="button" class="tool-card" data-tool="name-sorter"> <span class="icon icon-sorteio"></span> <span class="tool-card-title">Sorteador de Nomes</span> </button> 
-                <button type="button" class="tool-card" data-tool="timer-stopwatch"> <span class="icon icon-cronometro"></span> <span class="tool-card-title">Cronômetro/ Timer</span> </button> 
-                <button type="button" class="tool-card" data-tool="group-generator"> <span class="icon icon-grupos"></span> <span class="tool-card-title">Gerador de Grupos</span> </button> 
-                <button type="button" class="tool-card" data-tool="advanced-calculator"> <span class="icon icon-calculadora-avancada"></span> <span class="tool-card-title">Calculadora Avançada</span> </button> 
-                <button type="button" class="tool-card" data-tool="calendar-notes"> <span class="icon icon-calendario"></span> <span class="tool-card-title">Calendário de Anotações</span> </button> 
-                <button type="button" class="tool-card" data-tool="notepad"> <span class="icon icon-anotacao"></span> <span class="tool-card-title">Bloco de Notas</span> </button> 
-                <button type="button" class="tool-card" data-tool="audio-recorder"> <span class="icon icon-mic"></span> <span class="tool-card-title">Gravador de Áudio</span> </button> 
-                <button type="button" class="tool-card" data-tool="whiteboard"> <span class="icon icon-palette"></span> <span class="tool-card-title">Quadro Branco</span> </button>
-                <button type="button" class="tool-card" data-tool="mind-map"> <span class="icon icon-mind-map"></span> <span class="tool-card-title">Mapa Mental</span> </button>
-                <button type="button" class="tool-card" data-tool="flashcards"> <span class="icon icon-flashcards"></span> <span class="tool-card-title">Flashcards</span> </button>
-                <button type="button" class="tool-card" data-tool="event-organizer"> <span class="icon icon-event"></span> <span class="tool-card-title">Excursões/Eventos</span> </button>
-                <button type="button" class="tool-card" data-tool="noise-meter"> <span class="icon icon-noise"></span> <span class="tool-card-title">Semáforo do Silêncio</span> </button>
-                <button type="button" class="tool-card" data-tool="todo-list"> <span class="icon icon-checklist"></span> <span class="tool-card-title">Gerenciador de Tarefas</span> </button>
-                <button type="button" class="tool-card" data-tool="topic-sorter"> <span class="icon icon-lightbulb"></span> <span class="tool-card-title">Sorteador de Temas</span> </button>
-                <button type="button" class="tool-card" data-tool="grade-converter"> <span class="icon icon-sync-alt"></span> <span class="tool-card-title">Conversor de Notas</span> </button>
-                <button type="button" class="tool-card" data-tool="pomodoro-timer"> <span class="icon icon-alarm"></span> <span class="tool-card-title">Pomodoro Timer</span> </button>
-                <button type="button" class="tool-card ai-tool" id="tool-rubric-generator" style="display: none;" data-tool="rubric-generator"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Gerador de Rubricas</span> </button>
-                <button type="button" class="tool-card ai-tool" id="tool-class-analyzer" style="display: none;" data-tool="class-analyzer"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Analisar Turma</span> </button>
-                <button type="button" class="tool-card ai-tool" id="tool-exam-assistant" style="display: none;"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Assistente de Provas</span> </button>
-                <button type="button" class="tool-card ai-tool" id="tool-question-generator" style="display: none;"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Gerador de Questões</span> </button>
-                <button type="button" class="tool-card ai-tool" id="tool-exam-corrector" style="display: none;"> <span class="icon icon-auto-awesome"></span> <span class="tool-card-title">Corretor de Provas</span> </button>
+            <div class="tools-category mt-2">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-plano"></span> Organização e Planejamento</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="calendar-notes"> <span class="icon icon-calendario"></span> <span class="tool-card-title">Calendário de Anotações</span> </button> 
+                    <button type="button" class="tool-card" data-tool="notepad"> <span class="icon icon-anotacao"></span> <span class="tool-card-title">Bloco de Notas</span> </button> 
+                    <button type="button" class="tool-card" data-tool="todo-list"> <span class="icon icon-checklist"></span> <span class="tool-card-title">Gerenciador de Tarefas</span> </button>
+                    <button type="button" class="tool-card" data-tool="event-organizer"> <span class="icon icon-event"></span> <span class="tool-card-title">Excursões/Eventos</span> </button>
+                </div>
+            </div>
+
+            <div class="tools-category mt-4">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-grupos"></span> Gestão de Sala de Aula</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="name-sorter"> <span class="icon icon-sorteio"></span> <span class="tool-card-title">Sorteador de Nomes</span> </button> 
+                    <button type="button" class="tool-card" data-tool="group-generator"> <span class="icon icon-grupos"></span> <span class="tool-card-title">Gerador de Grupos</span> </button> 
+                    <button type="button" class="tool-card" data-tool="topic-sorter"> <span class="icon icon-lightbulb"></span> <span class="tool-card-title">Sorteador de Temas</span> </button>
+                    <button type="button" class="tool-card" data-tool="noise-meter"> <span class="icon icon-noise"></span> <span class="tool-card-title">Semáforo do Silêncio</span> </button>
+                </div>
+            </div>
+
+            <div class="tools-category mt-4">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-cronometro"></span> Produtividade e Foco</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="timer-stopwatch"> <span class="icon icon-cronometro"></span> <span class="tool-card-title">Cronômetro/ Timer</span> </button> 
+                    <button type="button" class="tool-card" data-tool="pomodoro-timer"> <span class="icon icon-alarm"></span> <span class="tool-card-title">Pomodoro Timer</span> </button>
+                    <button type="button" class="tool-card" data-tool="audio-recorder"> <span class="icon icon-mic"></span> <span class="tool-card-title">Gravador de Áudio</span> </button> 
+                </div>
+            </div>
+
+            <div class="tools-category mt-4">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-editar"></span> Ensino e Avaliação</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="advanced-calculator"> <span class="icon icon-calculadora-avancada"></span> <span class="tool-card-title">Calculadora Avançada</span> </button> 
+                    <button type="button" class="tool-card" data-tool="grade-converter"> <span class="icon icon-sync-alt"></span> <span class="tool-card-title">Conversor de Notas</span> </button>
+                    <button type="button" class="tool-card" data-tool="whiteboard"> <span class="icon icon-palette"></span> <span class="tool-card-title">Quadro Branco</span> </button>
+                    <button type="button" class="tool-card" data-tool="mind-map"> <span class="icon icon-mind-map"></span> <span class="tool-card-title">Mapa Mental</span> </button>
+                    <button type="button" class="tool-card" data-tool="flashcards"> <span class="icon icon-flashcards"></span> <span class="tool-card-title">Flashcards</span> </button>
+                </div>
+            </div>
+
+            <div class="tools-category mt-4 ai-tool" style="display: none;">
+                <h3 style="color: var(--accent-primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-auto-awesome"></span> Inteligência Artificial</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card ai-tool" id="tool-rubric-generator" style="display: none; position: relative;" data-tool="rubric-generator"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-checklist"></span> <span class="tool-card-title">Gerador de Rubricas</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-class-analyzer" style="display: none; position: relative;" data-tool="class-analyzer"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-notas"></span> <span class="tool-card-title">Analisar Turma</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-exam-assistant" style="display: none; position: relative;"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-plano"></span> <span class="tool-card-title">Assistente de Provas</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-question-generator" style="display: none; position: relative;"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-ajuda"></span> <span class="tool-card-title">Gerador de Questões</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-exam-corrector" style="display: none; position: relative;"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-todos-presentes"></span> <span class="tool-card-title">Corretor de Provas</span> 
+                    </button>
+                </div>
             </div> <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p> </section>
         <section id="profile-section" class="section">
             <div class="section-header">
@@ -208,35 +250,40 @@
                 <div style="width: 40px;" class="header-right-button"></div>
             </div>
             
-            <div class="card">
-                <h3><span class="icon icon-contato"></span>Contato</h3>
-                <h4 style="text-align: center; color: var(--accent-primary); margin-top: 10px;">Gostou do App? Apoie o Desenvolvedor!</h4>
-                <p class="mt-2">Olá, <span id="settings-welcome-name">Professor(a)</span>! <span class="icon icon-waving-hand"></span></p>
-                <p>O Super Professor Pro foi criado com muito carinho e dedicação para ser uma ferramenta útil e gratuita no seu dia a dia.</p>
-                <p>Se este app tem facilitado sua rotina, considere fazer uma contribuição voluntária via PIX.</p>
-                <h4 class="text-center mt-2">PIX Copia e Cola:</h4>
-                <div id="pix-key-text" class="pix-key-container">00020126580014BR.GOV.BCB.PIX01365787c86e-c2cb-44ac-8799-428e17e6b4635204000053039865802BR5925Paulo Ricardo Correa de A6009SAO PAULO6214051058aRkBp4Fm6304175C</div>
-                <button type="button" id="copy-pix-button" class="success">
-                    <span class="icon icon-copiar"></span> Copiar Código PIX
-                </button>
-                <p class="text-center mt-2"><strong>Muito obrigado pelo seu apoio!</strong></p>
-                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
-                <p>Para dúvidas, sugestões ou reporte de erros:</p>
-                <p style="text-align: center;">
-                    <a href="mailto:paulinhoandroidnf@gmail.com">paulinhoandroidnf@gmail.com</a>
+            <!-- Contato e Apoio -->
+            <div class="card mt-2">
+                <h3><span class="icon icon-contato"></span> Contato e Apoio</h3>
+                
+                <p class="text-sm mt-2">Para dúvidas, sugestões ou reporte de erros:</p>
+                <p style="text-align: center; margin-bottom: 15px;">
+                    <a href="mailto:paulinhoandroidnf@gmail.com" style="font-weight: bold; color: var(--accent-primary);">paulinhoandroidnf@gmail.com</a>
                 </p>
-
+                
                 <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
                 
                 <div style="text-align: center;">
-                    <h4 style="margin-bottom: 5px;">Compartilhe o App</h4>
-                    <p class="text-sm mb-3">Ajude outros professores a facilitar o dia a<br>dia compartilhando o Super Professor Pro!</p>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Compartilhe o App</div>
+                    <p class="text-sm mb-3">Ajude outros professores a facilitar o dia a dia compartilhando o Super Professor Pro!</p>
                     <button type="button" id="share-whatsapp-btn" class="success w-full" style="background-color: #25D366; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 5px;">
                         Compartilhar no WhatsApp
                     </button>
                 </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div style="text-align: center;">
+                    <div style="color: var(--accent-primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;"><span class="icon icon-favorite"></span> Apoie o Desenvolvedor</div>
+                    <p class="text-sm">Olá, <span id="settings-welcome-name">Professor(a)</span>! <span class="icon icon-waving-hand"></span></p>
+                    <p class="text-sm mt-1">Se este app tem facilitado sua rotina, considere fazer uma contribuição voluntária via PIX.</p>
+                    <div id="pix-key-text" class="pix-key-container mt-2">00020126580014BR.GOV.BCB.PIX01365787c86e-c2cb-44ac-8799-428e17e6b4635204000053039865802BR5925Paulo Ricardo Correa de A6009SAO PAULO6214051058aRkBp4Fm6304175C</div>
+                    <button type="button" id="copy-pix-button" class="success w-full mt-2">
+                        <span class="icon icon-copiar"></span> Copiar Código PIX
+                    </button>
+                    <p class="text-xs mt-2 text-secondary">Muito obrigado pelo seu apoio!</p>
+                </div>
             </div>
 
+            <!-- Inteligência Artificial -->
             <div class="card mt-2" id="ai-settings-card">
                 <h3><span class="icon icon-auto-awesome"></span> Inteligência Artificial</h3>
                 
@@ -244,12 +291,12 @@
                     <strong>Aviso:</strong> Esta funcionalidade é experimental. A Inteligência Artificial pode cometer erros ou gerar informações imprecisas. Sempre revise o conteúdo gerado antes de utilizá-lo.
                 </div>
 
-                <div class="toggle-container mt-2" style="display: flex; align-items: center;">
+                <div class="toggle-container mt-2" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 500;">Habilitar Assistente de I.A.</span>
                     <label class="switch">
                         <input type="checkbox" id="ai-enable-toggle">
                         <span class="slider round"></span>
                     </label>
-                    <span style="margin-left: 10px; font-weight: 500;">Habilitar Assistente de I.A.</span>
                 </div>
                 
                 <div id="ai-settings-content" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
@@ -278,9 +325,10 @@
                 </div>
             </div>
 
+            <!-- Sincronização e Nuvem -->
             <div class="card mt-2">
                 <h3><span class="icon icon-cloud"></span> Sincronização e Nuvem</h3>
-                <div id="sync-status-container" style="margin-bottom: 10px;">
+                <div id="sync-status-container" style="margin-bottom: 10px; margin-top: 10px;">
                     <p id="sync-status-text" class="text-sm">Status: <span style="font-weight: bold; color: #666;">Verificando...</span></p>
                     <p id="last-sync-text" class="text-sm text-secondary">Última sincronização: <span id="last-sync-time">Nunca</span></p>
                 </div>
@@ -288,8 +336,9 @@
                 <p class="text-xs text-secondary mt-1">O app salva automaticamente no seu dispositivo. Use este botão para forçar o envio/recebimento de dados da nuvem se estiver online.</p>
             </div>
 
+            <!-- Conta e Dados Locais -->
             <div class="card mt-2" id="account-card">
-                <h3><span class="icon icon-perfil"></span> Conta</h3>
+                <h3><span class="icon icon-perfil"></span> Conta e Dados Locais</h3>
                 <div id="logged-out-state">
                     <p class="text-sm text-secondary mb-2">Faça login para sincronizar seus dados na nuvem e acessá-los de qualquer dispositivo.</p>
                     <button type="button" id="auth-button" class="primary w-full"><span class="icon icon-key"></span> Login / Registrar</button>
@@ -297,54 +346,13 @@
                 <div id="logged-in-state" style="display: none;">
                     <p class="text-sm mb-1">Logado como: <strong id="settings-user-email"></strong></p>
                     <p class="text-sm text-secondary mb-2">Ao sair, seus dados locais serão removidos por segurança. Certifique-se de que a sincronização com a nuvem foi concluída.</p>
-                    <button type="button" id="logout-button" class="danger w-full"><span class="icon icon-logout"></span> Desconectar</button>
+                    <button type="button" id="logout-button" class="danger w-full mb-2"><span class="icon icon-logout"></span> Desconectar</button>
                 </div>
-            </div>
-
-
-
-            <div class="card mt-2">
-                <h3><span class="icon icon-menu"></span> Navegação</h3>
+                
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+                
+                <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;"><span class="icon icon-arquivo"></span> Gerenciar Dados Offline</div>
                 <div class="form-group">
-                    <label for="nav-style-select">Estilo de Navegação:</label>
-                    <select id="nav-style-select">
-                        <option value="fixed">Barra Inferior Fixa</option>
-                        <option value="side">Menu Lateral (Hambúrguer)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="card mt-2">
-                <h3><span class="icon icon-palette"></span> Temas</h3>
-                <div class="form-group">
-                    <label for="theme-select">Escolha o Tema:</label>
-                    <select id="theme-select">
-                        <option value="theme-light">Claro</option>
-                        <option value="theme-dark">Escuro</option>
-                        <option value="theme-forest-green">Verde Floresta</option>
-                        <option value="theme-math-master">Mestre da Matemática</option>
-                        <option value="theme-historic-scroll">Papiro Histórico</option>
-                        <option value="theme-alchemist">O Alquimista</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="card mt-2">
-                <h3><span class="icon icon-config"></span> Preferências</h3>
-                <div class="toggle-container mt-2" style="display: flex; align-items: center;">
-                    <label class="switch">
-                        <input type="checkbox" id="sound-effects-toggle" checked>
-                        <span class="slider round"></span>
-                    </label>
-                    <span style="margin-left: 10px; font-weight: 500;">Sons de Interação</span>
-                </div>
-                <p class="text-xs text-secondary mt-1 mb-3">Habilita sons suaves ao tocar em botões e abas.</p>
-            </div>
-
-            <div class="card mt-2">
-                <h3><span class="icon icon-arquivo"></span> Dados</h3>
-                <div class="form-group">
-                    <label for="data-action-select">Gerenciar Dados:</label>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <select id="data-action-select" style="flex: 1;">
                             <option value="">Selecione uma ação...</option>
@@ -358,38 +366,85 @@
                 </div>
             </div>
 
+            <!-- Preferências -->
             <div class="card mt-2">
-                <h3><span class="icon icon-notifications"></span> Notificações de Horários</h3>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="enable-global-notifications">
-                    <label for="enable-global-notifications">Ativar Notificações Globais</label>
+                <h3><span class="icon icon-config"></span> Preferências</h3>
+                
+                <div style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 15px; margin-bottom: 10px;"><span class="icon icon-palette"></span> Navegação e Tema</div>
+                <div class="form-group mt-2">
+                    <label for="nav-style-select" style="font-weight: normal; color: var(--text-secondary);">Estilo de Navegação:</label>
+                    <select id="nav-style-select">
+                        <option value="fixed">Barra Inferior Fixa</option>
+                        <option value="side">Menu Lateral (Hambúrguer)</option>
+                    </select>
                 </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="enable-notification-sound">
-                    <label for="enable-notification-sound">Ativar Som nas Notificações</label>
+
+                <div class="form-group mt-2">
+                    <label for="theme-select" style="font-weight: normal; color: var(--text-secondary);">Escolha o Tema:</label>
+                    <select id="theme-select">
+                        <option value="theme-light">Claro</option>
+                        <option value="theme-dark">Escuro</option>
+                        <option value="theme-forest-green">Verde Floresta</option>
+                        <option value="theme-math-master">Mestre da Matemática</option>
+                        <option value="theme-historic-scroll">Papiro Histórico</option>
+                        <option value="theme-alchemist">O Alquimista</option>
+                    </select>
                 </div>
-                <div class="custom-sound-container">
-                    <label for="custom-notification-sound-input">Som Personalizado (Opcional - máx 2MB):</label>
-                    <div class="custom-sound-input-group">
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+                
+                <div style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;"><span class="icon icon-notifications"></span> Notificações de Horários</div>
+                <div class="toggle-container mt-2" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: normal; color: var(--text-secondary);">Ativar Notificações Globais</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-global-notifications">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container mt-3" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: normal; color: var(--text-secondary);">Ativar Som nas Notificações</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-notification-sound">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="custom-sound-container mt-3">
+                    <label for="custom-notification-sound-input" class="text-sm" style="font-weight: normal; color: var(--text-secondary);">Som Personalizado (Opcional - máx 2MB):</label>
+                    <div class="custom-sound-input-group mt-1">
                         <label for="custom-notification-sound-input" class="button-like secondary" style="cursor: pointer;"><span class="icon icon-arquivo"></span> Escolher arquivo</label>
-                        <span id="custom-sound-filename">Nenhum arquivo escolhido</span>
+                        <span id="custom-sound-filename" style="color: var(--text-secondary);">Nenhum arquivo escolhido</span>
                         <input type="file" id="custom-notification-sound-input" accept="audio/*" class="hidden">
                     </div>
-                    <div id="current-custom-sound-display" class="hidden">
-                        <span id="current-custom-sound-name"></span>
+                    <div id="current-custom-sound-display" class="hidden mt-1">
+                        <span id="current-custom-sound-name" style="color: var(--text-secondary);"></span>
                         <button type="button" id="remove-custom-sound-button" class="danger icon-button" title="Remover Som Personalizado"><span class="icon icon-excluir icon-only"></span></button>
                     </div>
                 </div>
-                <p class="text-sm text-secondary mt-1">
-                    Notificações podem ser ativadas/desativadas individualmente para cada horário na tela "Meus Horários" (clicando no <span class="icon icon-notifications"></span>/<span class="icon icon-notifications-off"></span>). Elas aparecerão 5 minutos antes do início e do fim da aula programada.
+                <p class="text-xs text-secondary mt-2">
+                    Notificações podem ser ativadas/desativadas individualmente para cada horário na tela "Meus Horários". Elas aparecerão 5 minutos antes do início e do fim da aula programada.
                 </p>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;"><span class="icon icon-som"></span> Sons e Animações</div>
+                <div class="toggle-container mt-2" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: normal; color: var(--text-secondary);">Sons de Interação</span>
+                    <label class="switch">
+                        <input type="checkbox" id="sound-effects-toggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <p class="text-xs text-secondary mt-1 mb-3">Habilita sons suaves ao tocar em botões e abas.</p>
             </div>
-         <div class="card mt-2">
-             <h3><span class="icon icon-auto-awesome"></span> Novidades da Versão</h3>
-             <button type="button" id="show-whats-new-manual-button" class="secondary">
-                 <span class="icon icon-auto-awesome"></span> Ver Novidades
-             </button>
-         </div>
+
+            <!-- Novidades da Versão -->
+            <div class="mt-4 mb-4">
+                <button type="button" id="show-whats-new-manual-button" class="secondary w-full" style="padding: 12px; font-weight: bold;">
+                    <span class="icon icon-auto-awesome"></span> Ver Novidades da Versão
+                </button>
+            </div>
          <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p>
         </section>
     </main>
