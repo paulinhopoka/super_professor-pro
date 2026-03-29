@@ -381,6 +381,119 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .justification-modal .modal-body textarea { min-height: 100px; }
 .text-sm { font-size: 0.8rem; }
 
+/* --- Periodic Table Styles --- */
+.periodic-table-modal .modal-content {
+    max-width: 95vw;
+    width: 95vw;
+    height: 95vh;
+    max-height: 95vh;
+}
+
+.periodic-table-grid {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(45px, 1fr));
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    font-family: 'Inter', sans-serif;
+}
+
+.pt-element {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s, filter 0.2s;
+    color: #fff;
+    text-shadow: 0px 1px 2px rgba(0,0,0,0.5);
+    min-height: 50px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    user-select: none;
+}
+
+.pt-element:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+.pt-element.dimmed {
+    opacity: 0.15;
+    filter: grayscale(80%);
+}
+
+.pt-num {
+    font-size: 0.6rem;
+    align-self: flex-start;
+    line-height: 1;
+}
+
+.pt-sym {
+    font-size: 1.1rem;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.pt-mass {
+    font-size: 0.5rem;
+    line-height: 1;
+}
+
+.pt-cat-0 { background-color: #f59e0b; } /* Não-metal reativo */
+.pt-cat-1 { background-color: #10b981; } /* Gás Nobre */
+.pt-cat-2 { background-color: #ef4444; } /* Metal Alcalino */
+.pt-cat-3 { background-color: #f97316; } /* Metal Alcalinoterroso */
+.pt-cat-4 { background-color: #8b5cf6; } /* Metaloide */
+.pt-cat-5 { background-color: #eab308; } /* Halogênio */
+.pt-cat-6 { background-color: #64748b; } /* Metal Pós-transição */
+.pt-cat-7 { background-color: #3b82f6; } /* Metal de Transição */
+.pt-cat-8 { background-color: #ec4899; } /* Lantanídeo */
+.pt-cat-9 { background-color: #d946ef; } /* Actinídeo */
+.pt-cat-10 { background-color: #334155; } /* Propriedades Desconhecidas */
+
+.pt-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    justify-content: center;
+    background-color: var(--bg-tertiary-alpha);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.pt-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    color: var(--text-primary);
+}
+
+.pt-legend-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+.pt-legend-item input[type="checkbox"] {
+    cursor: pointer;
+    margin: 0;
+}
+
+.pt-legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
 .table-scroll-wrapper { width: 100%; overflow-x: auto; margin-top: 0.5rem; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--bg-primary); box-sizing: border-box; }
 .data-table { width: 100%; min-width: 250px; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; word-wrap: break-word; border: none; }
 .data-table th, .data-table td { border: 1px solid var(--border-color); padding: 0.4rem 0.3rem; text-align: left; vertical-align: middle; white-space: nowrap; }
@@ -487,6 +600,8 @@ body.nav-side .fab-button { bottom: 20px; }
 .icon { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 1.2em; display: inline-block; line-height: 1; text-transform: none; letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -moz-osx-font-smoothing: grayscale; font-feature-settings: 'liga'; margin-right: 0.4em; flex-shrink: 0; vertical-align: middle; }
 .icon-only { margin-right: 0 !important; }
 .icon-horario::before { content: "schedule"; } .icon-escola::before { content: "school"; } .icon-turmas::before { content: "class"; } .icon-alunos::before { content: "group"; } .icon-notas::before { content: "bar_chart"; } .icon-config::before { content: "settings"; } .icon-contato::before { content: "mail"; } .icon-editar::before { content: "edit"; } .icon-excluir::before { content: "delete"; } .icon-anotacao::before { content: "notes"; } .icon-salvar::before { content: "save"; } .icon-voltar::before { content: "arrow_back"; } .icon-presenca::before { content: "check"; } .icon-falta::before { content: "close"; } .icon-justificar::before { content: "chat"; } .icon-adicionar::before { content: "add"; } .icon-estrutura::before { content: "account_tree"; } .icon-calendario::before { content: "calendar_month"; } .icon-plano::before { content: "event_note"; } .icon-copiar::before { content: "content_copy"; } .icon-pdf::before { content: "picture_as_pdf"; } .icon-perfil::before { content: "person"; } .icon-menu::before { content: "menu"; } .icon-upload::before { content: "upload"; } .icon-download::before { content: "download"; } .icon-warning::before { content: "warning"; } .icon-auto-awesome::before { content: "auto_awesome"; } .icon-waving-hand::before { content: "waving_hand"; } .icon-cloud::before { content: "cloud"; } .icon-sync::before { content: "sync"; } .icon-key::before { content: "key"; } .icon-logout::before { content: "logout"; } .icon-notifications::before { content: "notifications"; } .icon-notifications-off::before { content: "notifications_off"; } .icon-smartphone::before { content: "smartphone"; } .icon-bug-report::before { content: "bug_report"; } .icon-rocket-launch::before { content: "rocket_launch"; } .icon-coffee::before { content: "coffee"; } .icon-directions-run::before { content: "directions_run"; } .icon-alarm::before { content: "alarm"; } .icon-sports-score::before { content: "sports_score"; } .icon-face::before { content: "face"; } .icon-ads-click::before { content: "ads_click"; } .icon-celebration::before { content: "celebration"; } .icon-hourglass-empty::before { content: "hourglass_empty"; } .icon-language::before { content: "language"; } .icon-signal-cellular-alt::before { content: "signal_cellular_alt"; } .icon-palette::before { content: "palette"; } .icon-groups::before { content: "groups"; } .icon-flag::before { content: "flag"; } .icon-mouse::before { content: "mouse"; } .icon-block::before { content: "block"; } .icon-play-arrow::before { content: "play_arrow"; } .icon-pause::before { content: "pause"; } .icon-mic::before { content: "mic"; } .icon-stop::before { content: "stop"; } .icon-mind-map::before { content: "hub"; } .icon-flashcards::before { content: "style"; } .icon-event::before { content: "directions_bus"; } .icon-noise::before { content: "volume_up"; }
+.icon-science::before { content: "science"; }
+.icon-straighten::before { content: "straighten"; }
 .icon-checklist::before { content: "checklist"; }
 .icon-lightbulb::before { content: "lightbulb"; }
 .icon-sync-alt::before { content: "sync_alt"; }

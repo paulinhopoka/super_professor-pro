@@ -1,5 +1,51 @@
 import { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, onSnapshot, createUserWithEmailAndPassword, signInWithEmailAndPassword } from './firebase.js';
 import { GoogleGenAI } from '@google/genai';
+import { ptCategories, ptElements, catDescriptions } from './periodic-table-data.js';
+
+window.ptCategories = ptCategories;
+window.ptElements = ptElements;
+window.showElementInfo = (num) => {
+    const el = window.ptElements.find(e => e[0] === num);
+    if (!el) return;
+    const [n, sym, name, mass, group, period, cat] = el;
+    
+    document.getElementById('pt-details').style.display = 'block';
+    document.getElementById('pt-detail-name').textContent = `${name} (${sym})`;
+    document.getElementById('pt-detail-sym').textContent = sym;
+    document.getElementById('pt-detail-num').textContent = n;
+    document.getElementById('pt-detail-mass').textContent = mass;
+    document.getElementById('pt-detail-cat').textContent = window.ptCategories[cat];
+    document.getElementById('pt-detail-group').textContent = group || '-';
+    document.getElementById('pt-detail-period').textContent = period;
+    document.getElementById('pt-detail-desc').textContent = catDescriptions[cat];
+};
+
+window.filterPeriodicTable = () => {
+    const checkboxes = document.querySelectorAll('.pt-legend-checkbox');
+    const activeCategories = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+    
+    document.querySelectorAll('.pt-element').forEach(el => {
+        // Check if it's an actual element (has a category class)
+        let hasCategory = false;
+        let elementCategory = -1;
+        
+        for (let i = 0; i <= 10; i++) {
+            if (el.classList.contains(`pt-cat-${i}`)) {
+                hasCategory = true;
+                elementCategory = i;
+                break;
+            }
+        }
+        
+        if (!hasCategory) return; // Skip placeholders
+        
+        if (activeCategories.includes(elementCategory)) {
+            el.classList.remove('dimmed');
+        } else {
+            el.classList.add('dimmed');
+        }
+    });
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Seletores Globais (Existentes e Novos) ---
@@ -163,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const randomizeMapButton = document.getElementById('randomize-map-button');
     const teacherDeskTemplate = document.getElementById('teacher-desk-template');
     const classroomGridTemplate = document.getElementById('classroom-grid-template');
-    const toolsGrid = document.querySelector('#tools-section .tools-grid');
+    const toolsGrid = document.getElementById('tools-section');
     const calculatorModal = document.getElementById('advanced-calculator-modal');
     const calculatorDisplay = document.getElementById('calculator-display');
     const standardCalcSection = document.getElementById('calculator-standard-section');
@@ -2647,6 +2693,188 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const openUnitConverterModal = () => {
+        const title = "Conversor de Medidas";
+        const content = `
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="form-group">
+                    <label for="uc-category">Categoria:</label>
+                    <select id="uc-category" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);">
+                        <option value="length">Comprimento</option>
+                        <option value="mass">Massa</option>
+                        <option value="temperature">Temperatura</option>
+                        <option value="volume">Volume</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="flex: 1;">
+                        <input type="number" id="uc-input-value" value="1" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);">
+                    </div>
+                    <div style="flex: 1;">
+                        <select id="uc-input-unit" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);"></select>
+                    </div>
+                </div>
+                <div style="text-align: center; font-size: 1.5rem; color: var(--text-secondary);">=</div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="flex: 1;">
+                        <input type="text" id="uc-output-value" readonly style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+                    </div>
+                    <div style="flex: 1;">
+                        <select id="uc-output-unit" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);"></select>
+                    </div>
+                </div>
+            </div>
+        `;
+        showModal(title, content, '', 'unit-converter-modal');
+
+        const units = {
+            length: { m: 'Metros', km: 'Quilômetros', cm: 'Centímetros', mm: 'Milímetros', in: 'Polegadas', ft: 'Pés', mi: 'Milhas' },
+            mass: { kg: 'Quilogramas', g: 'Gramas', mg: 'Miligramas', lb: 'Libras', oz: 'Onças' },
+            temperature: { c: 'Celsius', f: 'Fahrenheit', k: 'Kelvin' },
+            volume: { l: 'Litros', ml: 'Mililitros', gal: 'Galões (EUA)', qt: 'Quartos (EUA)' }
+        };
+
+        const conversions = {
+            length: {
+                m: 1, km: 1000, cm: 0.01, mm: 0.001, in: 0.0254, ft: 0.3048, mi: 1609.34
+            },
+            mass: {
+                kg: 1, g: 0.001, mg: 0.000001, lb: 0.453592, oz: 0.0283495
+            },
+            volume: {
+                l: 1, ml: 0.001, gal: 3.78541, qt: 0.946353
+            }
+        };
+
+        const categorySelect = document.getElementById('uc-category');
+        const inputUnitSelect = document.getElementById('uc-input-unit');
+        const outputUnitSelect = document.getElementById('uc-output-unit');
+        const inputValue = document.getElementById('uc-input-value');
+        const outputValue = document.getElementById('uc-output-value');
+
+        const updateUnits = () => {
+            const cat = categorySelect.value;
+            const catUnits = units[cat];
+            let options = '';
+            for (const [val, label] of Object.entries(catUnits)) {
+                options += `<option value="${val}">${label}</option>`;
+            }
+            inputUnitSelect.innerHTML = options;
+            outputUnitSelect.innerHTML = options;
+            if (Object.keys(catUnits).length > 1) {
+                outputUnitSelect.selectedIndex = 1;
+            }
+            calculate();
+        };
+
+        const calculate = () => {
+            const cat = categorySelect.value;
+            const inUnit = inputUnitSelect.value;
+            const outUnit = outputUnitSelect.value;
+            const val = parseFloat(inputValue.value);
+
+            if (isNaN(val)) {
+                outputValue.value = '';
+                return;
+            }
+
+            let result = 0;
+            if (cat === 'temperature') {
+                let c = 0;
+                if (inUnit === 'c') c = val;
+                else if (inUnit === 'f') c = (val - 32) * 5/9;
+                else if (inUnit === 'k') c = val - 273.15;
+
+                if (outUnit === 'c') result = c;
+                else if (outUnit === 'f') result = (c * 9/5) + 32;
+                else if (outUnit === 'k') result = c + 273.15;
+            } else {
+                const inFactor = conversions[cat][inUnit];
+                const outFactor = conversions[cat][outUnit];
+                const baseVal = val * inFactor;
+                result = baseVal / outFactor;
+            }
+
+            // format to avoid long decimals
+            outputValue.value = Number.isInteger(result) ? result : parseFloat(result.toFixed(6));
+        };
+
+        categorySelect.addEventListener('change', updateUnits);
+        inputUnitSelect.addEventListener('change', calculate);
+        outputUnitSelect.addEventListener('change', calculate);
+        inputValue.addEventListener('input', calculate);
+
+        updateUnits();
+    };
+
+    const openPeriodicTableModal = () => {
+        const title = "Tabela Periódica Interativa";
+        
+        let gridHtml = '<div class="periodic-table-grid">';
+        
+        // Add placeholders for Lanthanides and Actinides
+        gridHtml += `<div class="pt-element pt-cat-8" style="grid-column: 3; grid-row: 6; font-size: 0.6rem; text-align: center;">57-71<br>La-Lu</div>`;
+        gridHtml += `<div class="pt-element pt-cat-9" style="grid-column: 3; grid-row: 7; font-size: 0.6rem; text-align: center;">89-103<br>Ac-Lr</div>`;
+
+        window.ptElements.forEach(el => {
+            const [num, sym, name, mass, group, period, cat] = el;
+            let col = group;
+            let row = period;
+            
+            if (cat === 8) { // Lanthanide
+                row = 9;
+                col = num - 57 + 3;
+            } else if (cat === 9) { // Actinide
+                row = 10;
+                col = num - 89 + 3;
+            }
+            
+            gridHtml += `<div class="pt-element pt-cat-${cat}" style="grid-column: ${col}; grid-row: ${row};" onclick="window.showElementInfo(${num})">
+                <span class="pt-num">${num}</span>
+                <span class="pt-sym">${sym}</span>
+                <span class="pt-mass">${mass}</span>
+            </div>`;
+        });
+
+        gridHtml += '</div>';
+
+        let legendHtml = '<div class="pt-legend">';
+        window.ptCategories.forEach((catName, index) => {
+            legendHtml += `
+            <label class="pt-legend-item">
+                <input type="checkbox" class="pt-legend-checkbox" value="${index}" checked onchange="window.filterPeriodicTable()">
+                <div class="pt-legend-color pt-cat-${index}"></div>
+                <span>${catName}</span>
+            </label>`;
+        });
+        legendHtml += '</div>';
+
+        const detailsHtml = `
+            <div id="pt-details" style="margin-top: 20px; padding: 15px; border-radius: 8px; background: var(--bg-secondary); display: none; text-align: left; border: 1px solid var(--border-color);">
+                <h3 id="pt-detail-name" style="margin-top: 0; color: var(--accent-primary);"></h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <p><strong>Símbolo:</strong> <span id="pt-detail-sym"></span></p>
+                    <p><strong>Número Atômico:</strong> <span id="pt-detail-num"></span></p>
+                    <p><strong>Massa Atômica:</strong> <span id="pt-detail-mass"></span></p>
+                    <p><strong>Categoria:</strong> <span id="pt-detail-cat"></span></p>
+                    <p><strong>Grupo:</strong> <span id="pt-detail-group"></span></p>
+                    <p><strong>Período:</strong> <span id="pt-detail-period"></span></p>
+                </div>
+                <p id="pt-detail-desc" style="margin-top: 15px; font-style: italic;"></p>
+            </div>
+        `;
+
+        const content = `
+            <div style="text-align: center; padding: 10px;">
+                <p style="margin-bottom: 15px;">Clique em um elemento para ver seus detalhes. Use a legenda para filtrar as categorias.</p>
+                ${gridHtml}
+                ${legendHtml}
+                ${detailsHtml}
+            </div>
+        `;
+        showModal(title, content, '', 'periodic-table-modal');
+    };
+
     const openPomodoroTimerModal = () => {
         const title = "Pomodoro Timer";
         const content = `
@@ -3471,7 +3699,7 @@ Exemplo de formato esperado:
         observer.observe(modal, { attributes: true });
     };
 
-    const openToolModal = (toolType) => { if (toolType === 'advanced-calculator') { openAdvancedCalculatorModal(); return; } let title = "Ferramenta"; let content = "<p>Funcionalidade em desenvolvimento.</p>"; let modalClass = ''; let footer = ''; switch (toolType) { case 'name-sorter': openNameSorterModal(); return; case 'timer-stopwatch': openTimerModal(); return; case 'group-generator': openGroupGeneratorModal(); return; case 'notepad': openNotepadModal(); return; case 'calendar-notes': openCalendarNotesModal(); return; case 'audio-recorder': openAudioRecorderModal(); return; case 'whiteboard': openWhiteboardModal(); return; case 'todo-list': openTodoListModal(); return; case 'topic-sorter': openTopicSorterModal(); return; case 'grade-converter': openGradeConverterModal(); return; case 'pomodoro-timer': openPomodoroTimerModal(); return; case 'rubric-generator': openRubricGeneratorModal(); return; case 'lesson-planner': openLessonPlannerModal(); return; case 'mind-map': openMindMapModal(); return; case 'flashcards': openFlashcardsModal(); return; case 'event-organizer': openEventOrganizerModal(); return; case 'noise-meter': openNoiseMeterModal(); return; default: title = "Funcionalidade Indisponível"; content = "<p>Esta ferramenta ainda não foi implementada.</p>"; } showModal(title, content, footer, modalClass); };
+    const openToolModal = (toolType) => { if (toolType === 'advanced-calculator') { openAdvancedCalculatorModal(); return; } let title = "Ferramenta"; let content = "<p>Funcionalidade em desenvolvimento.</p>"; let modalClass = ''; let footer = ''; switch (toolType) { case 'name-sorter': openNameSorterModal(); return; case 'timer-stopwatch': openTimerModal(); return; case 'group-generator': openGroupGeneratorModal(); return; case 'notepad': openNotepadModal(); return; case 'calendar-notes': openCalendarNotesModal(); return; case 'audio-recorder': openAudioRecorderModal(); return; case 'whiteboard': openWhiteboardModal(); return; case 'todo-list': openTodoListModal(); return; case 'topic-sorter': openTopicSorterModal(); return; case 'grade-converter': openGradeConverterModal(); return; case 'pomodoro-timer': openPomodoroTimerModal(); return; case 'rubric-generator': openRubricGeneratorModal(); return; case 'lesson-planner': openLessonPlannerModal(); return; case 'mind-map': openMindMapModal(); return; case 'flashcards': openFlashcardsModal(); return; case 'event-organizer': openEventOrganizerModal(); return; case 'noise-meter': openNoiseMeterModal(); return; case 'unit-converter': openUnitConverterModal(); return; case 'periodic-table': openPeriodicTableModal(); return; default: title = "Funcionalidade Indisponível"; content = "<p>Esta ferramenta ainda não foi implementada.</p>"; } showModal(title, content, footer, modalClass); };
     const updateScheduleItemsUI = () => { if (currentSection !== 'schedule-section' || !scheduleListContainer) return; const now = new Date(); const currentDayIndex = now.getDay(); const currentDayName = weekdays[currentDayIndex]; const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes(); const scheduleItemsElements = scheduleListContainer.querySelectorAll(`.schedule-item`); let nextItemFoundForToday = false; scheduleItemsElements.forEach(el => { const itemId = el.dataset.id; const item = findScheduleById(itemId); if (!item) return; const startMinutes = parseInt(el.dataset.startMinutes); const endMinutes = parseInt(el.dataset.endMinutes); const progressBar = el.querySelector('.progress-bar'); el.classList.remove('current', 'next'); if (progressBar) progressBar.style.width = '0%'; if (item.day === currentDayName && !isNaN(startMinutes) && !isNaN(endMinutes)) { const isCurrent = currentTimeInMinutes >= startMinutes && currentTimeInMinutes < endMinutes; const isUpcoming = currentTimeInMinutes < startMinutes; if (isCurrent) { el.classList.add('current'); const duration = endMinutes - startMinutes; const elapsed = currentTimeInMinutes - startMinutes; const progress = duration > 0 ? Math.min(100, Math.max(0, (elapsed / duration) * 100)) : 0; if (progressBar) progressBar.style.width = `${progress}%`; nextItemFoundForToday = true; } else if (isUpcoming && !nextItemFoundForToday) { el.classList.add('next'); nextItemFoundForToday = true; } } }); };
     const startScheduleUpdates = () => { stopScheduleUpdates(); console.log("Starting schedule UI updates..."); updateScheduleItemsUI(); scheduleUpdateInterval = setInterval(updateScheduleItemsUI, 1000); };
     const stopScheduleUpdates = () => { if (scheduleUpdateInterval) { clearInterval(scheduleUpdateInterval); scheduleUpdateInterval = null; console.log("Stopped schedule UI updates."); } };
