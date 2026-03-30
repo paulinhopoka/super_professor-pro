@@ -1,7 +1,5 @@
 {
   "name": "Super Professor Pro",
-  "description": "Aplicativo para auxiliar professores com ferramentas de organização, planejamento e IA.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "description": "A web application based on the super_professor-pro repository.",
+  "requestFramePermissions": []
 }

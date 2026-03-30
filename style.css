@@ -456,15 +456,15 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 .pt-cat-10 { background-color: #334155; } /* Propriedades Desconhecidas */
 
 .pt-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
     margin-top: 20px;
     font-size: 0.85rem;
-    justify-content: center;
     background-color: var(--bg-tertiary-alpha);
-    padding: 10px;
+    padding: 15px;
     border-radius: 8px;
+    text-align: left;
 }
 
 .pt-legend-item {
@@ -495,8 +495,8 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 }
 
 .table-scroll-wrapper { width: 100%; overflow-x: auto; margin-top: 0.5rem; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-color); border-radius: 5px; background-color: var(--bg-primary); box-sizing: border-box; }
-.data-table { width: 100%; min-width: 250px; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; word-wrap: break-word; border: none; }
-.data-table th, .data-table td { border: 1px solid var(--border-color); padding: 0.4rem 0.3rem; text-align: left; vertical-align: middle; white-space: nowrap; }
+.data-table { width: 100%; min-width: 250px; border-collapse: collapse; font-size: 0.85rem; table-layout: auto; word-wrap: break-word; border: none; }
+.data-table th, .data-table td { border: 1px solid var(--border-color); padding: 0.4rem 0.3rem; text-align: left; vertical-align: middle; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; }
 .data-table th { background-color: var(--bg-tertiary); font-weight: 600; position: sticky; top: 0; z-index: 2; font-size: 0.8rem; }
 #class-details-section #attendance-table-container .data-table th:first-child,
 #class-details-section #attendance-table-container .data-table td:first-child { position: sticky; left: 0; z-index: 1; background-color: var(--bg-sticky-alpha); border-right: 1px solid var(--border-color); white-space: normal; }
@@ -504,7 +504,7 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #grades-table-container .data-table th:first-child,
 #grades-table-container .data-table td:first-child { position: sticky; left: 0; z-index: 1; background-color: var(--bg-sticky-alpha); border-right: 1px solid var(--border-color); white-space: normal; }
 #grades-table-container .data-table th:first-child { z-index: 3; }
-.data-table td input[type="number"], .data-table td select { padding: 0.3rem; margin-bottom: 0; font-size: 0.85rem; width: 55px; max-width: 100%; border-radius: 3px; text-align: center; border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-primary); }
+.data-table td input[type="number"], .data-table td select { padding: 0.3rem; margin-bottom: 0; font-size: 0.85rem; width: 100%; min-width: 55px; max-width: 100%; border-radius: 3px; text-align: center; border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-primary); box-sizing: border-box; }
 .data-table td input.grade-input { transition: background-color 0.3s ease, color 0.3s ease; }
 .data-table td select { width: 80px; }
 .data-table td button { padding: 0.2rem 0.4rem; font-size: 0.75rem; margin: 0 1px; min-width: 30px; }
@@ -523,7 +523,7 @@ label[for*="checkbox"], label[for*="radio"] { display: inline; font-weight: norm
 #class-details-section .data-table tr.suspended-student.clickable-suspended:hover td { background-color: color-mix(in srgb, var(--suspended-bg) 80%, black) !important; }
 #class-details-section .data-table tr.suspended-student td.attendance-status { font-weight: bold; }
 
-#grades-table-container .data-table .grade-col { width: 55px; text-align: center; }
+#grades-table-container .data-table .grade-col { min-width: 60px; width: auto; text-align: center; }
 #grades-table-container .data-table .sum-col { width: 60px; text-align: center; }
 #grades-table-container .data-table .avg-col { width: 60px; text-align: center; font-weight: bold; transition: background-color 0.3s ease, color 0.3s ease; }
 #grades-table-container .data-table .student-col { width: 120px; min-width: 100px; white-space: normal; word-break: break-word; border-right: 2px solid var(--border-color); }
@@ -625,6 +625,7 @@ body.nav-side .fab-button { bottom: 20px; }
 .icon-ajuda::before { content: "help"; }
 .icon-transferir::before { content: "sync_alt"; }
 .icon-more-vert::before { content: "more_vert"; }
+.icon-filtro::before { content: "filter_list"; }
 /* Tool Specific Styles */
 .mindmap-list { list-style: none; padding-left: 20px; border-left: 2px solid var(--accent-primary); margin-left: 10px; }
 .mindmap-list li { position: relative; margin: 10px 0; }
