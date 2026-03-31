@@ -5155,17 +5155,15 @@ Exemplo de formato esperado:
                     const mimeType = imgPreview.src.split(';')[0].split(':')[1];
                     
                     response = await ai.models.generateContent({
-                        model: 'gemini-3.1-pro-preview',
+                        model: 'gemini-3-flash-preview', // <-- ALTERE PARA O FLASH
                         contents: {
                             parts: [
+                                { text: promptText },
                                 {
                                     inlineData: {
                                         data: base64Data,
                                         mimeType: mimeType
                                     }
-                                },
-                                {
-                                    text: promptText
                                 }
                             ]
                         }
