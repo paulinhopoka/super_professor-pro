@@ -231,8 +231,8 @@ const ClassDetailsModule = (() => {
 
                 // Adiciona botões P e F
                  statusCell.innerHTML = `
-                    <button type="button" class="attendance-toggle present"><span class="icon">✔️</span> P</button>
-                    <button type="button" class="attendance-toggle absent"><span class="icon">❌</span> F</button>
+                    <button type="button" class="attendance-toggle present"><span class="icon icon-presenca"></span> P</button>
+                    <button type="button" class="attendance-toggle absent"><span class="icon icon-falta"></span> F</button>
                  `;
                 const pBtn = statusCell.querySelector('.present');
                 const aBtn = statusCell.querySelector('.absent');
@@ -242,7 +242,7 @@ const ClassDetailsModule = (() => {
                      pBtn.classList.toggle('selected', st === 'P');
                      aBtn.classList.toggle('selected', st === 'F');
                      aBtn.classList.toggle('justified', st === 'F' && !!just);
-                     aBtn.innerHTML = `<span class="icon">❌</span> ${st === 'F' && just ? 'FJ' : 'F'}`;
+                     aBtn.innerHTML = `<span class="icon icon-falta"></span> ${st === 'F' && just ? 'FJ' : 'F'}`;
                      aBtn.title = st === 'F' && just ? `Just.: ${sanitizeHTML(just.substring(0, 30))}... (Clique para editar)` : 'Faltou (Clique para justificar)';
                  };
 
