@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Super Professor Pro</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <!-- Incluir html2pdf.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Link para o arquivo CSS externo -->
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <!-- Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        svg: {
+          fontCache: 'none'
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.sh/@google/genai"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <div id="notification-banner"> <span id="notification-message">Mensagem...</span> <button id="notification-close-button" type="button">×</button> </div>
+    <audio id="notification-sound-default" preload="auto"> <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUReT18AAAAAAAAAAAAAAAAAAAAAAP////8AAAAA///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8=" type="audio/wav"> </audio>
+    <header class="app-header">
+        <div class="header-top-row">
+            <button id="hamburger-menu-button" class="icon-button" style="display: none; margin-right: 10px; background: transparent; border: none; color: inherit; font-size: 1.5rem; cursor: pointer;">
+                <span class="icon icon-menu"></span>
+            </button>
+            <h1>Super Professor Pro</h1>
+        </div>
+        <input type="search" id="search-input" placeholder="Buscar aluno, turma, escola...">
+    </header>
+    <main class="app-content" id="main-content">
+        <!-- Seções Horários, Escolas, Turmas -->
+        <section id="schedule-section" class="section">
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-horario"></span>Meus Horários</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            <button type="button" id="add-schedule-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button>
+            <div id="schedule-list"><p style="text-align: center; padding: 1rem;">Nenhum horário cadastrado.</p></div>
+            <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p>
+        </section>
+        <section id="schools-section" class="section">
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-escola"></span>Minhas Escolas</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            <button type="button" id="add-school-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button>
+            <div id="school-list"><p style="text-align: center; padding: 1rem;">Nenhuma escola cadastrada.</p></div>
+        </section>
+        <section id="classes-section" class="section">
+            <div class="section-header">
+                <button type="button" id="back-to-schools-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button>
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; overflow: hidden; padding: 0 5px;">
+                    <h2 style="white-space: nowrap; line-height: 1.1; margin-bottom: 2px; padding: 0; flex-grow: 0;"><span class="icon icon-turmas"></span>Turmas</h2>
+                    <span id="classes-school-name" style="font-size: 0.85rem; color: var(--text-secondary); text-align: center; line-height: 1.2; display: block; width: 100%; word-wrap: break-word;">Selecione Escola</span>
+                </div>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            <button type="button" id="add-class-button" class="fab-button success"><span class="icon icon-adicionar icon-only"></span></button>
+            <div id="class-list"><p style="text-align: center; padding: 1rem;">Selecione uma escola.</p></div>
+        </section>
+
+        <!-- Seção Detalhes da Turma -->
+        <section id="class-details-section" class="section">
+            <div id="class-details-header" class="section-header">
+                 <button type="button" id="back-to-classes-button" class="button-like secondary icon-button back-button"><span class="icon icon-voltar icon-only"></span></button>
+                 <h2><span class="icon icon-alunos"></span><span id="class-details-title">Detalhes da Turma</span></h2>
+                 <button type="button" id="details-help-button" class="icon-button header-right-button" title="Ajuda">
+                     <span class="icon icon-ajuda icon-only"></span>
+                 </button>
+            </div>
+            <div class="card collapsed" id="students-card">
+                <div class="card-header">
+                    <h3><span class="icon icon-alunos"></span>Alunos</h3>
+                    <div class="options">
+                        <button type="button" id="renumber-students-button" class="secondary" title="Renumerar Alunos"><span class="icon icon-sorteio"></span> Renumerar</button>
+                        <button type="button" id="add-student-button" class="success"><span class="icon icon-adicionar"></span> Novo Aluno</button>
+                        <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button>
+                    </div>
+                </div>
+                <div id="student-list-container" class="card-content"><p style="text-align: center; padding: 1rem;">Nenhum aluno nesta turma.</p></div>
+            </div>
+            <div class="card collapsed" id="attendance-card">
+                <div class="card-header">
+                    <h3><span class="icon icon-presenca"></span>Presença</h3>
+                    <div class="options">
+                        <input type="date" id="attendance-date" style="width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0; font-size: 0.85rem;" title="Data da Presença">
+                        <button type="button" id="view-monthly-attendance-button" class="secondary icon-button ml-1" title="Ver Frequência Mensal"><span class="icon icon-calendario icon-only"></span></button>
+                        <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div id="attendance-actions-container" class="attendance-actions-container hidden">
+                         <button type="button" id="mark-all-present-button" class="success"> <span class="icon icon-todos-presentes"></span>Todos P. </button>
+                         <button type="button" id="mark-non-school-day-button" class="secondary"> <span class="icon icon-nao-letivo"></span>Não Letivo </button>
+                    </div>
+                    <div class="table-scroll-wrapper">
+                        <div id="attendance-table-container"><p>Selecione data.</p></div>
+                    </div>
+                    <button type="button" id="save-attendance-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Presença</button>
+                </div>
+            </div>
+            <div class="card collapsed" id="map-card">
+                 <div class="card-header"> <h3><span class="icon icon-mapa"></span>Mapa da Sala</h3> <div class="options"> <button type="button" id="edit-map-button" class="secondary icon-button" title="Editar Mapa"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> <div id="classroom-map-edit-controls" class="classroom-map-edit-controls hidden"> <div class="form-group"> <label for="map-rows-input">Fileiras:</label> <input type="number" id="map-rows-input" min="1" max="20" value="5"> </div> <div class="form-group"> <label for="map-cols-input">Colunas:</label> <input type="number" id="map-cols-input" min="1" max="20" value="6"> </div> <div class="form-group"> <label for="teacher-desk-position-select">Mesa Prof.:</label> <select id="teacher-desk-position-select"> <option value="top-center">Topo (Centro)</option> <option value="top-left">Topo (Esquerda)</option> <option value="top-right">Topo (Direita)</option> <option value="bottom-center">Fundo (Centro)</option> <option value="bottom-left">Fundo (Esquerda)</option> <option value="bottom-right">Fundo (Direita)</option> <option value="left-center">Esquerda (Centro)</option> <option value="left-top">Esquerda (Topo)</option> <option value="left-bottom">Esquerda (Fundo)</option> <option value="right-center">Direita (Centro)</option> <option value="right-top">Direita (Topo)</option> <option value="right-bottom">Direita (Fundo)</option> </select> </div> <div class="form-group" style="margin-left: auto;"> <button type="button" id="randomize-map-button" class="secondary" title="Distribuir alunos aleatoriamente"><span class="icon icon-sorteio"></span> Aleatório</button> <button type="button" id="cancel-map-edit-button" class="secondary">Cancelar</button> <button type="button" id="save-map-button" class="success"><span class="icon icon-salvar"></span> Salvar Mapa</button> </div> </div> <div id="map-edit-area" class="map-edit-area hidden"> <div id="unassigned-students-container" class="unassigned-students-list" droppable="true"> <h5>Alunos sem lugar (Clique aqui após selecionar mesa vazia)</h5> </div> <div id="classroom-container-edit" class="classroom-container"> </div> </div> <div id="classroom-container-display" class="classroom-container"> <div class="teacher-desk"><span class="icon icon-escola"></span></div> <div class="classroom-map-grid"> <p style="padding: 1rem; text-align: center; grid-column: 1 / -1;">Configure o mapa clicando no botão <span class="icon icon-editar"></span>.</p> </div> </div> </div>
+            </div>
+            <div class="card collapsed" id="grades-card">
+                 <div class="card-header"> <h3><span class="icon icon-notas"></span>Notas e Médias</h3> <div class="options"> <select id="grade-set-select" title="Conjunto de Notas"> <option value="">--</option> </select> <button type="button" id="manage-grade-structure-button" class="secondary icon-button" title="Gerenciar Estrutura de Notas"><span class="icon icon-estrutura icon-only"></span></button> <div class="export-buttons"> <button type="button" id="export-grades-csv-button" class="secondary icon-button hidden" title="Exportar Notas (CSV)"><span class="icon icon-upload"></span></button> <button type="button" id="export-grades-pdf-button" class="secondary icon-button hidden" title="Exportar Notas (PDF)"><span class="icon icon-pdf"></span></button> </div> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> <div class="table-scroll-wrapper"> <div id="grades-table-container"><p style="padding: 1rem; text-align: center;">Selecione um conjunto de notas ou configure a estrutura.</p></div> </div> <button type="button" id="save-grades-button" class="success mt-1 hidden"><span class="icon icon-salvar"></span>Salvar Notas</button> </div>
+            </div>
+             <div class="card collapsed" id="lesson-plan-card">
+                 <div class="card-header"> <h3><span class="icon icon-plano"></span>Planejamento da Aula</h3> <div class="options"> <input type="date" id="lesson-plan-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data do Planejamento"> <button type="button" id="edit-lesson-plan-button" class="secondary icon-button" title="Editar Plano"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div class="card-content collapsible-content"> 
+                    <button type="button" id="ai-generate-plan-btn" class="secondary w-full mb-2 ai-tool" style="display: none;">
+                        <span class="icon icon-auto-awesome"></span> Gerar Esboço com IA
+                    </button>
+                    <div id="lesson-plan-display" class="markdown-body" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 5px; min-height: 100px; background: var(--bg-tertiary); max-height: 400px; overflow-y: auto;">Nenhum planejamento para esta data.</div> </div>
+            </div>
+             <div class="card collapsed" id="class-notes-card">
+                 <div class="card-header"> <h3><span class="icon icon-anotacao"></span>Anotações da Turma</h3> <div class="options"> <input type="date" id="class-notes-date" style="display: inline-block; width: auto; padding: 0.3rem 0.5rem; margin-bottom: 0;" title="Data da Anotação"> <button type="button" id="edit-class-notes-button" class="secondary icon-button" title="Editar Anotações"><span class="icon icon-editar icon-only"></span></button> <button type="button" class="card-toggle-button" title="Mostrar Opções"><span class="icon icon-more-vert icon-only"></span></button> </div> </div> <div id="class-notes-display-container" class="card-content collapsible-content"> 
+                    <div id="class-notes-display" class="markdown-body" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 5px; min-height: 100px; background: var(--bg-tertiary); max-height: 400px; overflow-y: auto;">Nenhuma anotação para esta data.</div> </div>
+            </div>
+        </section>
+
+        <!-- Seções Ferramentas, Contato, Configurações -->
+        <section id="tools-section" class="section">
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-ferramentas"></span>Ferramentas</h2>
+                <button type="button" id="tools-help-button" class="icon-button header-right-button" title="Ajuda">
+                    <span class="icon icon-ajuda icon-only"></span>
+                </button>
+            </div>
+            <div class="tools-category mt-2">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-plano"></span> Organização e Planejamento</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="calendar-notes"> <span class="icon icon-calendario"></span> <span class="tool-card-title">Calendário de Anotações</span> </button> 
+                    <button type="button" class="tool-card" data-tool="notepad"> <span class="icon icon-anotacao"></span> <span class="tool-card-title">Bloco de Notas</span> </button> 
+                    <button type="button" class="tool-card" data-tool="todo-list"> <span class="icon icon-checklist"></span> <span class="tool-card-title">Gerenciador de Tarefas</span> </button>
+                    <button type="button" class="tool-card" data-tool="event-organizer"> <span class="icon icon-event"></span> <span class="tool-card-title">Excursões/Eventos</span> </button>
+                </div>
+            </div>
+
+            <div class="tools-category mt-4">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-grupos"></span> Gestão de Sala de Aula</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="name-sorter"> <span class="icon icon-sorteio"></span> <span class="tool-card-title">Sorteador de Nomes</span> </button> 
+                    <button type="button" class="tool-card" data-tool="group-generator"> <span class="icon icon-grupos"></span> <span class="tool-card-title">Gerador de Grupos</span> </button> 
+                    <button type="button" class="tool-card" data-tool="topic-sorter"> <span class="icon icon-lightbulb"></span> <span class="tool-card-title">Sorteador de Temas</span> </button>
+                    <button type="button" class="tool-card" data-tool="noise-meter"> <span class="icon icon-noise"></span> <span class="tool-card-title">Semáforo do Silêncio</span> </button>
+                </div>
+            </div>
+
+            <div class="tools-category mt-4">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-cronometro"></span> Produtividade e Foco</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="timer-stopwatch"> <span class="icon icon-cronometro"></span> <span class="tool-card-title">Cronômetro/ Timer</span> </button> 
+                    <button type="button" class="tool-card" data-tool="pomodoro-timer"> <span class="icon icon-alarm"></span> <span class="tool-card-title">Pomodoro Timer</span> </button>
+                    <button type="button" class="tool-card" data-tool="audio-recorder"> <span class="icon icon-mic"></span> <span class="tool-card-title">Gravador de Áudio</span> </button> 
+                </div>
+            </div>
+
+            <div class="tools-category mt-4">
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-editar"></span> Ensino e Avaliação</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card" data-tool="advanced-calculator"> <span class="icon icon-calculadora-avancada"></span> <span class="tool-card-title">Calculadora Avançada</span> </button> 
+                    <button type="button" class="tool-card" data-tool="grade-converter"> <span class="icon icon-sync-alt"></span> <span class="tool-card-title">Conversor de Notas</span> </button>
+                    <button type="button" class="tool-card" data-tool="whiteboard"> <span class="icon icon-palette"></span> <span class="tool-card-title">Quadro Branco</span> </button>
+                    <button type="button" class="tool-card" data-tool="mind-map"> <span class="icon icon-mind-map"></span> <span class="tool-card-title">Mapa Mental</span> </button>
+                    <button type="button" class="tool-card" data-tool="flashcards"> <span class="icon icon-flashcards"></span> <span class="tool-card-title">Flashcards</span> </button>
+                    <button type="button" class="tool-card" data-tool="unit-converter"> <span class="icon icon-straighten"></span> <span class="tool-card-title">Conversor de Medidas</span> </button>
+                    <button type="button" class="tool-card" data-tool="periodic-table"> <span class="icon icon-science"></span> <span class="tool-card-title">Tabela Periódica</span> </button>
+                </div>
+            </div>
+
+            <div class="tools-category mt-4 ai-tool" style="display: none;">
+                <h3 style="color: var(--accent-primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-left: 5px;"><span class="icon icon-auto-awesome"></span> Inteligência Artificial</h3>
+                <div class="tools-grid"> 
+                    <button type="button" class="tool-card ai-tool" id="tool-rubric-generator" style="display: none; position: relative;" data-tool="rubric-generator"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-checklist"></span> <span class="tool-card-title">Gerador de Rubricas</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-class-analyzer" style="display: none; position: relative;"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-notas"></span> <span class="tool-card-title">Analisar Turma</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-exam-assistant" style="display: none; position: relative;"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-plano"></span> <span class="tool-card-title">Assistente de Provas</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-question-generator" style="display: none; position: relative;"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-ajuda"></span> <span class="tool-card-title">Gerador de Questões</span> 
+                    </button>
+                    <button type="button" class="tool-card ai-tool" id="tool-exam-corrector" style="display: none; position: relative;"> 
+                        <span class="icon icon-auto-awesome" style="position: absolute; top: 8px; right: 8px; font-size: 1.1em; color: var(--accent-primary);"></span>
+                        <span class="icon icon-todos-presentes"></span> <span class="tool-card-title">Corretor de Provas</span> 
+                    </button>
+                </div>
+            </div> <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p> </section>
+        <section id="profile-section" class="section">
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-perfil"></span>Perfil de Usuário</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            <div class="card">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div id="profile-avatar-container" style="width: 100px; height: 100px; border-radius: 50%; background-color: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--accent-primary); cursor: pointer; position: relative;">
+                        <img id="profile-avatar-img" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <span id="profile-avatar-placeholder" style="font-size: 3rem; color: var(--text-secondary);"><span class="icon icon-perfil"></span></span>
+                        <div style="position: absolute; bottom: 0; background: rgba(0,0,0,0.5); width: 100%; text-align: center; padding: 2px 0; font-size: 0.7rem; color: white;">Editar</div>
+                        <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="form-group" style="width: 100%;">
+                        <label for="profile-name-input">Nome de Exibição:</label>
+                        <input type="text" id="profile-name-input" placeholder="Seu nome...">
+                    </div>
+                    <div class="form-group" style="width: 100%;">
+                        <label for="profile-subjects-input">Matéria(s) de Formação/Leciona:</label>
+                        <input type="text" id="profile-subjects-input" placeholder="Ex: Matemática, Física...">
+                    </div>
+                    <button type="button" id="save-profile-button" class="success w-full"><span class="icon icon-salvar"></span> Salvar Perfil</button>
+                </div>
+            </div>
+            <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p>
+        </section>
+
+        <section id="settings-section" class="section">
+            <div class="section-header">
+                <div style="width: 40px;" class="back-button"></div>
+                <h2><span class="icon icon-config"></span>Ajustes & Contato</h2>
+                <div style="width: 40px;" class="header-right-button"></div>
+            </div>
+            
+            <!-- Contato e Apoio -->
+            <div class="card mt-2">
+                <h3><span class="icon icon-contato"></span> Contato e Apoio</h3>
+                
+                <p class="text-sm mt-2">Para dúvidas, sugestões ou reporte de erros:</p>
+                <p style="text-align: center; margin-bottom: 15px;">
+                    <a href="mailto:paulinhoandroidnf@gmail.com" style="font-weight: bold; color: var(--accent-primary);">paulinhoandroidnf@gmail.com</a>
+                </p>
+                
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+                
+                <div style="text-align: center;">
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Compartilhe o App</div>
+                    <p class="text-sm mb-3">Ajude outros professores a facilitar o dia a dia compartilhando o Super Professor Pro!</p>
+                    <button type="button" id="share-whatsapp-btn" class="success w-full" style="background-color: #25D366; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 5px;">
+                        Compartilhar no WhatsApp
+                    </button>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div style="text-align: center;">
+                    <div style="color: var(--accent-primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;"><span class="icon icon-favorite"></span> Apoie o Desenvolvedor</div>
+                    <p class="text-sm">Olá, <span id="settings-welcome-name">Professor(a)</span>! <span class="icon icon-waving-hand"></span></p>
+                    <p class="text-sm mt-1">Se este app tem facilitado sua rotina, considere fazer uma contribuição voluntária via PIX.</p>
+                    <div id="pix-key-text" class="pix-key-container mt-2">00020126580014BR.GOV.BCB.PIX01365787c86e-c2cb-44ac-8799-428e17e6b4635204000053039865802BR5925Paulo Ricardo Correa de A6009SAO PAULO6214051058aRkBp4Fm6304175C</div>
+                    <button type="button" id="copy-pix-button" class="success w-full mt-2">
+                        <span class="icon icon-copiar"></span> Copiar Código PIX
+                    </button>
+                    <p class="text-xs mt-2 text-secondary">Muito obrigado pelo seu apoio!</p>
+                </div>
+            </div>
+
+            <!-- Inteligência Artificial -->
+            <div class="card mt-2" id="ai-settings-card">
+                <h3><span class="icon icon-auto-awesome"></span> Inteligência Artificial</h3>
+                
+                <div class="warning-box mt-2 mb-2" style="background-color: rgba(255, 152, 0, 0.1); border-left: 4px solid #ff9800; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: var(--text-color);">
+                    <strong>Aviso:</strong> Esta funcionalidade é experimental. A Inteligência Artificial pode cometer erros ou gerar informações imprecisas. Sempre revise o conteúdo gerado antes de utilizá-lo.
+                </div>
+
+                <div class="toggle-container mt-2" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 500;">Habilitar Assistente de I.A.</span>
+                    <label class="switch">
+                        <input type="checkbox" id="ai-enable-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div id="ai-settings-content" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                    <p class="text-sm mb-2">O Super Professor Pro usa a inteligência artificial do Google (Gemini) para ajudar você a criar planos de aula e gerar questões. Para usar, você precisa de uma chave gratuita.</p>
+                    
+                    <button type="button" id="ai-tutorial-btn" class="secondary w-full mb-2" style="font-size: 0.9em;">
+                        <span class="icon icon-ajuda"></span> Como gerar minha chave gratuita?
+                    </button>
+                    
+                    <div id="ai-tutorial-content" style="display: none; background: var(--bg-secondary); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85em;">
+                        <ol style="padding-left: 20px; margin-bottom: 10px;">
+                            <li>Acesse o <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--accent-primary); font-weight: bold;">Google AI Studio</a>.</li>
+                            <li>Faça login com sua conta Google.</li>
+                            <li>Clique no botão azul <strong>"Create API Key"</strong>.</li>
+                            <li>Copie o código gerado e cole no campo abaixo.</li>
+                        </ol>
+                        <p style="color: var(--text-secondary); font-style: italic;">Sua chave fica salva apenas no seu celular e nunca é enviada para nossos servidores.</p>
+                    </div>
+
+                    <label for="ai-api-key" class="text-sm font-bold">Sua API Key (Gemini):</label>
+                    <input type="password" id="ai-api-key" placeholder="Cole sua chave aqui..." class="w-full mt-1 mb-2" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    
+                    <button type="button" id="save-ai-key-btn" class="primary w-full">
+                        <span class="icon icon-salvar"></span> Salvar Chave
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sincronização e Nuvem -->
+            <div class="card mt-2">
+                <h3><span class="icon icon-cloud"></span> Sincronização e Nuvem</h3>
+                <div id="sync-status-container" style="margin-bottom: 10px; margin-top: 10px;">
+                    <p id="sync-status-text" class="text-sm">Status: <span style="font-weight: bold; color: #666;">Verificando...</span></p>
+                    <p id="last-sync-text" class="text-sm text-secondary">Última sincronização: <span id="last-sync-time">Nunca</span></p>
+                </div>
+                <button type="button" id="force-sync-button" class="secondary w-full"><span class="icon icon-sync"></span> Sincronizar Agora (Nuvem)</button>
+                <p class="text-xs text-secondary mt-1">O app salva automaticamente no seu dispositivo. Use este botão para forçar o envio/recebimento de dados da nuvem se estiver online.</p>
+            </div>
+
+            <!-- Conta e Dados Locais -->
+            <div class="card mt-2" id="account-card">
+                <h3><span class="icon icon-perfil"></span> Conta e Dados Locais</h3>
+                <div id="logged-out-state">
+                    <p class="text-sm text-secondary mb-2">Faça login para sincronizar seus dados na nuvem e acessá-los de qualquer dispositivo.</p>
+                    <button type="button" id="auth-button" class="primary w-full"><span class="icon icon-key"></span> Login / Registrar</button>
+                </div>
+                <div id="logged-in-state" style="display: none;">
+                    <p class="text-sm mb-1">Logado como: <strong id="settings-user-email"></strong></p>
+                    <p class="text-sm text-secondary mb-2">Ao sair, seus dados locais serão removidos por segurança. Certifique-se de que a sincronização com a nuvem foi concluída.</p>
+                    <button type="button" id="logout-button" class="danger w-full mb-2"><span class="icon icon-logout"></span> Desconectar</button>
+                </div>
+                
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+                
+                <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;"><span class="icon icon-arquivo"></span> Gerenciar Dados Offline</div>
+                <div class="form-group">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="data-action-select" style="flex: 1;">
+                            <option value="">Selecione uma ação...</option>
+                            <option value="export">Exportar Dados (JSON)</option>
+                            <option value="import">Importar Dados (JSON)</option>
+                            <option value="clear">Limpar Todos os Dados</option>
+                        </select>
+                        <button type="button" id="execute-data-action" class="primary">Executar</button>
+                    </div>
+                    <input type="file" id="import-data-input" accept=".json" class="hidden">
+                </div>
+            </div>
+
+            <!-- Preferências -->
+            <div class="card mt-2">
+                <h3><span class="icon icon-config"></span> Preferências</h3>
+                
+                <div style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 15px; margin-bottom: 10px;"><span class="icon icon-palette"></span> Navegação e Tema</div>
+                <div class="form-group mt-2">
+                    <label for="nav-style-select" style="font-weight: normal; color: var(--text-secondary);">Estilo de Navegação:</label>
+                    <select id="nav-style-select">
+                        <option value="fixed">Barra Inferior Fixa</option>
+                        <option value="side">Menu Lateral (Hambúrguer)</option>
+                    </select>
+                </div>
+
+                <div class="form-group mt-2">
+                    <label for="theme-select" style="font-weight: normal; color: var(--text-secondary);">Escolha o Tema:</label>
+                    <select id="theme-select">
+                        <option value="theme-light">Claro</option>
+                        <option value="theme-dark">Escuro</option>
+                        <option value="theme-forest-green">Verde Floresta</option>
+                        <option value="theme-math-master">Mestre da Matemática</option>
+                        <option value="theme-historic-scroll">Papiro Histórico</option>
+                        <option value="theme-alchemist">O Alquimista</option>
+                    </select>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+                
+                <div style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;"><span class="icon icon-notifications"></span> Notificações de Horários</div>
+                <div class="toggle-container mt-2" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: normal; color: var(--text-secondary);">Ativar Notificações Globais</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-global-notifications">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container mt-3" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: normal; color: var(--text-secondary);">Ativar Som nas Notificações</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-notification-sound">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="custom-sound-container mt-3">
+                    <label for="custom-notification-sound-input" class="text-sm" style="font-weight: normal; color: var(--text-secondary);">Som Personalizado (Opcional - máx 2MB):</label>
+                    <div class="custom-sound-input-group mt-1">
+                        <label for="custom-notification-sound-input" class="button-like secondary" style="cursor: pointer;"><span class="icon icon-arquivo"></span> Escolher arquivo</label>
+                        <span id="custom-sound-filename" style="color: var(--text-secondary);">Nenhum arquivo escolhido</span>
+                        <input type="file" id="custom-notification-sound-input" accept="audio/*" class="hidden">
+                    </div>
+                    <div id="current-custom-sound-display" class="hidden mt-1">
+                        <span id="current-custom-sound-name" style="color: var(--text-secondary);"></span>
+                        <button type="button" id="remove-custom-sound-button" class="danger icon-button" title="Remover Som Personalizado"><span class="icon icon-excluir icon-only"></span></button>
+                    </div>
+                </div>
+                <p class="text-xs text-secondary mt-2">
+                    Notificações podem ser ativadas/desativadas individualmente para cada horário na tela "Meus Horários". Elas aparecerão 5 minutos antes do início e do fim da aula programada.
+                </p>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;"><span class="icon icon-som"></span> Sons e Animações</div>
+                <div class="toggle-container mt-2" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: normal; color: var(--text-secondary);">Sons de Interação</span>
+                    <label class="switch">
+                        <input type="checkbox" id="sound-effects-toggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <p class="text-xs text-secondary mt-1 mb-3">Habilita sons suaves ao tocar em botões e abas.</p>
+            </div>
+
+            <!-- Novidades da Versão -->
+            <div class="mt-4 mb-4">
+                <button type="button" id="show-whats-new-manual-button" class="secondary w-full" style="padding: 12px; font-weight: bold;">
+                    <span class="icon icon-auto-awesome"></span> Ver Novidades da Versão
+                </button>
+            </div>
+         <p class="footer-message">Feito com <span class="icon" style="font-size: 1em; margin: 0 4px; color: red;">favorite</span> para professores</p>
+        </section>
+    </main>
+    <div id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <div id="side-menu-profile" style="display: flex; align-items: center; gap: 10px; cursor: pointer;" data-section="profile-section">
+                <div id="side-menu-avatar" style="width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--accent-primary);">
+                    <img id="side-menu-avatar-img" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <span id="side-menu-avatar-placeholder" style="font-size: 1.5rem; color: var(--text-secondary);"><span class="icon icon-perfil"></span></span>
+                </div>
+                <span id="side-menu-name" style="font-weight: bold; font-size: 1.1rem;">Professor</span>
+            </div>
+            <button id="close-side-menu" class="close-button">×</button>
+        </div>
+        <nav class="side-menu-nav">
+            <button type="button" class="side-nav-button" data-section="schedule-section"><span class="icon icon-horario"></span>Horários</button>
+            <button type="button" class="side-nav-button" data-section="schools-section"><span class="icon icon-escola"></span>Escolas</button>
+            <button type="button" class="side-nav-button" data-section="classes-section" id="side-nav-classes-button" disabled><span class="icon icon-turmas"></span>Turmas</button>
+            <button type="button" class="side-nav-button" data-section="class-details-section" id="side-nav-details-button" disabled><span class="icon icon-alunos"></span>Detalhes</button>
+            <button type="button" class="side-nav-button" data-section="tools-section"><span class="icon icon-ferramentas"></span>Ferramentas</button>
+            <button type="button" class="side-nav-button" data-section="profile-section"><span class="icon icon-perfil"></span>Perfil</button>
+            <button type="button" class="side-nav-button" data-section="settings-section"><span class="icon icon-config"></span>Ajustes</button>
+        </nav>
+    </div>
+    <div id="side-menu-overlay" class="side-menu-overlay"></div>
+
+    <nav class="app-nav"> <button type="button" class="nav-button" data-section="schedule-section"><span class="icon icon-horario"></span>Horários</button> <button type="button" class="nav-button" data-section="schools-section"><span class="icon icon-escola"></span>Escolas</button> <button type="button" class="nav-button" data-section="classes-section" id="nav-classes-button" disabled><span class="icon icon-turmas"></span>Turmas</button> <button type="button" class="nav-button" data-section="class-details-section" id="nav-details-button" disabled><span class="icon icon-alunos"></span>Detalhes</button> <button type="button" class="nav-button" data-section="tools-section"><span class="icon icon-ferramentas"></span>Ferramentas</button> <button type="button" class="nav-button" data-section="profile-section"><span class="icon icon-perfil"></span>Perfil</button> <button type="button" class="nav-button" data-section="settings-section"><span class="icon icon-config"></span>Ajustes</button> </nav>
+
+    <!-- Modal de Edição de Planejamento de Aula -->
+    <div id="lesson-plan-modal" class="modal full-screen-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Planejamento da Aula</h2>
+            </div>
+            <div class="modal-body">
+                <div class="options" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <label for="lesson-plan-modal-date" style="margin: 0;">Data:</label>
+                    <input type="date" id="lesson-plan-modal-date" style="width: auto; padding: 0.3rem 0.5rem; margin: 0;">
+                    <button type="button" id="lesson-plan-modal-add-ai-btn" class="secondary ai-tool" style="margin-left: auto; display: none;">
+                        <span class="icon icon-auto-awesome"></span> Gerar Esboço com IA
+                    </button>
+                </div>
+                <textarea id="lesson-plan-modal-textarea" placeholder="Digite o conteúdo/tópico da aula para esta data..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="lesson-plan-modal-cancel-btn" class="secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" id="lesson-plan-modal-save-btn" class="success"><span class="icon icon-salvar"></span> Salvar Plano</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Anotações da Turma -->
+    <div id="class-notes-modal" class="modal full-screen-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Anotações da Turma</h2>
+            </div>
+            <div class="modal-body">
+                <div class="options" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <label for="class-notes-modal-date" style="margin: 0;">Data:</label>
+                    <input type="date" id="class-notes-modal-date" style="width: auto; padding: 0.3rem 0.5rem; margin: 0;">
+                    <button type="button" id="class-notes-modal-add-note-btn" class="secondary" style="margin-left: auto;">
+                        <span class="icon icon-adicionar"></span> Nova Anotação
+                    </button>
+                </div>
+                <textarea id="class-notes-modal-textarea" placeholder="Digite suas anotações sobre a turma para esta data..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="class-notes-modal-cancel-btn" class="secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" id="class-notes-modal-save-btn" class="success"><span class="icon icon-salvar"></span> Salvar Anotações</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="generic-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Título do Modal</h2>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+            <div id="modal-footer" class="modal-footer">
+                <button type="button" data-dismiss="modal" class="secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ferramentas de IA -->
+    <div id="ai-tool-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="ai-tool-title">Assistente de IA</h2>
+            </div>
+            <div class="modal-body">
+                <div id="ai-tool-inputs-container" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem;">
+                    <!-- Inputs dinâmicos -->
+                </div>
+                <button type="button" id="ai-tool-generate-btn" class="success w-full">
+                    <span class="icon icon-auto-awesome"></span> Gerar
+                </button>
+                <div id="ai-tool-loading" class="hidden" style="text-align: center; padding: 1rem;">
+                    <span class="icon icon-sync" style="animation: spin 1s linear infinite; font-size: 2rem; color: #9b72cb; display: inline-block;"></span>
+                    <p>A IA está pensando...</p>
+                </div>
+                <div id="ai-tool-result-container" class="hidden" style="margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <h3 style="margin: 0;">Resultado:</h3>
+                        <button type="button" id="ai-tool-export-pdf-btn" class="secondary" title="Exportar PDF" style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">
+                            <span class="icon icon-pdf"></span> Exportar PDF
+                        </button>
+                    </div>
+                    <div id="ai-tool-result-content" class="markdown-body" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; min-height: 100px; font-family: var(--font-primary); overflow-y: auto; max-height: 400px;"></div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <button type="button" id="ai-tool-copy-btn" class="secondary" style="flex: 1;">Copiar Texto</button>
+                        <button type="button" id="ai-tool-add-to-lesson-plan-btn" class="success hidden" style="flex: 1;">
+                            <span class="icon icon-auto-awesome"></span> Adicionar ao Plano de Aula
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+                <button type="button" class="secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Novidades -->
+    <div id="whats-new-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="whats-new-title">Novidades da Versão!</h2>
+            </div>
+            <div class="modal-body" id="whats-new-body">
+                <ul>
+                    <li><span class="icon icon-auto-awesome"></span> <strong>Novas Ferramentas de IA:</strong> Adicionamos o Assistente de Provas e o Gerador de Questões na aba Ferramentas!</li>
+                    <li><span class="icon icon-auto-awesome"></span> <strong>Análise de Turma com IA:</strong> Agora você pode analisar o perfil da turma com base nas suas anotações e número de alunos.</li>
+                    <li><span class="icon icon-auto-awesome"></span> <strong>Plano de Aula Inteligente:</strong> O gerador de esboço de aula foi aprimorado e agora conta com uma interface dedicada.</li>
+                    <li><span class="icon icon-pdf"></span> <strong>Exportação para PDF:</strong> Exporte facilmente os conteúdos gerados pela IA (provas, questões, planos) diretamente para PDF.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="ok-whats-new">Entendi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Calculator Modal -->
+    <div id="advanced-calculator-modal" class="modal calculator-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="calculator-modal-title">Calculadora Avançada</h2>
+            </div>
+            <div class="modal-body">
+                <div class="calculator-mode-selector">
+                    <button type="button" id="calc-mode-standard" class="active" data-mode="standard">Padrão</button>
+                    <button type="button" id="calc-mode-weighted" data-mode="weighted">Média Ponderada</button>
+                </div>
+                <div id="calculator-standard-section">
+                    <div id="calculator-display" class="calculator-display">0</div>
+                    <div class="calculator-buttons">
+                        <button type="button" class="danger util" data-action="clearAll">AC</button>
+                        <button type="button" class="warn util" data-action="clearEntry">C</button>
+                        <button type="button" class="util" data-action="backspace">←</button>
+                        <button type="button" class="op" data-operator="divide">÷</button>
+                        <button type="button" class="num" data-value="7">7</button>
+                        <button type="button" class="num" data-value="8">8</button>
+                        <button type="button" class="num" data-value="9">9</button>
+                        <button type="button" class="op" data-operator="multiply">×</button>
+                        <button type="button" class="num" data-value="4">4</button>
+                        <button type="button" class="num" data-value="5">5</button>
+                        <button type="button" class="num" data-value="6">6</button>
+                        <button type="button" class="op" data-operator="subtract">−</button>
+                        <button type="button" class="num" data-value="1">1</button>
+                        <button type="button" class="num" data-value="2">2</button>
+                        <button type="button" class="num" data-value="3">3</button>
+                        <button type="button" class="op" data-operator="add">+</button>
+                        <button type="button" class="num zero" data-value="0">0</button>
+                        <button type="button" class="num" data-action="decimal">.</button>
+                        <button type="button" class="eq" data-action="calculate">=</button>
+                    </div>
+                </div>
+                <div id="calculator-weighted-section" class="weighted-average-section hidden">
+                    <h5>Adicionar Notas e Pesos</h5>
+                    <div class="grade-weight-input-group">
+                        <input type="number" id="weighted-grade-input" placeholder="Nota" step="any">
+                        <input type="number" id="weighted-weight-input" placeholder="Peso" step="any">
+                        <button type="button" id="add-pair-button" class="success"><span class="icon icon-adicionar"></span> Add</button>
+                    </div>
+                    <h5>Pares Adicionados:</h5>
+                    <ul id="weighted-pairs-list" class="pairs-list">
+                        <p>Nenhum par adicionado.</p>
+                    </ul>
+                    <button type="button" id="calculate-weighted-avg-button" class="success calculate">
+                        <span class="icon icon-calculadora-avancada"></span> Calcular Média Ponderada
+                    </button>
+                    <div id="weighted-average-result" class="weighted-average-result">--</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Templates -->
+     <template id="school-item-template">
+        <div class="list-item school-item" data-id="">
+            <div class="school-item-main-row">
+                <div class="item-info">
+                    <h4 class="school-name">Nome da Escola</h4>
+                </div>
+                <div class="list-item-actions">
+                    <button type="button" class="view-classes-button button-like primary" title="Ver Turmas"><span class="icon icon-turmas"></span> Turmas</button>
+                    <button type="button" class="edit-school-button secondary icon-button" title="Opções da Escola"><span class="icon icon-more-vert icon-only"></span></button>
+                </div>
+            </div>
+            <div class="school-quorum-info">
+                <div class="quorum-label-row">
+                    <label class="text-sm" for="quorum-date-input-ID_ESCOLA">Quórum:</label>
+                </div>
+                <div class="quorum-inputs-row">
+                    <input type="date" class="quorum-date-input" id="quorum-date-input-ID_ESCOLA">
+                    <select class="quorum-shift-select">
+                        <option value="Geral">Geral</option>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Noite">Noite</option>
+                        <option value="Integral">Integral</option>
+                    </select>
+                    <span class="quorum-display">--/-- (--%)</span>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="class-item-template">
+        <div class="list-item" data-id="">
+            <div class="item-info">
+                <h4 class="class-name"></h4>
+                <p class="class-details"></p>
+            </div>
+            <div class="list-item-actions">
+                <button type="button" class="view-details-button primary" title="Ver Detalhes"><span class="icon icon-alunos"></span> Ver</button>
+                <button type="button" class="edit-class-button secondary icon-button" title="Opções da Turma"><span class="icon icon-more-vert icon-only"></span></button>
+            </div>
+        </div>
+    </template>
+    <!-- **** MODIFICADO: Template de Aluno com espaço para indicadores de programa **** -->
+    <template id="student-list-item-template">
+        <div class="list-item" data-id="">
+            <div class="list-item-content-wrapper">
+                <div class="list-item-main-row">
+                    <span class="student-number"></span>
+                    <span class="student-programs-indicator"></span> <!-- NOVO: Contêiner para os badges -->
+                    <span class="student-name"></span>
+                    <button type="button" class="expand-actions-button" title="Mais Ações"><span class="icon icon-more-vert icon-only"></span></button>
+                </div>
+                <div class="list-item-hidden-actions">
+                    <button type="button" class="action-button set-representative-button" title="Promover a Rep."><span class="icon icon-representante icon-only"></span></button>
+                    <button type="button" class="action-button set-vice-button" title="Promover a Vice"><span class="icon icon-vice icon-only"></span></button>
+                    <button type="button" class="action-button notes-student-button warning" title="Observações"><span class="icon icon-anotacao icon-only"></span></button>
+                    <button type="button" class="action-button edit-student-button secondary" title="Editar Aluno"><span class="icon icon-editar icon-only"></span></button>
+                    <button type="button" class="action-button move-student-button secondary" title="Mover Aluno"><span class="icon icon-mover icon-only"></span></button>
+                    <button type="button" class="action-button delete-student-button danger" title="Excluir Aluno"><span class="icon icon-excluir icon-only"></span></button>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="grades-header-template"> <th class="student-col">Aluno</th> <th class="sum-col">Soma</th> <th class="avg-col">Média</th> </template>
+    <template id="grades-row-template"> <tr> <td class="student-col"> <span class="student-number" style="font-weight:bold; margin-right: 5px;"></span> <span class="student-name"></span> </td> <td class="sum-col sum">--</td> <td class="avg-col average">--</td> </tr> </template>
+    <template id="attendance-row-template"> <tr> <td class="student-col"> <span class="student-number"></span> <span class="student-name"></span> </td> <td class="attendance-status"></td> </tr> </template>
+    <template id="observation-item-template">
+        <div class="observation-item" data-index="">
+            <div class="observation-details">
+                <span class="observation-info">
+                    <span class="category"></span>
+                    <span class="observation-date"></span>
+                </span>
+                <p class="observation-text"></p>
+                <span class="observation-suspension-dates hidden"></span>
+            </div>
+            <button type="button" class="delete-observation-button danger icon-button" title="Excluir Observação"><span class="icon icon-excluir icon-only"></span></button>
+        </div>
+    </template>
+    <template id="schedule-item-template">
+        <div class="schedule-item" data-id="" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); margin-bottom: 8px;">
+            <!-- Progress bar as background -->
+            <div class="progress-bar"></div>
+            
+            <!-- Content -->
+            <div style="position: relative; z-index: 1; display: flex; align-items: center; gap: 15px; flex: 1; min-width: 0;">
+                <span class="schedule-time" style="font-weight: bold; white-space: nowrap; font-size: 0.95em;"></span>
+                <div class="schedule-info" style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; flex: 1;">
+                    <div class="school-name" style="font-weight: 500; font-size: 0.9em; word-break: break-word; line-height: 1.2;"></div>
+                    <div class="note" style="color: var(--text-secondary); font-size: 0.85em; word-break: break-word; line-height: 1.2;"></div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="schedule-actions" style="position: relative; z-index: 1; margin-left: 10px;">
+                <button type="button" class="edit-schedule-button secondary icon-button" title="Editar Horário">
+                    <span class="icon icon-more-vert icon-only"></span>
+                </button>
+            </div>
+        </div>
+    </template>
+    <template id="grade-label-item-template"> <div class="grade-label-item"> <input type="text" class="gs-label" value="" placeholder="Nome da Avaliação (Ex: Prova 1)"> <label style="font-size: 0.8rem; margin-left: 5px; display: flex; align-items: center; gap: 3px;"><input type="checkbox" class="gs-has-recovery"> Recuperação</label> <button type="button" class="delete-gs-label-button danger icon-button" title="Excluir Instrumento"><span class="icon icon-excluir icon-only"></span></button> </div> </template>
+    <template id="color-range-item-template"> <div class="color-range-item"> <label>De:</label> <input type="number" class="gs-color-min" step="0.1" placeholder="0.0" value=""> <label>Até:</label> <input type="number" class="gs-color-max" step="0.1" placeholder="10.0" value=""> <label>Cor:</label> <input type="color" class="gs-color-input" value="#ffffff"> <button type="button" class="delete-color-range-button danger icon-button" title="Excluir Faixa"> <span class="icon icon-excluir icon-only"></span> </button> </div> </template>
+    <template id="seat-template"> <div class="seat" draggable="false"> <span class="seat-student-number"></span> <span class="seat-student-name"></span> <span class="seat-placeholder-text"></span> </div> </template>
+    <template id="draggable-student-template"> <div class="draggable-student" draggable="true"> <span class="student-number"></span> <span class="student-name"></span> </div> </template>
+    <template id="teacher-desk-template"> <div class="teacher-desk"><span class="icon icon-escola"></span></div> </template>
+    <template id="classroom-grid-template"> <div class="classroom-map-grid"></div> </template>
+    <template id="weighted-pair-item-template">
+        <li class="pair-item" data-index="">
+            <span>Nota: <strong></strong>, Peso: <strong></strong></span>
+            <button type="button" class="delete-pair-button danger icon-button" title="Remover Par"><span class="icon icon-excluir icon-only"></span></button>
+        </li>
+    </template>
+
+    <script type="module" src="./script.js"></script>
+
+</body>
+</html>
