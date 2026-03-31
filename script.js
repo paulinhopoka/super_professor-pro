@@ -1891,7 +1891,34 @@ const renderFinalAverageTable = (classId, studentsInClass, currentClass) => {
     let touchStartX = 0; let touchEndX = 0; let touchStartY = 0; let isSwiping = false; const swipeThreshold = 110; const verticalThreshold = 60; mainContent.addEventListener('touchstart', (e) => { const targetTagName = e.target.tagName.toLowerCase(); const isInteractive = ['input', 'button', 'select', 'textarea', 'a'].includes(targetTagName); const isInScrollable = e.target.closest('.table-scroll-wrapper, .modal-body, .list-item-actions, #monthly-attendance-table-wrapper, #student-observations-list, .classroom-container, .unassigned-students-list, .school-quorum-info'); if (isInteractive || isInScrollable) { isSwiping = false; return; } touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; touchEndX = touchStartX; isSwiping = true; }, { passive: true }); mainContent.addEventListener('touchmove', (e) => { if (!isSwiping) return; touchEndX = e.changedTouches[0].screenX; const touchEndY = e.changedTouches[0].screenY; if (Math.abs(touchEndY - touchStartY) > verticalThreshold) { isSwiping = false; } }, { passive: true }); mainContent.addEventListener('touchend', (e) => { if (!isSwiping) { touchStartX = 0; touchEndX = 0; touchStartY = 0; return; } isSwiping = false; const deltaX = touchEndX - touchStartX; const deltaY = e.changedTouches[0].screenY - touchStartY; if (Math.abs(deltaX) > swipeThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.8) { const visibleNavButtons = Array.from(navButtons).filter(btn => !btn.disabled && !btn.parentElement.classList.contains('hidden')); const currentActiveIndex = visibleNavButtons.findIndex(btn => btn.classList.contains('active')); if (currentActiveIndex === -1) return; let nextIndex; if (deltaX < 0) { nextIndex = currentActiveIndex + 1; if (nextIndex >= visibleNavButtons.length) return; } else { nextIndex = currentActiveIndex - 1; if (nextIndex < 0) return; } const targetButton = visibleNavButtons[nextIndex]; if(targetButton) { targetButton.click(); } } touchStartX = 0; touchEndX = 0; touchStartY = 0; });
     const notificationMessages = { start: ["<span class='icon icon-rocket-launch'></span> Preparar... Apontar... Aula! Sua aula ({CLASS}) na {SCHOOL} começa em 5 minutos.", "<span class='icon icon-coffee'></span> Último gole de café? Sua aula ({CLASS}) na {SCHOOL} começa em 5 minutos!", "<span class='icon icon-notifications'></span> O sino quase tocou! Aula ({CLASS}) na {SCHOOL} em 5 minutos. ", "<span class='icon icon-directions-run'></span> Corre, professor! Faltam 5 minutos para a aula ({CLASS}) na {SCHOOL} começar.", "<span class='icon icon-auto-awesome'></span> Hora de brilhar! Sua aula ({CLASS}) na {SCHOOL} inicia em 5 minutos.", "<span class='icon icon-alarm'></span> Tic-tac... 5 minutos para o início da aula ({CLASS}) na {SCHOOL}!"], end: ["<span class='icon icon-sports-score'></span> Quase lá! Sua aula ({CLASS}) na {SCHOOL} termina em 5 minutos.", "<span class='icon icon-face'></span> Ufa! Só mais 5 minutinhos de aula ({CLASS}) na {SCHOOL}.", "<span class='icon icon-notifications'></span> O sino da liberdade (quase)! Aula ({CLASS}) na {SCHOOL} acaba em 5 minutos.", "<span class='icon icon-ads-click'></span> Missão quase completa! A aula ({CLASS}) na {SCHOOL} termina em 5 minutos.", "<span class='icon icon-celebration'></span> Bom trabalho! Reta final da aula ({CLASS}) na {SCHOOL} - 5 minutos restantes.", "<span class='icon icon-hourglass-empty'></span> Contagem regressiva: 5 minutos para o fim da aula ({CLASS}) na {SCHOOL}."] };
     const getRandomMessage = (type, scheduleItem) => { const messages = notificationMessages[type]; if (!messages || messages.length === 0) return "Alerta de Horário!"; const randomIndex = Math.floor(Math.random() * messages.length); let message = messages[randomIndex]; const school = findSchoolById(scheduleItem.schoolId); message = message.replace('{CLASS}', sanitizeHTML(scheduleItem.note || '')); message = message.replace('{SCHOOL}', sanitizeHTML(school?.name || 'escola')); return message; };
-    const showNotification = (message) => { if (!notificationBanner || !notificationMessage) return; notificationMessage.innerHTML = message; notificationBanner.classList.add('show'); playSound(); setTimeout(hideNotification, 10000); };
+    const showNotification = (message) => { 
+        if (!notificationBanner || !notificationMessage) return; 
+        notificationMessage.innerHTML = message; 
+        notificationBanner.classList.add('show'); 
+        playSound(); 
+        setTimeout(hideNotification, 10000); 
+
+        // Native push notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+            const plainMessage = message.replace(/<[^>]*>?/gm, ''); // Strip HTML tags
+            
+            // Try to use service worker if available for better mobile support
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification('Super Professor Pro', {
+                        body: plainMessage,
+                        icon: '/icons/icon-192x192.png',
+                        vibrate: [200, 100, 200]
+                    });
+                }).catch(err => {
+                    // Fallback to normal Notification API
+                    new Notification('Super Professor Pro', { body: plainMessage });
+                });
+            } else {
+                new Notification('Super Professor Pro', { body: plainMessage });
+            }
+        }
+    };
     const hideNotification = () => { if (notificationBanner) notificationBanner.classList.remove('show'); };
     const playSound = () => { if (!appData.settings.notificationSoundEnabled) return; if (appData.settings.customNotificationSound) { try { const customAudio = new Audio(appData.settings.customNotificationSound); customAudio.play().catch(error => { console.warn("Erro ao tocar som personalizado:", error); defaultNotificationSound?.play().catch(e => console.warn("Erro ao tocar som padrão (fallback):", e)); }); } catch (error) { console.error("Erro ao criar Audio com som personalizado:", error); defaultNotificationSound?.play().catch(e => console.warn("Erro ao tocar som padrão (fallback 2):", e)); } } else { defaultNotificationSound?.play().catch(error => { console.warn("Erro ao tocar som da notificação padrão:", error); }); } };
     const checkNotifications = () => { shownNotificationsThisMinute = {}; if (!appData.settings.globalNotificationsEnabled) { return; } const now = new Date(); const currentDayIndex = now.getDay(); const currentDayName = weekdays[currentDayIndex]; const currentHour = now.getHours(); const currentMinute = now.getMinutes(); appData.schedule.forEach(item => { if (!item.notificationsEnabled || item.day !== currentDayName || !item.startTime || !item.endTime) { return; } const notificationKeyBase = item.id; try { const [startHour, startMinute] = item.startTime.split(':').map(Number); const [endHour, endMinute] = item.endTime.split(':').map(Number); if (isNaN(startHour) || isNaN(startMinute) || isNaN(endHour) || isNaN(endMinute)) { console.warn(`Invalid time format for schedule item ${item.id}`); return; } let notifyStartMinute = startMinute - NOTIFICATION_LEAD_TIME_MINUTES; let notifyStartHour = startHour; if (notifyStartMinute < 0) { notifyStartMinute += 60; notifyStartHour -= 1; if (notifyStartHour < 0) notifyStartHour = 23; } let notifyEndMinute = endMinute - NOTIFICATION_LEAD_TIME_MINUTES; let notifyEndHour = endHour; if (notifyEndMinute < 0) { notifyEndMinute += 60; notifyEndHour -= 1; if (notifyEndHour < 0) notifyEndHour = 23; } const startNotificationKey = notificationKeyBase + '_start'; if (currentHour === notifyStartHour && currentMinute === notifyStartMinute) { if (!shownNotificationsThisMinute[startNotificationKey]) { console.log(`Triggering START notification for ${item.id}`); const message = getRandomMessage('start', item); showNotification(message); shownNotificationsThisMinute[startNotificationKey] = true; } } const endNotificationKey = notificationKeyBase + '_end'; if (currentHour === notifyEndHour && currentMinute === notifyEndMinute) { if (!shownNotificationsThisMinute[endNotificationKey]) { console.log(`Triggering END notification for ${item.id}`); const message = getRandomMessage('end', item); showNotification(message); shownNotificationsThisMinute[endNotificationKey] = true; } } } catch (error) { console.error(`Error processing schedule item ${item.id}:`, error); } }); };
@@ -4728,10 +4755,27 @@ Exemplo de formato esperado:
     const settingsUserEmail = document.getElementById('settings-user-email');
 
     // showLoginPrompt removido e integrado ao showWhatsNew
-
+    
+    async function requestNotificationPermission(userId) {
+      if (!('Notification' in window)) {
+        console.log('Este navegador não suporta notificações de desktop.');
+        return;
+      }
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          console.log('Permissão de notificação concedida.');
+        } else {
+          console.log('Permissão de notificação negada.');
+        }
+      } catch (error) {
+        console.error('Erro ao solicitar permissão:', error);
+      }
+    }
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            requestNotificationPermission(user.uid);
             if (settingsUserEmail) settingsUserEmail.textContent = user.email;
             if (loggedOutState) loggedOutState.style.display = 'none';
             if (loggedInState) loggedInState.style.display = 'block';
